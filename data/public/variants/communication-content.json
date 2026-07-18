@@ -21,7 +21,9 @@
     "bullet-kunz-photo-video-social-ci",
     "bullet-kunz-external-partners",
     "bullet-kunz-websites-landing",
-    "bullet-kunz-online-campaigns-monitoring"
+    "bullet-kunz-online-campaigns-monitoring",
+    "bullet-rs-admin-support-summary",
+    "bullet-rs-digital-information-summary"
   ],
   "bulletPriority": [
     "bullet-kunz-guegg",
@@ -34,16 +36,22 @@
   ],
   "toolOrder": [
     "tool-adobe-cc",
+    "tool-adobe-indesign",
+    "tool-adobe-photoshop",
+    "tool-adobe-illustrator",
+    "tool-adobe-premiere-pro",
+    "tool-adobe-audition",
+    "tool-adobe-after-effects",
     "tool-canva",
-    "tool-google-analytics",
-    "tool-chatgpt",
     "tool-wordpress",
     "tool-typo3",
-    "tool-html-css",
-    "tool-ms-office"
+    "tool-google-analytics",
+    "tool-chatgpt",
+    "tool-ms-office",
+    "tool-wirecast-pro"
   ],
   "maxBulletsPerExperience": 5,
-  "maxTools": 8,
+  "maxTools": 14,
   "budgets": {
     "summaryMaxChars": 430,
     "pageOneMaxSkillItems": 18,

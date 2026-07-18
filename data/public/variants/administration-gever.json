@@ -35,16 +35,23 @@
     "bullet-kunz-photo-video-social-ci"
   ],
   "toolOrder": [
-    "tool-acta-nova",
     "tool-ms-office",
+    "tool-ms-word",
+    "tool-ms-excel",
+    "tool-ms-powerpoint",
+    "tool-ms-outlook",
+    "tool-ms-onenote",
+    "tool-office-365",
+    "tool-acta-nova",
     "tool-chatgpt",
-    "tool-typo3",
+    "tool-adobe-indesign",
+    "tool-adobe-photoshop",
     "tool-wordpress",
-    "tool-google-analytics",
-    "tool-html-css"
+    "tool-typo3",
+    "tool-canva"
   ],
   "maxBulletsPerExperience": 4,
-  "maxTools": 7,
+  "maxTools": 14,
   "budgets": {
     "summaryMaxChars": 430,
     "pageOneMaxSkillItems": 14,

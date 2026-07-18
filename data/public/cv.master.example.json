@@ -13,12 +13,22 @@
     "credential": "Mediamatiker EFZ mit Berufsmaturität"
   },
   "summary": {
-    "default": "Mediamatiker EFZ mit Berufsmaturität und mehr als vier Jahren Erfahrung in Marketing, Web und digitaler Kommunikation. Ich verbinde gestalterisches Know-how mit technischem Verständnis und begleite Projekte von der Konzeption bis zur Umsetzung. Besonders motivieren mich strukturierte Prozesse, digitale Systeme und die Weiterentwicklung bestehender Lösungen.",
+    "targetLines": 4,
+    "jobAnalysis": {
+      "company": "Basisvariante",
+      "role": "Lebenslauf",
+      "mustHaveTerms": [],
+      "preferredTerms": [],
+      "topRequirements": [],
+      "selectedEvidenceIds": []
+    },
+    "default": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in Digital Marketing, Web, Content und KI-gestützten Prozessen. Ich verbinde strukturierte Umsetzung mit visueller Kommunikation, Systemverständnis und zuverlässiger Koordination. Für Arbeitgeber schaffe ich klare Inhalte, gepflegte digitale Kanäle und nachvollziehbare Arbeitsabläufe. Meine Arbeitsweise ist selbstständig, sorgfältig und auf sichtbaren Nutzen ausgerichtet.",
     "variants": {
-      "communication-content": "Mediamatiker EFZ mit Schwerpunkt Content, Medienproduktion und digitaler Kommunikation. Ich konzipiere und erstelle Inhalte für Print, Web, Newsletter und Social Media, verbinde CI/CD-sichere Gestaltung mit Foto-/Videoproduktion und begleite Kampagnen von der Idee bis zur Umsetzung.",
-      "administration-gever": "Mediamatiker EFZ mit Erfahrung in strukturierten administrativen Abläufen, GEVER-System ACTA NOVA, Dokumentenverwaltung und Qualitätssicherung. Ich verbinde digitale Kommunikation mit sorgfältiger Prozessdokumentation, koordinativer Arbeit und sicherem Umgang in DE- und FR-sprachigen Umfeldern.",
-      "cms-web-process": "Mediamatiker EFZ mit Erfahrung in Webpflege, CMS-Administration, Onlineshop-Management und digitaler Prozessdokumentation. Ich betreue Websites und Landing Pages, arbeite mit Webhostern und externen Dienstleistern zusammen und integriere digitale sowie KI-gestützte Werkzeuge sinnvoll in bestehende Abläufe."
-    }
+      "communication-content": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in Content, Medienproduktion, Kampagnen und visueller Aufbereitung. Ich verbinde zielgruppengerechte Kommunikation mit sicherem Umgang mit digitalen Kanälen und Gestaltungstools. Für Teams und Arbeitgeber bereite ich Informationen verständlich, konsistent und markengerecht auf. Meine Arbeitsweise ist kreativ, strukturiert und zuverlässig in der Umsetzung.",
+      "administration-gever": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in digitaler Geschäftsvorgangsbearbeitung, Dokumentenmanagement und Prozessdokumentation. Ich verbinde strukturierte Arbeitsweise mit Systemverständnis und sorgfältiger Qualitätssicherung. Administrative Abläufe unterstütze ich zuverlässig, adressatengerecht und mit Blick für nachvollziehbare Informationen. Mehrsprachige Kommunikation und schnelle Einarbeitung in digitale Systeme gehören zu meiner Praxis.",
+      "cms-web-process": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in CMS, Webpflege, Onlineshop-Management und digitalen Prozessen. Ich verbinde Content Administration mit technischem Verständnis, strukturierter Datenpflege und sauberer Dokumentation. Für Arbeitgeber halte ich Webinhalte, Systeme und Abläufe nachvollziehbar und aktuell. Meine Arbeitsweise ist analytisch, lösungsorientiert und zuverlässig in der Umsetzung."
+    },
+    "candidates": []
   },
   "skillSections": [
     {
@@ -751,6 +761,70 @@
             "Geschäftsvorgänge"
           ],
           "status": "verified"
+        },
+        {
+          "id": "bullet-rs-admin-support-summary",
+          "text": "Administrative und organisatorische Unterstützung in einem strukturierten Bundesumfeld",
+          "shortText": "Administrative Unterstützung im Bundesumfeld",
+          "tags": [
+            "administration",
+            "organisation",
+            "bundesumfeld"
+          ],
+          "evidenceLevel": "defensible_inference",
+          "sources": [
+            "cv-2d",
+            "linkedin-acta-nova"
+          ],
+          "sourceIds": [
+            "bullet-rs-acta-nova",
+            "bullet-rs-doc-management",
+            "bullet-rs-coordination"
+          ],
+          "variantRelevance": [
+            "communication-content",
+            "cms-web-process",
+            "general"
+          ],
+          "atsSynonyms": [
+            "Administration",
+            "Organisation",
+            "Führungsunterstützung"
+          ],
+          "status": "defensible_inference",
+          "inferenceRationale": "Fasst belegte ACTA-NOVA-, Dokumentenverwaltungs-, Koordinations- und Führungsdienst-Unterstützung zusammen."
+        },
+        {
+          "id": "bullet-rs-digital-information-summary",
+          "text": "Koordination und qualitätsgesicherte Aufbereitung digitaler Informationen",
+          "shortText": "Qualitätsgesicherte Aufbereitung digitaler Informationen",
+          "tags": [
+            "quality",
+            "coordination",
+            "digital-information"
+          ],
+          "evidenceLevel": "defensible_inference",
+          "sources": [
+            "cv-2d",
+            "linkedin-acta-nova"
+          ],
+          "sourceIds": [
+            "bullet-rs-quality",
+            "bullet-rs-doc-management",
+            "bullet-rs-coordination"
+          ],
+          "variantRelevance": [
+            "communication-content",
+            "cms-web-process",
+            "administration-gever"
+          ],
+          "atsSynonyms": [
+            "Qualitätssicherung",
+            "digitale Informationen",
+            "Koordination"
+          ],
+          "status": "defensible_inference",
+          "inferenceRationale": "Verdichtet belegte Qualitätssicherung, Dokumentenmanagement und Koordination ohne zusätzliche Verantwortung."
         }
       ],
       "sources": [
@@ -788,6 +862,7 @@
           "variantRelevance": [
             "general",
             "communication-content",
+            "administration-gever",
             "cms-web-process"
           ],
           "fillPriority": 1,
@@ -816,6 +891,7 @@
           ],
           "variantRelevance": [
             "general",
+            "communication-content",
             "administration-gever",
             "cms-web-process"
           ],
@@ -862,6 +938,7 @@
           "variantRelevance": [
             "general",
             "communication-content",
+            "administration-gever",
             "cms-web-process"
           ],
           "fillPriority": 1,
@@ -889,7 +966,9 @@
           ],
           "variantRelevance": [
             "general",
-            "administration-gever"
+            "communication-content",
+            "administration-gever",
+            "cms-web-process"
           ],
           "fillPriority": 2,
           "preferredMaxChars": 75,
@@ -1248,6 +1327,433 @@
       "atsSynonyms": [
         "Bildbearbeitung",
         "Medienproduktion"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-adobe-illustrator",
+      "name": "Adobe Illustrator",
+      "category": "design-media",
+      "tags": [
+        "design",
+        "vector",
+        "adobe"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "communication-content",
+        "cms-web-process",
+        "general"
+      ],
+      "priority": 32,
+      "atsSynonyms": [
+        "Adobe Illustrator",
+        "design",
+        "vector",
+        "adobe"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-adobe-premiere-pro",
+      "name": "Adobe Premiere Pro",
+      "category": "design-media",
+      "tags": [
+        "video",
+        "media",
+        "adobe"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "communication-content",
+        "general"
+      ],
+      "priority": 33,
+      "atsSynonyms": [
+        "Adobe Premiere Pro",
+        "video",
+        "media",
+        "adobe"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-adobe-audition",
+      "name": "Adobe Audition",
+      "category": "design-media",
+      "tags": [
+        "audio",
+        "media",
+        "adobe"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "communication-content",
+        "general"
+      ],
+      "priority": 34,
+      "atsSynonyms": [
+        "Adobe Audition",
+        "audio",
+        "media",
+        "adobe"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-adobe-after-effects",
+      "name": "Adobe After Effects",
+      "category": "design-media",
+      "tags": [
+        "motion",
+        "media",
+        "adobe"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "communication-content",
+        "general"
+      ],
+      "priority": 35,
+      "atsSynonyms": [
+        "Adobe After Effects",
+        "motion",
+        "media",
+        "adobe"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-ms-word",
+      "name": "Microsoft Word",
+      "category": "admin-office",
+      "tags": [
+        "office",
+        "documentation"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "administration-gever",
+        "general"
+      ],
+      "priority": 36,
+      "atsSynonyms": [
+        "Microsoft Word",
+        "office",
+        "documentation"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-ms-excel",
+      "name": "Microsoft Excel",
+      "category": "admin-office",
+      "tags": [
+        "office",
+        "data"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "administration-gever",
+        "general"
+      ],
+      "priority": 37,
+      "atsSynonyms": [
+        "Microsoft Excel",
+        "office",
+        "data"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-ms-powerpoint",
+      "name": "Microsoft PowerPoint",
+      "category": "admin-office",
+      "tags": [
+        "office",
+        "presentation"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "administration-gever",
+        "communication-content",
+        "general"
+      ],
+      "priority": 38,
+      "atsSynonyms": [
+        "Microsoft PowerPoint",
+        "office",
+        "presentation"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-ms-outlook",
+      "name": "Microsoft Outlook",
+      "category": "admin-office",
+      "tags": [
+        "office",
+        "communication"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "administration-gever",
+        "general"
+      ],
+      "priority": 39,
+      "atsSynonyms": [
+        "Microsoft Outlook",
+        "office",
+        "communication"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-ms-onenote",
+      "name": "Microsoft OneNote",
+      "category": "admin-office",
+      "tags": [
+        "office",
+        "documentation"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "administration-gever",
+        "general"
+      ],
+      "priority": 40,
+      "atsSynonyms": [
+        "Microsoft OneNote",
+        "office",
+        "documentation"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-office-365",
+      "name": "Office 365",
+      "category": "admin-office",
+      "tags": [
+        "office",
+        "collaboration"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "administration-gever",
+        "general"
+      ],
+      "priority": 41,
+      "atsSynonyms": [
+        "Office 365",
+        "office",
+        "collaboration"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-github",
+      "name": "GitHub",
+      "category": "web-cms",
+      "tags": [
+        "development",
+        "version-control"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "cms-web-process",
+        "general"
+      ],
+      "priority": 42,
+      "atsSynonyms": [
+        "GitHub",
+        "development",
+        "version-control"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-phpmyadmin",
+      "name": "phpMyAdmin",
+      "category": "web-cms",
+      "tags": [
+        "database",
+        "web"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "cms-web-process",
+        "general"
+      ],
+      "priority": 43,
+      "atsSynonyms": [
+        "phpMyAdmin",
+        "database",
+        "web"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-mysql",
+      "name": "MySQL",
+      "category": "web-cms",
+      "tags": [
+        "database",
+        "web"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "cms-web-process",
+        "general"
+      ],
+      "priority": 44,
+      "atsSynonyms": [
+        "MySQL",
+        "database",
+        "web"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-wirecast-pro",
+      "name": "Wirecast Pro",
+      "category": "media-production",
+      "tags": [
+        "livestream",
+        "video"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "communication-content",
+        "general"
+      ],
+      "priority": 45,
+      "atsSynonyms": [
+        "Wirecast Pro",
+        "livestream",
+        "video"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-crealogix-stage",
+      "name": "Crealogix STAGE",
+      "category": "web-cms",
+      "tags": [
+        "web",
+        "cms"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "cms-web-process",
+        "administration-gever",
+        "general"
+      ],
+      "priority": 46,
+      "atsSynonyms": [
+        "Crealogix STAGE",
+        "web",
+        "cms"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-windows-server",
+      "name": "Windows Server",
+      "category": "systems",
+      "tags": [
+        "server",
+        "it"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "cms-web-process",
+        "general"
+      ],
+      "priority": 47,
+      "atsSynonyms": [
+        "Windows Server",
+        "server",
+        "it"
       ],
       "status": "verified"
     }

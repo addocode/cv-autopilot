@@ -45,10 +45,13 @@
     "tool-wordpress",
     "tool-grav",
     "tool-magento",
-    "tool-html-css"
+    "tool-html-css",
+    "tool-adobe-indesign",
+    "tool-adobe-photoshop",
+    "tool-adobe-illustrator"
   ],
   "maxBulletsPerExperience": 7,
-  "maxTools": 11,
+  "maxTools": 14,
   "budgets": {
     "summaryMaxChars": 430,
     "pageOneMaxSkillItems": 19,

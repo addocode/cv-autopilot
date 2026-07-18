@@ -21,7 +21,8 @@
     "bullet-kunz-external-partners",
     "bullet-freelance-content-print-web",
     "bullet-freelance-remote-stakeholders",
-    "bullet-rs-acta-nova"
+    "bullet-rs-acta-nova",
+    "bullet-rs-digital-information-summary"
   ],
   "bulletPriority": [
     "bullet-kunz-websites-landing",
@@ -38,13 +39,18 @@
     "tool-grav",
     "tool-magento",
     "tool-html-css",
+    "tool-phpmyadmin",
+    "tool-mysql",
+    "tool-github",
     "tool-google-analytics",
     "tool-chatgpt",
-    "tool-acta-nova",
-    "tool-ms-office"
+    "tool-ms-office",
+    "tool-adobe-photoshop",
+    "tool-adobe-indesign",
+    "tool-crealogix-stage"
   ],
   "maxBulletsPerExperience": 4,
-  "maxTools": 9,
+  "maxTools": 14,
   "budgets": {
     "summaryMaxChars": 430,
     "pageOneMaxSkillItems": 15,
