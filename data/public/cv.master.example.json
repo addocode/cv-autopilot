@@ -21,83 +21,745 @@
     }
   },
   "skillSections": [
-    {"id":"digital-marketing-web","title":"DIGITAL MARKETING & WEB","tags":["web","marketing","cms"],"items":[
-      {"id":"skill-websites-cms-landing","text":"Erstellung und Betreuung von Websites (CMS, Landing Pages)","tags":["web","cms"],"evidenceLevel":"professional_core","sources":["cv-2d-p1"]},
-      {"id":"skill-online-campaigns","text":"Onlineshop-Management inkl. Content-, Struktur- und Produktpflege","tags":["marketing","analytics"],"evidenceLevel":"professional_core","sources":["cv-2d-p1"]},
-      {"id":"skill-newsletter","text":"Newsletter-Konzeption und Umsetzung (Print & E-Mail)","tags":["communication","newsletter"],"evidenceLevel":"professional_core","sources":["cv-2d-p1"]},
-      {"id":"skill-social-performance","text":"Social Media Betreuung inkl. Performance-Analyse","tags":["social","analytics"],"evidenceLevel":"professional_core","sources":["cv-2d-p1"]},
-      {"id":"skill-google-analytics","text":"Google Analytics & Online-Tracking","tags":["analytics","web"],"evidenceLevel":"professional_supporting","sources":["cv-2d-p1"]}
-    ]},
-    {"id":"content-media","title":"CONTENT & MEDIENPRODUKTION","tags":["content","media","communication"],"items":[
-      {"id":"skill-flyers-magazines-rollups","text":"Konzeption und Design von Flyern, Magazinen und Rollups","tags":["print","design"],"evidenceLevel":"professional_core","sources":["cv-2d-p1"]},
-      {"id":"skill-photo-video","text":"Foto- und Videoproduktion (Storyboard, Schnitt, Ton)","tags":["video","photo"],"evidenceLevel":"professional_core","sources":["cv-2d-p1"]},
-      {"id":"skill-cicd-materials","text":"CI/CD-konforme Umsetzung von Marketingmaterialien","tags":["design","brand"],"evidenceLevel":"professional_core","sources":["cv-2d-p1"]},
-      {"id":"skill-presentations-docs","text":"Präsentations- und Dokumentationsgestaltung","tags":["documentation","design"],"evidenceLevel":"professional_supporting","sources":["cv-2d-p1"]}
-    ]},
-    {"id":"technik-systeme","title":"TECHNIK & SYSTEME","tags":["systems","cms","gever"],"items":[
-      {"id":"skill-cms-admin","text":"CMS-Administration (TYPO3, WordPress, Grav)","tags":["cms","web"],"evidenceLevel":"professional_core","sources":["cv-2d-p1"]},
-      {"id":"skill-shop-payments","text":"Onlineshop-Management inkl. Zahlungsprozessen","tags":["shop","process"],"evidenceLevel":"professional_core","sources":["cv-2d-p1"]},
-      {"id":"skill-ms-office-docs","text":"MS Office & strukturierte Dokumentenverwaltung","tags":["office","documentation"],"evidenceLevel":"professional_supporting","sources":["cv-2d-p1"]},
-      {"id":"skill-acta-nova","text":"GEVER-System ACTA NOVA","tags":["gever","administration"],"evidenceLevel":"professional_supporting","sources":["cv-2d-p1","cv-2d-p2"]},
-      {"id":"skill-webhosters","text":"Zusammenarbeit mit Webhostern und externen Dienstleistern","tags":["web","coordination"],"evidenceLevel":"professional_core","sources":["cv-2d-p1"]}
-    ]},
-    {"id":"arbeitsweise","title":"ARBEITSWEISE","tags":["process","coordination"],"items":[
-      {"id":"skill-structured-projects","text":"Strukturierte und selbstständige Projektumsetzung","tags":["project","process"],"evidenceLevel":"professional_core","sources":["cv-2d-p1"]},
-      {"id":"skill-process-documentation","text":"Prozessdokumentation & Wissenssicherung","tags":["documentation","process"],"evidenceLevel":"professional_core","sources":["cv-2d-p1","cv-2d-p2"]},
-      {"id":"skill-fast-onboarding","text":"Rasche Einarbeitung in neue Systeme","tags":["learning","systems"],"evidenceLevel":"professional_supporting","sources":["cv-2d-p1"]},
-      {"id":"skill-responsibility-quality","text":"Hohe Eigenverantwortung & Qualitätsbewusstsein","tags":["quality","responsibility"],"evidenceLevel":"professional_core","sources":["cv-2d-p1"]},
-      {"id":"skill-de-fr-context","text":"Sicheres Arbeiten in DE- und FR-sprachigen Umfeldern","tags":["languages","coordination"],"evidenceLevel":"professional_supporting","sources":["cv-2d-p1"]}
-    ]}
+    {
+      "id": "digital-marketing-web",
+      "title": "DIGITAL MARKETING & WEB",
+      "tags": [
+        "web",
+        "marketing",
+        "cms"
+      ],
+      "items": [
+        {
+          "id": "skill-websites-cms-landing",
+          "text": "Erstellung und Betreuung von Websites (CMS, Landing Pages)",
+          "tags": [
+            "web",
+            "cms"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1"
+          ]
+        },
+        {
+          "id": "skill-online-campaigns",
+          "text": "Onlineshop-Management inkl. Content-, Struktur- und Produktpflege",
+          "tags": [
+            "marketing",
+            "analytics"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1"
+          ]
+        },
+        {
+          "id": "skill-newsletter",
+          "text": "Newsletter-Konzeption und Umsetzung (Print & E-Mail)",
+          "tags": [
+            "communication",
+            "newsletter"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1"
+          ]
+        },
+        {
+          "id": "skill-social-performance",
+          "text": "Social Media Betreuung inkl. Performance-Analyse",
+          "tags": [
+            "social",
+            "analytics"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1"
+          ]
+        },
+        {
+          "id": "skill-google-analytics",
+          "text": "Google Analytics & Online-Tracking",
+          "tags": [
+            "analytics",
+            "web"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "content-media",
+      "title": "CONTENT & MEDIENPRODUKTION",
+      "tags": [
+        "content",
+        "media",
+        "communication"
+      ],
+      "items": [
+        {
+          "id": "skill-flyers-magazines-rollups",
+          "text": "Konzeption und Design von Flyern, Magazinen und Rollups",
+          "tags": [
+            "print",
+            "design"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1"
+          ]
+        },
+        {
+          "id": "skill-photo-video",
+          "text": "Foto- und Videoproduktion (Storyboard, Schnitt, Ton)",
+          "tags": [
+            "video",
+            "photo"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1"
+          ]
+        },
+        {
+          "id": "skill-cicd-materials",
+          "text": "CI/CD-konforme Umsetzung von Marketingmaterialien",
+          "tags": [
+            "design",
+            "brand"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1"
+          ]
+        },
+        {
+          "id": "skill-presentations-docs",
+          "text": "Präsentations- und Dokumentationsgestaltung",
+          "tags": [
+            "documentation",
+            "design"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "technik-systeme",
+      "title": "TECHNIK & SYSTEME",
+      "tags": [
+        "systems",
+        "cms",
+        "gever"
+      ],
+      "items": [
+        {
+          "id": "skill-cms-admin",
+          "text": "CMS-Administration (TYPO3, WordPress, Grav)",
+          "tags": [
+            "cms",
+            "web"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1"
+          ]
+        },
+        {
+          "id": "skill-shop-payments",
+          "text": "Onlineshop-Management inkl. Zahlungsprozessen",
+          "tags": [
+            "shop",
+            "process"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1"
+          ]
+        },
+        {
+          "id": "skill-ms-office-docs",
+          "text": "MS Office & strukturierte Dokumentenverwaltung",
+          "tags": [
+            "office",
+            "documentation"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p1"
+          ]
+        },
+        {
+          "id": "skill-acta-nova",
+          "text": "GEVER-System ACTA NOVA",
+          "tags": [
+            "gever",
+            "administration"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p1",
+            "cv-2d-p2"
+          ]
+        },
+        {
+          "id": "skill-webhosters",
+          "text": "Zusammenarbeit mit Webhostern und externen Dienstleistern",
+          "tags": [
+            "web",
+            "coordination"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arbeitsweise",
+      "title": "ARBEITSWEISE",
+      "tags": [
+        "process",
+        "coordination"
+      ],
+      "items": [
+        {
+          "id": "skill-structured-projects",
+          "text": "Strukturierte und selbstständige Projektumsetzung",
+          "tags": [
+            "project",
+            "process"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1"
+          ]
+        },
+        {
+          "id": "skill-process-documentation",
+          "text": "Prozessdokumentation & Wissenssicherung",
+          "tags": [
+            "documentation",
+            "process"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1",
+            "cv-2d-p2"
+          ]
+        },
+        {
+          "id": "skill-fast-onboarding",
+          "text": "Rasche Einarbeitung in neue Systeme",
+          "tags": [
+            "learning",
+            "systems"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p1"
+          ]
+        },
+        {
+          "id": "skill-responsibility-quality",
+          "text": "Hohe Eigenverantwortung & Qualitätsbewusstsein",
+          "tags": [
+            "quality",
+            "responsibility"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1"
+          ]
+        },
+        {
+          "id": "skill-de-fr-context",
+          "text": "Sicheres Arbeiten in DE- und FR-sprachigen Umfeldern",
+          "tags": [
+            "languages",
+            "coordination"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p1"
+          ]
+        }
+      ]
+    }
   ],
   "languages": [
-    {"id":"lang-de","name":"Deutsch","level":"C2","sources":["cv-2d-p1"]},
-    {"id":"lang-en","name":"Englisch","level":"C1","sources":["cv-2d-p1"]},
-    {"id":"lang-pl","name":"Polnisch","level":"C2","sources":["cv-2d-p1"]},
-    {"id":"lang-fr","name":"Französisch","level":"B1","sources":["cv-2d-p1"]}
+    {
+      "id": "lang-de",
+      "name": "Deutsch",
+      "level": "C2",
+      "sources": [
+        "cv-2d-p1"
+      ]
+    },
+    {
+      "id": "lang-en",
+      "name": "Englisch",
+      "level": "C1",
+      "sources": [
+        "cv-2d-p1"
+      ]
+    },
+    {
+      "id": "lang-fr",
+      "name": "Französisch",
+      "level": "B1",
+      "sources": [
+        "cv-2d-p1"
+      ]
+    },
+    {
+      "id": "lang-pl",
+      "name": "Polnisch",
+      "level": "C2",
+      "sources": [
+        "cv-2d-p1"
+      ]
+    }
   ],
   "experiences": [
-    {"id":"freelance-digital-marketing-media","period":"03/2026 – 07/2026","role":"Freelance Digital Marketing & Media Specialist","employer":"bis 05/2026 Pazifikregion (Neukaledonien), ab 06/2026 in Bern","location":"Neukaledonien / Bern","notes":[],"bullets":[
-      {"id":"bullet-freelance-project-marketing-media","text":"Projektbasierte Marketing- und Medienunterstützung im internationalen Umfeld","tags":["marketing","media","international"],"evidenceLevel":"professional_core","sources":["cv-2d-p2"]},
-      {"id":"bullet-freelance-content-print-web","text":"Erstellung von Content für Print-, Web- und digitale Kommunikationskanäle","tags":["content","web","print"],"evidenceLevel":"professional_core","sources":["cv-2d-p2"]},
-      {"id":"bullet-freelance-remote-stakeholders","text":"Remote-Zusammenarbeit mit Kunden, Partnern und internationalen Stakeholdern","tags":["remote","coordination"],"evidenceLevel":"professional_supporting","sources":["cv-2d-p2"]},
-      {"id":"bullet-freelance-french","text":"Vertiefung der Französischkenntnisse im internationalen Berufsalltag","tags":["languages","french"],"evidenceLevel":"professional_supporting","sources":["cv-2d-p2"]},
-      {"id":"bullet-freelance-self-organization","text":"Selbstständige Projektorganisation und schnelle Anpassung an neue Kulturen","tags":["organization","international"],"evidenceLevel":"professional_supporting","sources":["cv-2d-p2"]}
-    ],"sources":["cv-2d-p2"]},
-    {"id":"kunz-kunath-marketing-mediamatiker","period":"10/2021 – 02/2026","role":"Marketing-Mitarbeiter / Mediamatiker EFZ","employer":"Kunz Kunath AG","location":"Burgdorf","notes":[],"bullets":[
-      {"id":"bullet-kunz-websites-landing","text":"Betreuung, Optimierung und Weiterentwicklung von Websites und Landing Pages","tags":["web","cms"],"evidenceLevel":"professional_core","sources":["cv-2d-p2"]},
-      {"id":"bullet-kunz-online-campaigns-monitoring","text":"Onlineshop-Management inkl. Content-, Struktur- und Produktpflege","tags":["marketing","analytics"],"evidenceLevel":"professional_core","sources":["cv-2d-p2"]},
-      {"id":"bullet-kunz-guegg","text":"Eigenständige Produktion des Firmenmagazins «Gügg Grüggüü» (3 Ausgaben / Jahr)","tags":["editorial","print","content"],"evidenceLevel":"professional_core","sources":["cv-2d-p2"]},
-      {"id":"bullet-kunz-campaigns","text":"Konzeption und Umsetzung von Print-, Newsletter- und Onlinekampagnen","tags":["campaigns","newsletter","print"],"evidenceLevel":"professional_core","sources":["cv-2d-p2"]},
-      {"id":"bullet-kunz-photo-video-social-ci","text":"Foto-, Video- und Social-Media-Content für Marketing und Corporate Identity","tags":["video","social","brand"],"evidenceLevel":"professional_core","sources":["cv-2d-p2"]},
-      {"id":"bullet-kunz-external-partners","text":"Koordination externer Partner (Druckereien, Agenturen, Webhoster)","tags":["coordination","vendors"],"evidenceLevel":"professional_core","sources":["cv-2d-p2"]},
-      {"id":"bullet-kunz-process-handover","text":"Prozessdokumentation zur Wissenssicherung und nachhaltigen Übergabe","tags":["process","documentation"],"evidenceLevel":"professional_core","sources":["cv-2d-p2"]}
-    ],"sources":["cv-2d-p2"]},
-    {"id":"rekrutenschule-triage-fuehrungsdienst","period":"11/2022 – 03/2023","role":"Rekrutenschule – Triage & Führungsdienst","employer":"Stab Personelles der Armee","location":"Bern","notes":["Während Anstellung im Zeitraum bei Kunz Kunath AG"],"bullets":[
-      {"id":"bullet-rs-acta-nova","text":"Bearbeitung und Verteilung von Geschäftsvorgängen im GEVER-System ACTA NOVA","tags":["gever","administration"],"evidenceLevel":"professional_supporting","sources":["cv-2d-p2"]},
-      {"id":"bullet-rs-quality","text":"Qualitätssicherung von Schriftverkehr und Entscheidungsgrundlagen","tags":["quality","administration"],"evidenceLevel":"professional_supporting","sources":["cv-2d-p2"]},
-      {"id":"bullet-rs-doc-management","text":"Strukturierte Dokumentenverwaltung und Unterstützung der Führungsstelle","tags":["documentation","leadership-support"],"evidenceLevel":"professional_supporting","sources":["cv-2d-p2"]},
-      {"id":"bullet-rs-coordination","text":"Koordination zwischen internen Organisationseinheiten und Fachstellen","tags":["coordination","administration"],"evidenceLevel":"professional_supporting","sources":["cv-2d-p2"]}
-    ],"sources":["cv-2d-p2"]},
-    {"id":"mediamatiker-ausbildung-army-bict","period":"08/2017 – 08/2021","role":"Mediamatiker in Ausbildung","employer":"Digitale Medien der Armee (ehemals ZEM), Bern & BiCT AG","location":"Bern","notes":[],"bullets":[],"sources":["cv-2d-p2"]},
-    {"id":"schachfestival-livestream-event","period":"Juli 2019 / 2020","role":"Livestream-Operator & Assistent Eventorganisation","employer":"Internationales Schachfestival","location":"Biel-Bienne","notes":[],"bullets":[],"sources":["cv-2d-p2"]}
+    {
+      "id": "freelance-digital-marketing-media",
+      "period": "03/2026 – heute",
+      "role": "Freelance Digital Marketing & Media Specialist",
+      "employer": "bis 05/2026 Pazifikregion (Neukaledonien), ab 06/2026 in Bern",
+      "location": "Neukaledonien / Bern",
+      "notes": [],
+      "bullets": [
+        {
+          "id": "bullet-freelance-project-marketing-media",
+          "text": "Projektbasierte Marketing- und Medienunterstützung im internationalen Umfeld",
+          "tags": [
+            "marketing",
+            "media",
+            "international"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p2"
+          ]
+        },
+        {
+          "id": "bullet-freelance-content-print-web",
+          "text": "Erstellung von Content für Print-, Web- und digitale Kommunikationskanäle",
+          "tags": [
+            "content",
+            "web",
+            "print"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p2"
+          ]
+        },
+        {
+          "id": "bullet-freelance-remote-stakeholders",
+          "text": "Remote-Zusammenarbeit mit Kunden, Partnern und internationalen Stakeholdern",
+          "tags": [
+            "remote",
+            "coordination"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p2"
+          ]
+        },
+        {
+          "id": "bullet-freelance-french",
+          "text": "Vertiefung der Französischkenntnisse im internationalen Berufsalltag",
+          "tags": [
+            "languages",
+            "french"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p2"
+          ]
+        },
+        {
+          "id": "bullet-freelance-self-organization",
+          "text": "Selbstständige Projektorganisation und schnelle Anpassung an neue Kulturen",
+          "tags": [
+            "organization",
+            "international"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p2"
+          ]
+        }
+      ],
+      "sources": [
+        "cv-2d-p2"
+      ]
+    },
+    {
+      "id": "kunz-kunath-marketing-mediamatiker",
+      "period": "10/2021 – 02/2026",
+      "role": "Marketing-Mitarbeiter / Mediamatiker EFZ",
+      "employer": "Kunz Kunath AG",
+      "location": "Burgdorf",
+      "notes": [],
+      "bullets": [
+        {
+          "id": "bullet-kunz-websites-landing",
+          "text": "Betreuung, Optimierung und Weiterentwicklung von Websites und Landing Pages",
+          "tags": [
+            "web",
+            "cms"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p2"
+          ]
+        },
+        {
+          "id": "bullet-kunz-online-campaigns-monitoring",
+          "text": "Onlineshop-Management inkl. Content-, Struktur- und Produktpflege",
+          "tags": [
+            "marketing",
+            "analytics"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p2"
+          ]
+        },
+        {
+          "id": "bullet-kunz-guegg",
+          "text": "Eigenständige Produktion des Firmenmagazins «Gügg Grüggüü» (3 Ausgaben / Jahr)",
+          "tags": [
+            "editorial",
+            "print",
+            "content"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p2"
+          ]
+        },
+        {
+          "id": "bullet-kunz-campaigns",
+          "text": "Konzeption und Umsetzung von Print-, Newsletter- und Onlinekampagnen",
+          "tags": [
+            "campaigns",
+            "newsletter",
+            "print"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p2"
+          ]
+        },
+        {
+          "id": "bullet-kunz-photo-video-social-ci",
+          "text": "Foto-, Video- und Social-Media-Content für Marketing und Corporate Identity",
+          "tags": [
+            "video",
+            "social",
+            "brand"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p2"
+          ]
+        },
+        {
+          "id": "bullet-kunz-external-partners",
+          "text": "Koordination externer Partner (Druckereien, Agenturen, Webhoster)",
+          "tags": [
+            "coordination",
+            "vendors"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p2"
+          ]
+        },
+        {
+          "id": "bullet-kunz-process-handover",
+          "text": "Prozessdokumentation zur Wissenssicherung und nachhaltigen Übergabe",
+          "tags": [
+            "process",
+            "documentation"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p2"
+          ]
+        }
+      ],
+      "sources": [
+        "cv-2d-p2"
+      ]
+    },
+    {
+      "id": "rekrutenschule-triage-fuehrungsdienst",
+      "period": "11/2022 – 03/2023",
+      "role": "Rekrutenschule – Triage & Führungsdienst",
+      "employer": "Stab Personelles der Armee",
+      "location": "Bern",
+      "notes": [
+        "Während Anstellung im Zeitraum bei Kunz Kunath AG"
+      ],
+      "bullets": [
+        {
+          "id": "bullet-rs-acta-nova",
+          "text": "Bearbeitung und Verteilung von Geschäftsvorgängen im GEVER-System ACTA NOVA",
+          "tags": [
+            "gever",
+            "administration"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p2"
+          ]
+        },
+        {
+          "id": "bullet-rs-quality",
+          "text": "Qualitätssicherung von Schriftverkehr und Entscheidungsgrundlagen",
+          "tags": [
+            "quality",
+            "administration"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p2"
+          ]
+        },
+        {
+          "id": "bullet-rs-doc-management",
+          "text": "Strukturierte Dokumentenverwaltung und Unterstützung der Führungsstelle",
+          "tags": [
+            "documentation",
+            "leadership-support"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p2"
+          ]
+        },
+        {
+          "id": "bullet-rs-coordination",
+          "text": "Koordination zwischen internen Organisationseinheiten und Fachstellen",
+          "tags": [
+            "coordination",
+            "administration"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p2"
+          ]
+        }
+      ],
+      "sources": [
+        "cv-2d-p2"
+      ]
+    },
+    {
+      "id": "mediamatiker-ausbildung-army-bict",
+      "period": "08/2017 – 08/2021",
+      "role": "Mediamatiker in Ausbildung",
+      "employer": "Digitale Medien der Armee (ehemals ZEM), Bern & BiCT AG",
+      "location": "Bern",
+      "notes": [],
+      "bullets": [],
+      "sources": [
+        "cv-2d-p2"
+      ]
+    },
+    {
+      "id": "schachfestival-livestream-event",
+      "period": "Juli 2019 / 2020",
+      "role": "Livestream-Operator & Assistent Eventorganisation",
+      "employer": "Internationales Schachfestival",
+      "location": "Biel-Bienne",
+      "notes": [],
+      "bullets": [],
+      "sources": [
+        "cv-2d-p2"
+      ]
+    }
   ],
   "tools": [
-    {"id":"tool-adobe-cc","name":"Adobe CC","tags":["design","media"],"evidenceLevel":"professional_core","sources":["cv-2d-p2"]},
-    {"id":"tool-ms-office","name":"MS Office","tags":["office","documentation"],"evidenceLevel":"professional_supporting","sources":["cv-2d-p2"]},
-    {"id":"tool-canva","name":"Canva","tags":["design"],"evidenceLevel":"professional_supporting","sources":["cv-2d-p2"]},
-    {"id":"tool-chatgpt","name":"ChatGPT","tags":["ai","process"],"evidenceLevel":"project_experience","sources":["cv-2d-p2"]},
-    {"id":"tool-google-analytics","name":"Google Analytics","tags":["analytics","web"],"evidenceLevel":"professional_supporting","sources":["cv-2d-p2"]},
-    {"id":"tool-acta-nova","name":"ACTA NOVA","tags":["gever","administration"],"evidenceLevel":"professional_supporting","sources":["cv-2d-p2"]},
-    {"id":"tool-typo3","name":"TYPO 3","tags":["cms","web"],"evidenceLevel":"professional_core","sources":["cv-2d-p2"]},
-    {"id":"tool-wordpress","name":"WordPress","tags":["cms","web"],"evidenceLevel":"professional_core","sources":["cv-2d-p2"]},
-    {"id":"tool-grav","name":"Grav","tags":["cms","web"],"evidenceLevel":"professional_core","sources":["cv-2d-p2"]},
-    {"id":"tool-magento","name":"Magento","tags":["shop","web"],"evidenceLevel":"professional_core","sources":["cv-2d-p2"]},
-    {"id":"tool-html-css","name":"HTML / CSS","tags":["web"],"evidenceLevel":"professional_core","sources":["cv-2d-p2"]}
+    {
+      "id": "tool-adobe-cc",
+      "name": "Adobe CC",
+      "tags": [
+        "design",
+        "media"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "cv-2d-p2"
+      ]
+    },
+    {
+      "id": "tool-ms-office",
+      "name": "MS Office",
+      "tags": [
+        "office",
+        "documentation"
+      ],
+      "evidenceLevel": "professional_supporting",
+      "sources": [
+        "cv-2d-p2"
+      ]
+    },
+    {
+      "id": "tool-canva",
+      "name": "Canva",
+      "tags": [
+        "design"
+      ],
+      "evidenceLevel": "professional_supporting",
+      "sources": [
+        "cv-2d-p2"
+      ]
+    },
+    {
+      "id": "tool-chatgpt",
+      "name": "ChatGPT",
+      "tags": [
+        "ai",
+        "process"
+      ],
+      "evidenceLevel": "project_experience",
+      "sources": [
+        "cv-2d-p2"
+      ]
+    },
+    {
+      "id": "tool-google-analytics",
+      "name": "Google Analytics",
+      "tags": [
+        "analytics",
+        "web"
+      ],
+      "evidenceLevel": "professional_supporting",
+      "sources": [
+        "cv-2d-p2"
+      ]
+    },
+    {
+      "id": "tool-acta-nova",
+      "name": "ACTA NOVA",
+      "tags": [
+        "gever",
+        "administration"
+      ],
+      "evidenceLevel": "professional_supporting",
+      "sources": [
+        "cv-2d-p2"
+      ]
+    },
+    {
+      "id": "tool-typo3",
+      "name": "TYPO 3",
+      "tags": [
+        "cms",
+        "web"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "cv-2d-p2"
+      ]
+    },
+    {
+      "id": "tool-wordpress",
+      "name": "WordPress",
+      "tags": [
+        "cms",
+        "web"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "cv-2d-p2"
+      ]
+    },
+    {
+      "id": "tool-grav",
+      "name": "Grav",
+      "tags": [
+        "cms",
+        "web"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "cv-2d-p2"
+      ]
+    },
+    {
+      "id": "tool-magento",
+      "name": "Magento",
+      "tags": [
+        "shop",
+        "web"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "cv-2d-p2"
+      ]
+    },
+    {
+      "id": "tool-html-css",
+      "name": "HTML / CSS",
+      "tags": [
+        "web"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "cv-2d-p2"
+      ]
+    }
   ],
   "references": [
-    {"id":"ref-peter-stadelmann","name":"Peter Stadelmann","role":"ehem. CEO & Marketingleiter","employer":"Kunz Kunath AG","phone":"+41 79 208 90 74","sources":["cv-2d-p2"]},
-    {"id":"ref-peter-wyss","name":"Peter Wyss","role":"Chef Spedition","employer":"Personelles der Armee","phone":"+51 58 489 20 03","manualVerificationRequired":true,"sources":["cv-2d-p2"]}
+    {
+      "id": "ref-peter-stadelmann",
+      "name": "Peter Stadelmann",
+      "role": "ehem. CEO & Marketingleiter",
+      "employer": "Kunz Kunath AG",
+      "phone": "+41 79 208 90 74",
+      "sources": [
+        "cv-2d-p2"
+      ]
+    },
+    {
+      "id": "ref-peter-wyss",
+      "name": "Peter Wyss",
+      "role": "Chef Spedition",
+      "employer": "Personelles der Armee",
+      "phone": "+51 58 489 20 03",
+      "manualVerificationRequired": true,
+      "sources": [
+        "cv-2d-p2"
+      ]
+    }
   ],
-  "availability": {"label":"Eintritt","text":"nach Vereinbarung oder sofort","sources":["cv-2d-p2"]},
-  "workload": {"label":"Pensum","text":"60–100 % flexibel nach Absprache","sources":["cv-2d-p2"]}
+  "availability": {
+    "label": "Eintritt",
+    "text": "nach Vereinbarung oder sofort",
+    "sources": [
+      "cv-2d-p2"
+    ]
+  },
+  "workload": {
+    "label": "Pensum",
+    "text": "60–100 % flexibel nach Absprache",
+    "sources": [
+      "cv-2d-p2"
+    ]
+  }
 }
