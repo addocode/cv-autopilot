@@ -21,7 +21,7 @@ Benötigt Node.js 20 LTS oder neuer.
 npm install
 ```
 
-In eingeschränkten Umgebungen funktioniert das Projekt auch ohne externe Pakete, weil Render- und Testskripte nur Node.js-Standardmodule verwenden.
+Für Produktions-Rendering werden Playwright und Chromium benötigt. In eingeschränkten Umgebungen ohne Paket-/Browserzugriff schlägt `npm run render:all` bewusst fehl, statt ein falsches erfolgreiches PDF zu melden. Ein Debug-Fallback ist nur mit `--debug-fallback` erlaubt und gilt nicht als Produktionsrender.
 
 ## Befehle
 
@@ -32,6 +32,7 @@ npm run render -- --variant general
 npm run render -- --variant communication-content
 npm run render -- --variant administration-gever
 npm run render -- --variant cms-web-process
+npm run render:all
 ```
 
 Ausgaben liegen in `dist/`: HTML-Preview, PDF, SVG-Seitenvorschauen und `render-report-*.json`.
@@ -55,10 +56,29 @@ Ausgaben liegen in `dist/`: HTML-Preview, PDF, SVG-Seitenvorschauen und `render-
 
 ## Bekannte visuelle Abweichungen
 
-- Die PDF-Ausgabe ist aktuell eine ATS-lesbare Phase-1-Ausgabe; die detailgetreue Browser-/Playwright-PDF-Pipeline ist vorbereitet, konnte aber wegen gesperrtem Paket-/Browserzugriff nicht installiert werden.
-- SVG-Seitenvorschauen dokumentieren Raster, Farbe und Seitenlogik, ersetzen aber keinen pixelgenauen Chromium-Screenshot.
+- Die Produktionspipeline rendert HTML, PDF und PNG aus demselben DOM/CSS mit Playwright/Chromium.
+- Lokale Umgebungen ohne npm-/Chromium-Zugriff können den Produktionsrender nicht ausführen; GitHub Actions installiert die Abhängigkeiten und lädt PDFs, PNGs und Reports als Artefakte hoch.
 - Typografie nutzt System-Fallbacks statt eingebetteter Referenzfonts.
 
 ## Phase 2
 
 Phase 2 soll eine automatische Stelleninserat-Analyse ergänzen: Inserat einlesen, Anforderungen extrahieren, belegte CV-Bausteine matchen, Variante vorschlagen, Längenbudget prüfen und anonymisierte Demo-Daten für öffentliche Präsentationen erzwingen.
+
+## Produktionspipeline und Qualitätskontrollen
+
+Der Hauptrenderer ist `scripts/render.mjs` mit Playwright/Chromium. Er misst `scrollHeight`, `clientHeight`, Bounding Boxes aller markierten Module, geladene Bilder, Links und die tatsächliche PDF-Seitenzahl. Bei Overflow, fehlendem Chromium oder falscher Seitenzahl beendet der Render mit Fehlercode. `render-report-<variant>.json` enthält `success`, `pageCount`, `overflows`, `elementId`, `scrollHeight`, `clientHeight`, `overflowPixels`, `warnings`, Variante und Renderzeitpunkt.
+
+## GitHub Actions
+
+Der Workflow `.github/workflows/render-cv.yml` führt auf GitHub aus:
+
+```bash
+npm ci
+npx playwright install --with-deps chromium
+npm run build
+npm run validate
+npm run render:all
+npm run test
+```
+
+Anschliessend werden PDFs, PNG-Screenshots, HTML-Previews und Render Reports als Artefakte hochgeladen.
