@@ -16,3 +16,6 @@ test('optional and supplementary content is verified and variant-bound',()=>{ass
 test('page.evaluate transfers one serializable payload object',()=>{const src=readFileSync('scripts/render.mjs','utf8');assert.ok(src.includes('page.evaluate(({ bgExists, variantMeta }) =>'));assert.ok(src.includes('bgExists: backgroundFileExists'));assert.equal(src.includes('}, backgroundFileExists, {'),false)});
 
 test('tool pool includes only sourced tool records with visibility metadata',()=>{assert.ok(data.tools.length>11);for(const tool of data.tools){assert.ok(tool.id.startsWith('tool-'));assert.ok(tool.name);assert.ok(tool.tags.length);assert.ok(tool.evidenceLevel);assert.ok(tool.sources.length);assert.equal(typeof tool.surfaceAutomatically,'boolean');assert.ok(Array.isArray(tool.allowedVariants));assert.ok(Number.isInteger(tool.priority))}assert.ok(data.tools.find(t=>t.id==='tool-adobe-indesign'&&t.surfaceAutomatically===false));assert.ok(data.tools.find(t=>t.id==='tool-adobe-photoshop'&&t.surfaceAutomatically===false))});
+
+
+test('fill gap uses visible experience content bottom instead of flex container bottom',()=>{const src=readFileSync('scripts/render.mjs','utf8');assert.ok(src.includes('getExperienceContentBottom'));assert.ok(src.includes("#experience-list .experience:not([hidden])"));assert.equal(src.includes('bottomGrid.top - experienceList.bottom'),false)});

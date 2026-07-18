@@ -88,7 +88,9 @@ function applyVariant() {
     experiences,
     tools,
     supplementary: {
-      items: supplementaryItems,
+      candidateItems: supplementaryItems,
+      renderedItems: [],
+      rejectedItems: [],
       optionalCandidates: experiences.flatMap((experience) => experience.optionalCandidates.map((bullet) => ({ ...bullet, text: bullet.text }))),
       optionalVisibleBulletIds: [],
       omittedToolIds: omittedTools.map((tool) => tool.id),
@@ -139,9 +141,9 @@ function html() {
   const skillHtml = cv.skillSections.map((section) => `<section class="module skill-section" id="skill-${section.id}" data-check data-collision-group="skills"><div>${icon(section.id)}</div><div><h2>${esc(section.title)}</h2><ul>${section.items.map((item) => `<li id="${item.id}" data-check>${esc(item.text)}</li>`).join('')}</ul></div></section>`).join('');
   const expHtml = cv.experiences.map((experience) => {
     const bullets = experience.bullets;
-    const optionalHtml = experience.optionalCandidates.map((bullet) => `<li id="${bullet.id}" class="optional-fill" data-check data-fill-state="candidate" data-fill-id="${bullet.id}" hidden>${esc(bullet.text)}</li>`).join('');
-    const indicatorAllowed = cv.supplementary.items.find((item) => item.type === 'experience' && item.experienceId === experience.id);
-    const indicatorHtml = indicatorAllowed ? `<p class="supplementary experience-more" data-check data-fill-state="candidate" data-fill-id="${indicatorAllowed.id}" hidden>${esc(indicatorAllowed.text)}</p>` : '';
+    const optionalHtml = experience.optionalCandidates.map((bullet) => `<li id="${bullet.id}" class="optional-fill" data-check data-fill-state="candidate" data-fill-kind="optional-bullet" data-experience-id="${experience.id}" data-fill-priority="${bullet.fillPriority ?? 99}" data-long-text="${esc(bullet.text)}" data-short-text="${esc(bullet.shortText || bullet.text)}" data-fill-id="${bullet.id}" hidden>${esc(bullet.text)}</li>`).join('');
+    const indicatorAllowed = cv.supplementary.candidateItems.find((item) => item.type === 'experience' && item.experienceId === experience.id);
+    const indicatorHtml = indicatorAllowed ? `<p class="supplementary experience-more" data-check data-fill-state="candidate" data-fill-kind="experience-indicator" data-experience-id="${experience.id}" data-fill-priority="${indicatorAllowed.priority ?? 99}" data-long-text="${esc(indicatorAllowed.text)}" data-short-text="${esc(indicatorAllowed.text)}" data-fill-id="${indicatorAllowed.id}" hidden>${esc(indicatorAllowed.text)}</p>` : '';
     return `<article class="module experience" id="experience-${experience.id}" data-check data-collision-group="experiences"><div class="meta">${esc(experience.period)} <span>|</span> <strong>${esc(experience.role)}</strong></div><div class="employer">${experienceLine(experience)}</div>${experience.notes.map((note) => `<div class="note">${esc(note)}</div>`).join('')}<ul>${bullets.map((bullet) => `<li id="${bullet.id}" data-check>${esc(bullet.text)}</li>`).join('')}${optionalHtml}</ul>${indicatorHtml}</article>`;
   }).join('');
   const toolIndicator = cv.supplementary.toolsIndicator ? `<p class="supplementary tools-more" data-check>${esc(cv.supplementary.toolsIndicator.text)}</p>` : '';
@@ -238,9 +240,15 @@ async function withPlaywright() {
         if (collision.area > 4) out.collisions.push({ type: 'collision', elementA: a.id, elementB: b.id, overlapWidth: Math.round(collision.width), overlapHeight: Math.round(collision.height), overlapArea: Math.round(collision.area) });
       }
     }
-    const experienceList = document.querySelector('#experience-list')?.getBoundingClientRect();
+    const getExperienceContentBottom = () => {
+      const visibleExperiences = [...document.querySelectorAll('#experience-list .experience:not([hidden])')];
+      const list = document.querySelector('#experience-list');
+      if (visibleExperiences.length === 0) return list.getBoundingClientRect().top;
+      return Math.max(...visibleExperiences.map((element) => element.getBoundingClientRect().bottom));
+    };
     const bottomGrid = document.querySelector('#bottom-grid')?.getBoundingClientRect();
-    if (experienceList && bottomGrid) out.fill.experienceBottomGapPx = Math.round(bottomGrid.top - experienceList.bottom);
+    const contentBottom = getExperienceContentBottom();
+    if (bottomGrid) out.fill.experienceBottomGapPx = Math.round(bottomGrid.top - contentBottom);
     if (document.querySelector('.summary p').textContent.length > 430) out.warnings.push('Summary exceeds 430 characters.');
     if (!out.assets.profile.loaded) out.warnings.push('Profile image did not load.');
     if ([out.fonts.heading, out.fonts.body, out.fonts.slab].some((font) => /Times New Roman/i.test(font))) out.warnings.push('Chromium fell back to Times New Roman.');
@@ -283,9 +291,15 @@ async function withPlaywright() {
           if (width * height > 4) collisions.push({ elementA: a.id, elementB: b.id, overlapWidth: Math.round(width), overlapHeight: Math.round(height), overlapArea: Math.round(width * height) });
         }
       }
-      const experienceList = document.querySelector('#experience-list')?.getBoundingClientRect();
+      const getExperienceContentBottom = () => {
+        const visibleExperiences = [...document.querySelectorAll('#experience-list .experience:not([hidden])')];
+        const list = document.querySelector('#experience-list');
+        if (visibleExperiences.length === 0) return list.getBoundingClientRect().top;
+        return Math.max(...visibleExperiences.map((element) => element.getBoundingClientRect().bottom));
+      };
       const bottomGrid = document.querySelector('#bottom-grid')?.getBoundingClientRect();
-      const gapPx = experienceList && bottomGrid ? Math.round(bottomGrid.top - experienceList.bottom) : 0;
+      const contentBottom = getExperienceContentBottom();
+      const gapPx = bottomGrid ? Math.round(bottomGrid.top - contentBottom) : 0;
       return { overflows, collisions, gapPx, pageCount: document.querySelectorAll('.cv-page').length };
     });
   }
@@ -294,26 +308,65 @@ async function withPlaywright() {
     const minGapPx = Math.ceil(metrics.fill.minRemainingSpaceMm * 96 / 25.4);
     const baseline = await measureLayout();
     metrics.fill.baselineGapPx = baseline.gapPx;
-    const optionalCandidates = await page.locator('[data-fill-state="candidate"]').evaluateAll((elements) => elements.map((element) => element.dataset.fillId));
-    metrics.fill.consideredOptionalBulletIds = optionalCandidates;
-    for (const id of optionalCandidates) {
+    const optionalCandidates = await page.locator('[data-fill-state="candidate"]').evaluateAll((elements) => elements.map((element) => ({
+      id: element.dataset.fillId,
+      kind: element.dataset.fillKind,
+      experienceId: element.dataset.experienceId,
+      priority: Number(element.dataset.fillPriority || 99),
+      longText: element.dataset.longText || element.textContent,
+      shortText: element.dataset.shortText || element.dataset.longText || element.textContent,
+    })).sort((a, b) => (a.kind === 'optional-bullet' ? 0 : 1) - (b.kind === 'optional-bullet' ? 0 : 1) || a.priority - b.priority));
+    metrics.fill.consideredOptionalBulletIds = optionalCandidates.map((candidate) => candidate.id);
+    metrics.supplementary.candidateItems = optionalCandidates.map((candidate) => ({ id: candidate.id, type: candidate.kind, experienceId: candidate.experienceId }));
+    const acceptedOptionalByExperience = new Map();
+    const optionalTotalsByExperience = new Map(optionalCandidates.filter((candidate) => candidate.kind === 'optional-bullet').reduce((entries, candidate) => {
+      entries.set(candidate.experienceId, (entries.get(candidate.experienceId) || 0) + 1);
+      return entries;
+    }, new Map()));
+    for (const candidate of optionalCandidates) {
+      const { id } = candidate;
       const locator = page.locator(`[data-fill-id="${id}"]`).first();
-      await locator.evaluate((element) => { element.hidden = false; element.dataset.fillState = 'accepted'; });
-      const measured = await measureLayout();
-      const accepted = measured.overflows.length === 0 && measured.collisions.length === 0 && measured.pageCount === 2 && measured.gapPx >= minGapPx;
+      if (candidate.kind === 'experience-indicator') {
+        const acceptedForExperience = acceptedOptionalByExperience.get(candidate.experienceId) || 0;
+        const totalForExperience = optionalTotalsByExperience.get(candidate.experienceId) || 0;
+        if (totalForExperience > 0 && acceptedForExperience >= totalForExperience) {
+          metrics.fill.rejectedOptionalBulletIds.push({ id, reason: 'duplicate-content', gapPx: metrics.fill.finalGapPx || metrics.fill.baselineGapPx });
+          metrics.supplementary.rejectedItems.push({ id, type: candidate.kind, experienceId: candidate.experienceId, reason: 'duplicate-content' });
+          continue;
+        }
+      }
+      await locator.evaluate((element, text) => { element.textContent = text; element.hidden = false; element.dataset.fillState = 'accepted'; element.dataset.textMode = 'long'; }, candidate.longText);
+      let measured = await measureLayout();
+      let textMode = 'long';
+      let renderedText = candidate.longText;
+      let accepted = measured.overflows.length === 0 && measured.collisions.length === 0 && measured.pageCount === 2 && measured.gapPx >= minGapPx;
+      if (!accepted && candidate.kind === 'optional-bullet' && candidate.shortText && candidate.shortText !== candidate.longText) {
+        await locator.evaluate((element, text) => { element.textContent = text; element.dataset.textMode = 'short'; }, candidate.shortText);
+        measured = await measureLayout();
+        textMode = 'short';
+        renderedText = candidate.shortText;
+        accepted = measured.overflows.length === 0 && measured.collisions.length === 0 && measured.pageCount === 2 && measured.gapPx >= minGapPx;
+      }
       if (accepted) {
-        metrics.fill.acceptedOptionalBulletIds.push(id);
-        if (id.startsWith('optional-')) metrics.supplementary.optionalVisibleBulletIds.push(id);
+        const item = { id, type: candidate.kind, experienceId: candidate.experienceId, accepted: true, textMode, renderedText, gapPx: measured.gapPx };
+        metrics.fill.acceptedOptionalBulletIds.push(item);
+        metrics.supplementary.renderedItems.push(item);
+        if (candidate.kind === 'optional-bullet') {
+          metrics.supplementary.optionalVisibleBulletIds.push(id);
+          acceptedOptionalByExperience.set(candidate.experienceId, (acceptedOptionalByExperience.get(candidate.experienceId) || 0) + 1);
+        }
         metrics.fill.finalGapPx = measured.gapPx;
       } else {
         await locator.evaluate((element) => { element.hidden = true; element.dataset.fillState = 'rejected'; });
         const reason = measured.overflows.length ? 'overflow' : measured.collisions.length ? 'collision' : measured.pageCount !== 2 ? 'page-count' : 'minimum-gap';
-        metrics.fill.rejectedOptionalBulletIds.push({ id, reason, gapPx: measured.gapPx });
+        const item = { id, type: candidate.kind, experienceId: candidate.experienceId, reason, gapPx: measured.gapPx };
+        metrics.fill.rejectedOptionalBulletIds.push(item);
+        metrics.supplementary.rejectedItems.push(item);
       }
     }
     const finalLayout = await measureLayout();
     metrics.fill.finalGapPx = finalLayout.gapPx;
-    metrics.fill.optionalBulletsUsed = metrics.fill.acceptedOptionalBulletIds.filter((id) => id.startsWith('optional-')).length;
+    metrics.fill.optionalBulletsUsed = metrics.fill.acceptedOptionalBulletIds.filter((item) => item.id.startsWith('optional-')).length;
     metrics.overflows = finalLayout.overflows;
     metrics.collisions = finalLayout.collisions;
   }
