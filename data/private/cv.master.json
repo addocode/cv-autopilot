@@ -578,7 +578,58 @@
       "bullets": [],
       "sources": [
         "cv-2d-p2"
-      ]
+      ],
+      "optionalBullets": [
+        {
+          "id": "optional-training-web-digital-media",
+          "text": "Ausbildungs- und Praxiserfahrung in Web, digitalen Medien und Gestaltung",
+          "shortText": "Web, digitale Medien und Gestaltung in Ausbildung und Praxis",
+          "tags": [
+            "training",
+            "web",
+            "digital-media",
+            "design"
+          ],
+          "evidenceLevel": "training_verified",
+          "sources": [
+            "cv-2d-p2",
+            "cv-2b",
+            "linkedin"
+          ],
+          "variantRelevance": [
+            "general",
+            "communication-content",
+            "cms-web-process"
+          ],
+          "fillPriority": 1,
+          "preferredMaxChars": 92
+        },
+        {
+          "id": "optional-training-documentation-projects",
+          "text": "Dokumentation und Projektarbeit in mediamatikbezogenen Lern- und Praxisprojekten",
+          "shortText": "Dokumentation und mediamatikbezogene Projektarbeit",
+          "tags": [
+            "training",
+            "documentation",
+            "projects"
+          ],
+          "evidenceLevel": "training_verified",
+          "sources": [
+            "cv-2b",
+            "linkedin"
+          ],
+          "variantRelevance": [
+            "general",
+            "administration-gever",
+            "cms-web-process"
+          ],
+          "fillPriority": 2,
+          "preferredMaxChars": 88
+        }
+      ],
+      "supplementaryText": "Weitere mediamatikbezogene Ausbildungsinhalte und Praxiserfahrungen",
+      "showSupplementaryWhenOmitted": true,
+      "minRemainingSpaceMm": 5
     },
     {
       "id": "schachfestival-livestream-event",
@@ -590,7 +641,55 @@
       "bullets": [],
       "sources": [
         "cv-2d-p2"
-      ]
+      ],
+      "optionalBullets": [
+        {
+          "id": "optional-event-livestream-operations",
+          "text": "Technische Unterstützung von Livestreaming und Veranstaltungsbetrieb",
+          "shortText": "Livestreaming und Veranstaltungsbetrieb technisch unterstützt",
+          "tags": [
+            "livestream",
+            "event",
+            "technical-support"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p2",
+            "cv-2b"
+          ],
+          "variantRelevance": [
+            "general",
+            "communication-content",
+            "cms-web-process"
+          ],
+          "fillPriority": 1,
+          "preferredMaxChars": 78
+        },
+        {
+          "id": "optional-event-organization-operations",
+          "text": "Mitarbeit in Eventorganisation und operativer Durchführung",
+          "shortText": "Eventorganisation und operative Durchführung unterstützt",
+          "tags": [
+            "event-organization",
+            "operations",
+            "coordination"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p2",
+            "cv-2b"
+          ],
+          "variantRelevance": [
+            "general",
+            "administration-gever"
+          ],
+          "fillPriority": 2,
+          "preferredMaxChars": 75
+        }
+      ],
+      "supplementaryText": "Weitere Aufgaben in Liveproduktion und Eventorganisation",
+      "showSupplementaryWhenOmitted": true,
+      "minRemainingSpaceMm": 5
     }
   ],
   "tools": [
@@ -760,5 +859,17 @@
     "sources": [
       "cv-2d-p2"
     ]
+  },
+  "supplementaryIndicators": {
+    "tools": {
+      "enabled": true,
+      "text": "+ weitere mediamatikbezogene Tools und Systeme"
+    },
+    "experience": {
+      "general": "Weitere mediamatikbezogene Aufgaben und Kompetenzen vorhanden",
+      "communication-content": "Weitere Kompetenzen in Web, Systemen und digitalen Prozessen",
+      "administration-gever": "Zusätzliche Kompetenzen in Kommunikation, Gestaltung und digitalen Medien",
+      "cms-web-process": "Weitere mediamatikbezogene Kompetenzen in Content und Medienproduktion"
+    }
   }
 }

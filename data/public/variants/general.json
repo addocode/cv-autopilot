@@ -1,1 +1,72 @@
-{"id":"general","headline":"Digital Marketing · Web · Content · KI-gestützte Prozesse","summaryKey":"default","skillSectionOrder":["digital-marketing-web","content-media","technik-systeme","arbeitsweise"],"skillSectionTitles":{},"hiddenSkillSections":[],"selectedBulletIds":["bullet-freelance-project-marketing-media","bullet-freelance-content-print-web","bullet-freelance-remote-stakeholders","bullet-freelance-french","bullet-freelance-self-organization","bullet-kunz-websites-landing","bullet-kunz-online-campaigns-monitoring","bullet-kunz-guegg","bullet-kunz-campaigns","bullet-kunz-photo-video-social-ci","bullet-kunz-external-partners","bullet-kunz-process-handover","bullet-rs-acta-nova","bullet-rs-quality","bullet-rs-doc-management","bullet-rs-coordination"],"bulletPriority":["bullet-kunz-websites-landing","bullet-kunz-guegg","bullet-kunz-campaigns"],"hiddenBulletIds":[],"toolOrder":["tool-adobe-cc","tool-ms-office","tool-canva","tool-chatgpt","tool-google-analytics","tool-acta-nova","tool-typo3","tool-wordpress","tool-grav","tool-magento","tool-html-css"],"maxBulletsPerExperience":7,"maxTools":11,"budgets":{"summaryMaxChars":430,"pageOneMaxSkillItems":19,"pageTwoMaxExperienceBullets":18}}
+{
+  "id": "general",
+  "headline": "Digital Marketing · Web · Content · KI-gestützte Prozesse",
+  "summaryKey": "default",
+  "skillSectionOrder": [
+    "digital-marketing-web",
+    "content-media",
+    "technik-systeme",
+    "arbeitsweise"
+  ],
+  "skillSectionTitles": {},
+  "hiddenSkillSections": [],
+  "selectedBulletIds": [
+    "bullet-freelance-project-marketing-media",
+    "bullet-freelance-content-print-web",
+    "bullet-freelance-remote-stakeholders",
+    "bullet-freelance-french",
+    "bullet-freelance-self-organization",
+    "bullet-kunz-websites-landing",
+    "bullet-kunz-online-campaigns-monitoring",
+    "bullet-kunz-guegg",
+    "bullet-kunz-campaigns",
+    "bullet-kunz-photo-video-social-ci",
+    "bullet-kunz-external-partners",
+    "bullet-kunz-process-handover",
+    "bullet-rs-acta-nova",
+    "bullet-rs-quality",
+    "bullet-rs-doc-management",
+    "bullet-rs-coordination"
+  ],
+  "bulletPriority": [
+    "bullet-kunz-websites-landing",
+    "bullet-kunz-guegg",
+    "bullet-kunz-campaigns"
+  ],
+  "hiddenBulletIds": [],
+  "toolOrder": [
+    "tool-adobe-cc",
+    "tool-ms-office",
+    "tool-canva",
+    "tool-chatgpt",
+    "tool-google-analytics",
+    "tool-acta-nova",
+    "tool-typo3",
+    "tool-wordpress",
+    "tool-grav",
+    "tool-magento",
+    "tool-html-css"
+  ],
+  "maxBulletsPerExperience": 7,
+  "maxTools": 11,
+  "budgets": {
+    "summaryMaxChars": 430,
+    "pageOneMaxSkillItems": 19,
+    "pageTwoMaxExperienceBullets": 18
+  },
+  "supplementaryIndicators": {
+    "tools": {
+      "enabled": false,
+      "text": "+ weitere mediamatikbezogene Tools und Systeme"
+    },
+    "experience": {
+      "enabled": true,
+      "maxPerVariant": 3
+    }
+  },
+  "fill": {
+    "enabled": true,
+    "minRemainingSpaceMm": 5,
+    "optionalBulletLimit": 4
+  }
+}

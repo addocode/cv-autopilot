@@ -14,6 +14,6 @@ if(d.references.length<2 || d.references.some(r=>!r.phone || /gemäss|siehe|Refe
 if(raw.includes('+51 58 489 20 03')) errs.push('obsolete +51 Peter Wyss number must not appear');
 const wyss=d.references.find(r=>r.name==='Peter Wyss'); if(!wyss||wyss.phone!=='+41 58 489 20 03'||'manualVerificationRequired' in wyss) errs.push('Peter Wyss confirmed +41 number invalid');
 for(const section of d.skillSections) for(const item of section.items) if(!item.id||!item.tags?.length||!item.evidenceLevel||!item.sources?.length) errs.push(`invalid skill ${item.id}`);
-for(const exp of d.experiences) for(const b of exp.bullets) if(!b.id||!b.tags?.length||!b.evidenceLevel||!b.sources?.length) errs.push(`invalid bullet ${b.id}`);
-for(const v of variants){for(const b of v.selectedBulletIds){if(!d.experiences.flatMap(e=>e.bullets).find(x=>x.id===b)) errs.push(`${v.id} selects missing bullet ${b}`)}}
+for(const exp of d.experiences){ for(const b of exp.bullets) if(!b.id||!b.tags?.length||!b.evidenceLevel||!b.sources?.length) errs.push(`invalid bullet ${b.id}`); for(const b of (exp.optionalBullets||[])) if(!b.id||!b.shortText||!b.tags?.length||!b.evidenceLevel||!b.sources?.length||!b.variantRelevance?.length||!Number.isInteger(b.fillPriority)||!b.preferredMaxChars) errs.push(`invalid optional bullet ${b.id}`); }
+for(const v of variants){for(const b of v.selectedBulletIds){if(!d.experiences.flatMap(e=>e.bullets).find(x=>x.id===b)) errs.push(`${v.id} selects missing bullet ${b}`)} if(v.supplementaryIndicators?.tools?.enabled && v.maxTools>=d.tools.length) errs.push(`${v.id} enables tool indicator without omitted tools`)}
 if(errs.length){console.error(errs.join('\n')); process.exit(1)} console.log('CV data and variants valid');

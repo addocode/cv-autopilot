@@ -119,6 +119,10 @@ Der Workflow `.github/workflows/render-cv.yml` läuft nur auf:
 
 Er installiert Node.js 22, npm-Abhängigkeiten und Chromium, führt Build, Validierung, Daten-Tests, Render-All und Render-Tests aus und lädt PDFs, PNGs, HTML-Previews sowie Reports als Artefakt `cv-render-artifacts` hoch. Der finale Guard bleibt aktiv und lässt den Job nur grün werden, wenn Render und Render-Tests intern erfolgreich sind.
 
+## Intelligente Zusatz- und Fill-Logik
+
+Die Varianten zeigen zunächst die definierten Kerninhalte. Wenn verifizierte Masterdaten wegen Variantenfokus, Tool-Limit oder Platzbudget ausgeblendet werden, ergänzt der Renderer nur datengetriebene Hinweise wie `+ weitere mediamatikbezogene Tools und Systeme` oder variantenspezifische Hinweise zu weiteren Kompetenzen. Optionale Zusatzpunkte für Ausbildung und Eventstation besitzen stabile IDs, Tags, Evidence-Level, Quellen, Variantenrelevanz und Fill-Priorität; sie werden im Render Report unter `supplementary` und `fill` dokumentiert. Der Produktionsrender darf keine erfundenen Fähigkeiten verwenden und muss weiterhin ohne Overflows oder Collisions abschließen.
+
 ## Typografie
 
 Die CSS-Font-Stacks orientieren sich an der Referenz:
@@ -131,7 +135,7 @@ Es werden keine proprietären Avenir-Fontdateien committed. Times New Roman ist 
 
 ## Hintergrundbild
 
-`assets/bg_img.jpeg` wird als seitenfüllender Hintergrund mit `background-size: var(--background-size)` und seitenbezogener `background-position` gerendert. Aktuell verwendet das Design `left top`, damit Laptop-Ecke und Tastatur im oberen linken Bereich sichtbar bleiben.
+`assets/bg_img.jpeg` wird als seitenfüllender Hintergrund mit `background-size: cover`, `background-position: left top`, `background-repeat: no-repeat` und transparenter Seitenfarbe gerendert. Der Render Report prüft zusätzlich `coversFullPage`, `bottomZoneNotGray`, `topLeftLaptopExpected`, die tatsächlich berechnete Position und die Größe.
 
 ## CV-Anpassung für Stellen
 
@@ -144,5 +148,5 @@ Es werden keine proprietären Avenir-Fontdateien committed. Times New Roman ist 
 ## Verbleibende visuelle Abweichungen
 
 - Systemabhängige Avenir-Verfügbarkeit kann zu Fallbacks wie Nunito Sans, Montserrat oder Arial führen.
-- Der Hintergrund nutzt `background-position: left top` und `background-size: 142%`; die Referenzwirkung ist auf Laptop/Tastatur oben links optimiert, muss bei finalem CI-Artefakt visuell bestätigt werden.
+- Der Hintergrund nutzt `background-position: left top` und `background-size: cover`; Laptop/Tastatur bleiben oben links sichtbar, die Referenz kann je nach Chromium-Fontmetrik noch leicht im Bildausschnitt abweichen.
 - Kleine Unterschiede zu InDesign bei Mikrotypografie und exakten Zeilenumbrüchen bleiben möglich.
