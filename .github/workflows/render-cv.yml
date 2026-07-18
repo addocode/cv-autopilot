@@ -1,0 +1,37 @@
+name: Render CV
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: npm run validate
+      - run: npm run test:data
+      - id: render_all
+        continue-on-error: true
+        run: npm run render:all
+      - id: render_tests
+        continue-on-error: true
+        run: npm run test:render
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cv-render-artifacts
+          path: |
+            dist/*.pdf
+            dist/*.png
+            dist/*-preview.html
+            dist/render-report-*.json
+      - name: Fail if render or render tests failed
+        if: steps.render_all.outcome != 'success' || steps.render_tests.outcome != 'success'
+        run: exit 1
