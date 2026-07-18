@@ -11,7 +11,8 @@ if(d.workload.text!=='60–100 % flexibel nach Absprache') errs.push('workload t
 if(d.languages.map(l=>l.name).join('|')!=='Deutsch|Englisch|Französisch|Polnisch') errs.push('language order invalid');
 const general=variants.find(v=>v.id==='general'); for(const bid of ['bullet-freelance-french','bullet-freelance-self-organization']) if(!general?.selectedBulletIds.includes(bid)) errs.push(`general missing ${bid}`);
 if(d.references.length<2 || d.references.some(r=>!r.phone || /gemäss|siehe|Referenzperson/i.test(JSON.stringify(r)))) errs.push('real references incomplete');
-const wyss=d.references.find(r=>r.name==='Peter Wyss'); if(!wyss||wyss.phone!=='+51 58 489 20 03'||wyss.manualVerificationRequired!==true) errs.push('Peter Wyss verification warning missing');
+if(raw.includes('+51 58 489 20 03')) errs.push('obsolete +51 Peter Wyss number must not appear');
+const wyss=d.references.find(r=>r.name==='Peter Wyss'); if(!wyss||wyss.phone!=='+41 58 489 20 03'||'manualVerificationRequired' in wyss) errs.push('Peter Wyss confirmed +41 number invalid');
 for(const section of d.skillSections) for(const item of section.items) if(!item.id||!item.tags?.length||!item.evidenceLevel||!item.sources?.length) errs.push(`invalid skill ${item.id}`);
 for(const exp of d.experiences) for(const b of exp.bullets) if(!b.id||!b.tags?.length||!b.evidenceLevel||!b.sources?.length) errs.push(`invalid bullet ${b.id}`);
 for(const v of variants){for(const b of v.selectedBulletIds){if(!d.experiences.flatMap(e=>e.bullets).find(x=>x.id===b)) errs.push(`${v.id} selects missing bullet ${b}`)}}
