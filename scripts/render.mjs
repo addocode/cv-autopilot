@@ -99,7 +99,8 @@ function applyVariant() {
     },
     fill: {
       enabled: Boolean(variant.fill?.enabled),
-      optionalBulletLimit: variant.fill?.optionalBulletLimit ?? 0,
+      preferredOptionalBulletCount: variant.fill?.preferredOptionalBulletCount ?? 0,
+      maxOptionalBullets: variant.fill?.maxOptionalBullets ?? 6,
       optionalBulletsUsed: 0,
       minRemainingSpaceMm: variant.fill?.minRemainingSpaceMm ?? 5,
       baselineGapPx: 0,
@@ -209,6 +210,9 @@ async function withPlaywright() {
       buttonStates: { normal: {}, hover: {}, focus: {} },
       emailState: {},
       finalInteractiveState: {},
+      layout: { pageTwoWhitePanelTopPx: 0, pageTwoFooterHeightPx: 0, counterRailAlignment: [] },
+      ats: { textExtractable: false, readingOrderValid: false, requiredTermsPresent: [], missingTerms: [], keywordCoverage: 0, keywordStuffingRisk: false, hiddenTextDetected: false },
+      reviewQueue: [],
       supplementary: variantMeta.supplementary,
       fill: { ...variantMeta.fill, experienceBottomGapPx: 0 },
     };
@@ -249,6 +253,10 @@ async function withPlaywright() {
     const bottomGrid = document.querySelector('#bottom-grid')?.getBoundingClientRect();
     const contentBottom = getExperienceContentBottom();
     if (bottomGrid) out.fill.experienceBottomGapPx = Math.round(bottomGrid.top - contentBottom);
+    const panel2 = document.querySelector('#page-2 .white-panel')?.getBoundingClientRect();
+    const page2 = document.querySelector('#page-2')?.getBoundingClientRect();
+    if (panel2 && page2) { out.layout.pageTwoWhitePanelTopPx = Math.round(panel2.top - page2.top); out.layout.pageTwoFooterHeightPx = Math.round(page2.bottom - panel2.bottom); }
+    out.layout.counterRailAlignment = [...document.querySelectorAll('.cv-page')].map((page) => { const counter = page.querySelector('.counter').getBoundingClientRect(); const pageRect = page.getBoundingClientRect(); const expectedCenterX = pageRect.left + (10 + 5) * 96 / 25.4; const actualCenterX = counter.left + counter.width / 2; return { pageId: page.id, expectedCenterX: Math.round(expectedCenterX), actualCenterX: Math.round(actualCenterX), deltaPx: Math.round(Math.abs(actualCenterX - expectedCenterX)) }; });
     if (document.querySelector('.summary p').textContent.length > 430) out.warnings.push('Summary exceeds 430 characters.');
     if (!out.assets.profile.loaded) out.warnings.push('Profile image did not load.');
     if ([out.fonts.heading, out.fonts.body, out.fonts.slab].some((font) => /Times New Roman/i.test(font))) out.warnings.push('Chromium fell back to Times New Roman.');
@@ -317,6 +325,7 @@ async function withPlaywright() {
       shortText: element.dataset.shortText || element.dataset.longText || element.textContent,
     })).sort((a, b) => (a.kind === 'optional-bullet' ? 0 : 1) - (b.kind === 'optional-bullet' ? 0 : 1) || a.priority - b.priority));
     metrics.fill.consideredOptionalBulletIds = optionalCandidates.map((candidate) => candidate.id);
+    const maxOptionalBullets = metrics.fill.maxOptionalBullets || optionalCandidates.length;
     metrics.supplementary.candidateItems = optionalCandidates.map((candidate) => ({ id: candidate.id, type: candidate.kind, experienceId: candidate.experienceId }));
     const acceptedOptionalByExperience = new Map();
     const optionalTotalsByExperience = new Map(optionalCandidates.filter((candidate) => candidate.kind === 'optional-bullet').reduce((entries, candidate) => {
@@ -325,6 +334,12 @@ async function withPlaywright() {
     }, new Map()));
     for (const candidate of optionalCandidates) {
       const { id } = candidate;
+      if (candidate.kind === 'optional-bullet' && metrics.fill.acceptedOptionalBulletIds.filter((item) => item.id.startsWith('optional-')).length >= maxOptionalBullets) {
+        const item = { id, type: candidate.kind, experienceId: candidate.experienceId, reason: 'max-optional-bullets', gapPx: metrics.fill.finalGapPx || metrics.fill.baselineGapPx };
+        metrics.fill.rejectedOptionalBulletIds.push(item);
+        metrics.supplementary.rejectedItems.push(item);
+        continue;
+      }
       const locator = page.locator(`[data-fill-id="${id}"]`).first();
       if (candidate.kind === 'experience-indicator') {
         const acceptedForExperience = acceptedOptionalByExperience.get(candidate.experienceId) || 0;
@@ -405,6 +420,9 @@ async function withPlaywright() {
     emailFocused: Boolean(document.querySelector('.contact a[href^="mailto:"]:focus')),
   }));
 
+  metrics.visibleText = await page.evaluate(() => document.body.innerText.replace(/\s+/g, ' ').trim());
+  metrics.ats.hiddenTextDetected = await page.evaluate(() => [...document.querySelectorAll('body *')].some((element) => { const style = getComputedStyle(element); const text = element.textContent?.trim(); return Boolean(text && style.visibility === 'hidden' && !element.closest('[hidden]')); }));
+
   await page.evaluate(() => document.fonts.ready);
   await page.pdf({ path: `dist/Lebenslauf_Adam-Dolinsky_${variantId}.pdf`, format: 'A4', printBackground: true, preferCSSPageSize: true });
   await page.locator('#page-1').screenshot({ path: `dist/cv-${variantId}-page-1.png` });
@@ -429,8 +447,65 @@ try {
   pageCount = (pdf.match(/\/Type\s*\/Page\b/g) || []).length;
 } catch {}
 
+async function buildAtsReport(pdfPath, metrics) {
+  const visibleText = metrics.visibleText || '';
+  const baseTerms = [cv.person.name, cv.headline, cv.person.email, 'Peter Wyss', '+41 58 489 20 03', cv.availability.text, cv.workload.text];
+  const employerTerms = cv.experiences.map((experience) => experience.employer.split('(')[0].trim()).filter(Boolean);
+  const periodTerms = cv.experiences.map((experience) => experience.period);
+  const toolTerms = cv.tools.map((tool) => tool.name);
+  const skillTerms = cv.skillSections.map((section) => section.title);
+  const required = [...new Set([...baseTerms, ...employerTerms, ...periodTerms, ...toolTerms, ...skillTerms])];
+  let extractedText = visibleText;
+  let textExtractable = false;
+  try {
+    const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+    const pdf = await pdfjs.getDocument({ data: new Uint8Array(readFileSync(pdfPath)) }).promise;
+    const pages = [];
+    for (let pageNo = 1; pageNo <= pdf.numPages; pageNo += 1) {
+      const page = await pdf.getPage(pageNo);
+      const content = await page.getTextContent();
+      pages.push(content.items.map((item) => item.str).join(' '));
+    }
+    extractedText = pages.join(' ').replace(/\s+/g, ' ').trim();
+    textExtractable = extractedText.length > 100;
+  } catch {
+    textExtractable = visibleText.length > 100;
+  }
+  const missingTerms = required.filter((term) => term && !extractedText.includes(term));
+  const requiredTermsPresent = required.filter((term) => term && extractedText.includes(term));
+  const lower = extractedText.toLowerCase();
+  const keywordTerms = [...new Set(cv.skillSections.flatMap((section) => section.items.flatMap((item) => item.atsSynonyms || item.tags || [])))];
+  const keywordHits = keywordTerms.filter((term) => lower.includes(String(term).toLowerCase()));
+  const orderChecks = [cv.person.name, cv.person.email, cv.experiences[0]?.period, cv.experiences[1]?.employer].filter(Boolean);
+  const readingOrderValid = orderChecks.every((term, index) => index === 0 || extractedText.indexOf(orderChecks[index - 1]) <= extractedText.indexOf(term));
+  return {
+    textExtractable,
+    readingOrderValid,
+    requiredTermsPresent,
+    missingTerms,
+    keywordCoverage: keywordTerms.length ? Number((keywordHits.length / keywordTerms.length).toFixed(2)) : 0,
+    keywordStuffingRisk: /(\b\w+\b)(?:\s+\1){3,}/i.test(extractedText),
+    hiddenTextDetected: Boolean(metrics.ats.hiddenTextDetected),
+    extractedCharCount: extractedText.length,
+  };
+}
+
+function buildReviewQueue() {
+  const blocks = [
+    ...data.skillSections.flatMap((section) => section.items || []),
+    ...data.experiences.flatMap((experience) => [...(experience.bullets || []), ...(experience.optionalBullets || [])]),
+    ...data.tools,
+  ];
+  return blocks
+    .filter((block) => block.status === 'inferred_review_required' || block.evidenceLevel === 'inferred_review_required')
+    .map((block) => ({ id: block.id, status: block.status || block.evidenceLevel, sources: block.sources || [], reason: 'manual review required before production visibility' }));
+}
+
+metrics.ats = await buildAtsReport(`dist/Lebenslauf_Adam-Dolinsky_${variantId}.pdf`, metrics);
+metrics.reviewQueue = buildReviewQueue();
+
 const report = {
-  success: renderer === 'playwright' && pageCount === 2 && metrics.overflows.length === 0 && metrics.collisions.length === 0 && metrics.warnings.length === 0,
+  success: renderer === 'playwright' && pageCount === 2 && metrics.overflows.length === 0 && metrics.collisions.length === 0 && metrics.warnings.length === 0 && metrics.ats.textExtractable && metrics.ats.readingOrderValid && metrics.ats.missingTerms.length === 0 && !metrics.ats.keywordStuffingRisk && !metrics.ats.hiddenTextDetected,
   variant: variantId,
   renderer,
   renderedAt: new Date().toISOString(),
@@ -446,6 +521,9 @@ const report = {
   buttonStates: metrics.buttonStates,
   emailState: metrics.emailState,
   finalInteractiveState: metrics.finalInteractiveState,
+  layout: metrics.layout,
+  ats: metrics.ats,
+  reviewQueue: metrics.reviewQueue,
   supplementary: metrics.supplementary,
   fill: metrics.fill,
 };

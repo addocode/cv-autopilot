@@ -92,6 +92,10 @@ Jeder `render-report-<variant>.json` prüft und dokumentiert:
 - `links`
 - `fonts`
 - `buttonStates`
+- `ats`
+- `reviewQueue`
+- `supplementary.candidateItems`, `supplementary.renderedItems`, `supplementary.rejectedItems`
+- `fill.baselineGapPx`, `fill.finalGapPx`, `fill.preferredOptionalBulletCount`, `fill.maxOptionalBullets`
 
 Ein erfolgreicher Produktionsrender benötigt `renderer: "playwright"`, exakt zwei Seiten, keine Overflows, keine Collisions und keine Warnungen.
 
@@ -112,6 +116,10 @@ Der Playwright-Renderer prüft:
 - adaptive Fill-Entscheidungen inklusive akzeptierter/abgelehnter Kandidaten,
 - zusätzliche verifizierte Master-Tools und datengetriebene Tool-Hinweise.
 
+## ATS und manuelle Schlusskontrolle
+
+Der Renderer erzeugt echten HTML-Text und Playwright-PDFs mit auswählbarem Text. Der Render Report enthält einen ATS-Block mit Textauslesbarkeit, Lesereihenfolge, Pflichtbegriffen, Keyword-Coverage, Keyword-Stuffing-Risiko und Hidden-Text-Prüfung. Spätere Stellenanalysen dürfen nur `verified` und vertretbare `defensible_inference`-Bausteine nutzen; `inferred_review_required` wird in `reviewQueue` gemeldet und darf nicht automatisch produktiv sichtbar werden. Der Agent erzeugt Bewerbungsartefakte, versendet sie aber niemals automatisch; die Schlusskontrolle bleibt manuell bei Adam.
+
 ## GitHub Actions
 
 Der Workflow `.github/workflows/render-cv.yml` läuft nur auf:
@@ -123,7 +131,7 @@ Er installiert Node.js 22, npm-Abhängigkeiten und Chromium, führt Build, Valid
 
 ## Intelligente Zusatz- und Fill-Logik
 
-Die Varianten zeigen zunächst die definierten Kerninhalte. Danach führt der Playwright-Renderer einen kontrollierten Mess-Fill aus: Er misst den Baseline-Abstand zwischen Berufserfahrung und Bottom-Grid, blendet optionale verifizierte Kandidaten nach `fillPriority` einzeln ein, misst erneut und behält einen Kandidaten nur, wenn keine Overflows/Collisions entstehen, weiterhin exakt zwei Seiten vorhanden sind und die Mindestreserve eingehalten bleibt. Wenn verifizierte Masterdaten wegen Variantenfokus, Tool-Limit oder Platzbudget ausgeblendet werden, ergänzt der Renderer nur datengetriebene Hinweise wie `+ weitere mediamatikbezogene Tools und Systeme` oder priorisierte Erfahrungshinweise bis `maxPerVariant`. Optionale Zusatzpunkte und zusätzliche Tools besitzen stabile IDs, Tags, Evidence-Level, Quellen, Variantenrelevanz, Priorität und Sichtbarkeitsmetadaten; Entscheidungen werden im Render Report unter `supplementary` und `fill` dokumentiert.
+Die Varianten zeigen zunächst die definierten Kerninhalte. Danach führt der Playwright-Renderer einen kontrollierten Mess-Fill aus: Er misst den Baseline-Abstand zwischen Berufserfahrung und Bottom-Grid, blendet optionale verifizierte Kandidaten nach `fillPriority` einzeln ein, misst erneut und behält einen Kandidaten nur, wenn keine Overflows/Collisions entstehen, weiterhin exakt zwei Seiten vorhanden sind und die Mindestreserve eingehalten bleibt. Wenn verifizierte Masterdaten wegen Variantenfokus, Tool-Limit oder Platzbudget ausgeblendet werden, ergänzt der Renderer nur datengetriebene Hinweise wie `+ weitere mediamatikbezogene Tools und Systeme` oder priorisierte Erfahrungshinweise bis `maxPerVariant`. Optionale Zusatzpunkte und zusätzliche Tools besitzen stabile IDs, Tags, Evidence-Level, Quellen, ATS-Synonyme, Status, Variantenrelevanz, Priorität und Sichtbarkeitsmetadaten; Entscheidungen werden im Render Report unter `supplementary` und `fill` dokumentiert. `preferredOptionalBulletCount` ist nur ein weicher Richtwert; `maxOptionalBullets` ist die Sicherheitsobergrenze, während der gemessene Freiraum entscheidet.
 
 ## Typografie
 

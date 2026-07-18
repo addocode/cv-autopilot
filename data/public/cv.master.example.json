@@ -40,7 +40,12 @@
           "evidenceLevel": "professional_core",
           "sources": [
             "cv-2d-p1"
-          ]
+          ],
+          "atsSynonyms": [
+            "web",
+            "cms"
+          ],
+          "status": "verified"
         },
         {
           "id": "skill-online-campaigns",
@@ -52,7 +57,12 @@
           "evidenceLevel": "professional_core",
           "sources": [
             "cv-2d-p1"
-          ]
+          ],
+          "atsSynonyms": [
+            "marketing",
+            "analytics"
+          ],
+          "status": "verified"
         },
         {
           "id": "skill-newsletter",
@@ -64,7 +74,12 @@
           "evidenceLevel": "professional_core",
           "sources": [
             "cv-2d-p1"
-          ]
+          ],
+          "atsSynonyms": [
+            "communication",
+            "newsletter"
+          ],
+          "status": "verified"
         },
         {
           "id": "skill-social-performance",
@@ -76,7 +91,12 @@
           "evidenceLevel": "professional_core",
           "sources": [
             "cv-2d-p1"
-          ]
+          ],
+          "atsSynonyms": [
+            "social",
+            "analytics"
+          ],
+          "status": "verified"
         },
         {
           "id": "skill-google-analytics",
@@ -88,7 +108,12 @@
           "evidenceLevel": "professional_supporting",
           "sources": [
             "cv-2d-p1"
-          ]
+          ],
+          "atsSynonyms": [
+            "analytics",
+            "web"
+          ],
+          "status": "verified"
         }
       ]
     },
@@ -111,7 +136,12 @@
           "evidenceLevel": "professional_core",
           "sources": [
             "cv-2d-p1"
-          ]
+          ],
+          "atsSynonyms": [
+            "print",
+            "design"
+          ],
+          "status": "verified"
         },
         {
           "id": "skill-photo-video",
@@ -123,7 +153,12 @@
           "evidenceLevel": "professional_core",
           "sources": [
             "cv-2d-p1"
-          ]
+          ],
+          "atsSynonyms": [
+            "video",
+            "photo"
+          ],
+          "status": "verified"
         },
         {
           "id": "skill-cicd-materials",
@@ -135,7 +170,12 @@
           "evidenceLevel": "professional_core",
           "sources": [
             "cv-2d-p1"
-          ]
+          ],
+          "atsSynonyms": [
+            "design",
+            "brand"
+          ],
+          "status": "verified"
         },
         {
           "id": "skill-presentations-docs",
@@ -147,7 +187,12 @@
           "evidenceLevel": "professional_supporting",
           "sources": [
             "cv-2d-p1"
-          ]
+          ],
+          "atsSynonyms": [
+            "documentation",
+            "design"
+          ],
+          "status": "verified"
         }
       ]
     },
@@ -170,7 +215,12 @@
           "evidenceLevel": "professional_core",
           "sources": [
             "cv-2d-p1"
-          ]
+          ],
+          "atsSynonyms": [
+            "cms",
+            "web"
+          ],
+          "status": "verified"
         },
         {
           "id": "skill-shop-payments",
@@ -182,7 +232,12 @@
           "evidenceLevel": "professional_core",
           "sources": [
             "cv-2d-p1"
-          ]
+          ],
+          "atsSynonyms": [
+            "shop",
+            "process"
+          ],
+          "status": "verified"
         },
         {
           "id": "skill-ms-office-docs",
@@ -194,7 +249,12 @@
           "evidenceLevel": "professional_supporting",
           "sources": [
             "cv-2d-p1"
-          ]
+          ],
+          "atsSynonyms": [
+            "office",
+            "documentation"
+          ],
+          "status": "verified"
         },
         {
           "id": "skill-acta-nova",
@@ -207,7 +267,12 @@
           "sources": [
             "cv-2d-p1",
             "cv-2d-p2"
-          ]
+          ],
+          "atsSynonyms": [
+            "gever",
+            "administration"
+          ],
+          "status": "verified"
         },
         {
           "id": "skill-webhosters",
@@ -219,7 +284,12 @@
           "evidenceLevel": "professional_core",
           "sources": [
             "cv-2d-p1"
-          ]
+          ],
+          "atsSynonyms": [
+            "web",
+            "coordination"
+          ],
+          "status": "verified"
         }
       ]
     },
@@ -241,7 +311,12 @@
           "evidenceLevel": "professional_core",
           "sources": [
             "cv-2d-p1"
-          ]
+          ],
+          "atsSynonyms": [
+            "project",
+            "process"
+          ],
+          "status": "verified"
         },
         {
           "id": "skill-process-documentation",
@@ -254,7 +329,12 @@
           "sources": [
             "cv-2d-p1",
             "cv-2d-p2"
-          ]
+          ],
+          "atsSynonyms": [
+            "documentation",
+            "process"
+          ],
+          "status": "verified"
         },
         {
           "id": "skill-fast-onboarding",
@@ -266,7 +346,12 @@
           "evidenceLevel": "professional_supporting",
           "sources": [
             "cv-2d-p1"
-          ]
+          ],
+          "atsSynonyms": [
+            "learning",
+            "systems"
+          ],
+          "status": "verified"
         },
         {
           "id": "skill-responsibility-quality",
@@ -278,7 +363,12 @@
           "evidenceLevel": "professional_core",
           "sources": [
             "cv-2d-p1"
-          ]
+          ],
+          "atsSynonyms": [
+            "quality",
+            "responsibility"
+          ],
+          "status": "verified"
         },
         {
           "id": "skill-de-fr-context",
@@ -290,7 +380,12 @@
           "evidenceLevel": "professional_supporting",
           "sources": [
             "cv-2d-p1"
-          ]
+          ],
+          "atsSynonyms": [
+            "languages",
+            "coordination"
+          ],
+          "status": "verified"
         }
       ]
     }
@@ -349,7 +444,13 @@
           "evidenceLevel": "professional_core",
           "sources": [
             "cv-2d-p2"
-          ]
+          ],
+          "atsSynonyms": [
+            "marketing",
+            "media",
+            "international"
+          ],
+          "status": "verified"
         },
         {
           "id": "bullet-freelance-content-print-web",
@@ -362,7 +463,13 @@
           "evidenceLevel": "professional_core",
           "sources": [
             "cv-2d-p2"
-          ]
+          ],
+          "atsSynonyms": [
+            "content",
+            "web",
+            "print"
+          ],
+          "status": "verified"
         },
         {
           "id": "bullet-freelance-remote-stakeholders",
@@ -374,7 +481,12 @@
           "evidenceLevel": "professional_supporting",
           "sources": [
             "cv-2d-p2"
-          ]
+          ],
+          "atsSynonyms": [
+            "remote",
+            "coordination"
+          ],
+          "status": "verified"
         },
         {
           "id": "bullet-freelance-french",
@@ -386,7 +498,12 @@
           "evidenceLevel": "professional_supporting",
           "sources": [
             "cv-2d-p2"
-          ]
+          ],
+          "atsSynonyms": [
+            "languages",
+            "french"
+          ],
+          "status": "verified"
         },
         {
           "id": "bullet-freelance-self-organization",
@@ -398,7 +515,12 @@
           "evidenceLevel": "professional_supporting",
           "sources": [
             "cv-2d-p2"
-          ]
+          ],
+          "atsSynonyms": [
+            "organization",
+            "international"
+          ],
+          "status": "verified"
         }
       ],
       "sources": [
@@ -423,7 +545,12 @@
           "evidenceLevel": "professional_core",
           "sources": [
             "cv-2d-p2"
-          ]
+          ],
+          "atsSynonyms": [
+            "web",
+            "cms"
+          ],
+          "status": "verified"
         },
         {
           "id": "bullet-kunz-online-campaigns-monitoring",
@@ -435,7 +562,12 @@
           "evidenceLevel": "professional_core",
           "sources": [
             "cv-2d-p2"
-          ]
+          ],
+          "atsSynonyms": [
+            "marketing",
+            "analytics"
+          ],
+          "status": "verified"
         },
         {
           "id": "bullet-kunz-guegg",
@@ -448,7 +580,13 @@
           "evidenceLevel": "professional_core",
           "sources": [
             "cv-2d-p2"
-          ]
+          ],
+          "atsSynonyms": [
+            "editorial",
+            "print",
+            "content"
+          ],
+          "status": "verified"
         },
         {
           "id": "bullet-kunz-campaigns",
@@ -461,7 +599,13 @@
           "evidenceLevel": "professional_core",
           "sources": [
             "cv-2d-p2"
-          ]
+          ],
+          "atsSynonyms": [
+            "campaigns",
+            "newsletter",
+            "print"
+          ],
+          "status": "verified"
         },
         {
           "id": "bullet-kunz-photo-video-social-ci",
@@ -474,7 +618,13 @@
           "evidenceLevel": "professional_core",
           "sources": [
             "cv-2d-p2"
-          ]
+          ],
+          "atsSynonyms": [
+            "video",
+            "social",
+            "brand"
+          ],
+          "status": "verified"
         },
         {
           "id": "bullet-kunz-external-partners",
@@ -486,11 +636,16 @@
           "evidenceLevel": "professional_core",
           "sources": [
             "cv-2d-p2"
-          ]
+          ],
+          "atsSynonyms": [
+            "coordination",
+            "vendors"
+          ],
+          "status": "verified"
         },
         {
           "id": "bullet-kunz-process-handover",
-          "text": "Prozessdokumentation zur Wissenssicherung und nachhaltigen Übergabe",
+          "text": "Prozessdokumentation, Wissenssicherung und strukturierte Übergaben für nachhaltige Abläufe",
           "tags": [
             "process",
             "documentation"
@@ -498,7 +653,14 @@
           "evidenceLevel": "professional_core",
           "sources": [
             "cv-2d-p2"
-          ]
+          ],
+          "atsSynonyms": [
+            "Prozessdokumentation",
+            "Wissensmanagement",
+            "Übergaben",
+            "strukturierte Abläufe"
+          ],
+          "status": "verified"
         }
       ],
       "sources": [
@@ -517,7 +679,7 @@
       "bullets": [
         {
           "id": "bullet-rs-acta-nova",
-          "text": "Bearbeitung und Verteilung von Geschäftsvorgängen im GEVER-System ACTA NOVA",
+          "text": "Digitale Geschäftsvorgangsbearbeitung und Dokumentenmanagement im GEVER-System ACTA NOVA",
           "tags": [
             "gever",
             "administration"
@@ -525,11 +687,18 @@
           "evidenceLevel": "professional_supporting",
           "sources": [
             "cv-2d-p2"
-          ]
+          ],
+          "atsSynonyms": [
+            "GEVER",
+            "ACTA NOVA",
+            "digitales Dokumentenmanagement",
+            "Geschäftsvorgangsbearbeitung"
+          ],
+          "status": "verified"
         },
         {
           "id": "bullet-rs-quality",
-          "text": "Qualitätssicherung von Schriftverkehr und Entscheidungsgrundlagen",
+          "text": "Qualitätsprüfung und formale Kontrolle von Schriftverkehr und Entscheidungsgrundlagen",
           "tags": [
             "quality",
             "administration"
@@ -537,11 +706,18 @@
           "evidenceLevel": "professional_supporting",
           "sources": [
             "cv-2d-p2"
-          ]
+          ],
+          "atsSynonyms": [
+            "Qualitätssicherung",
+            "Schriftverkehr",
+            "Entscheidungsgrundlagen",
+            "formale Kontrolle"
+          ],
+          "status": "verified"
         },
         {
           "id": "bullet-rs-doc-management",
-          "text": "Strukturierte Dokumentenverwaltung und Unterstützung der Führungsstelle",
+          "text": "Strukturierte Dokumentenverwaltung und administrative Unterstützung der Führungsstelle",
           "tags": [
             "documentation",
             "leadership-support"
@@ -549,11 +725,17 @@
           "evidenceLevel": "professional_supporting",
           "sources": [
             "cv-2d-p2"
-          ]
+          ],
+          "atsSynonyms": [
+            "Dokumentenverwaltung",
+            "administrative Unterstützung",
+            "strukturierte Ablage"
+          ],
+          "status": "verified"
         },
         {
           "id": "bullet-rs-coordination",
-          "text": "Koordination zwischen internen Organisationseinheiten und Fachstellen",
+          "text": "Koordination von Geschäftsvorgängen zwischen internen Organisationseinheiten und zuständigen Fachstellen",
           "tags": [
             "coordination",
             "administration"
@@ -561,7 +743,14 @@
           "evidenceLevel": "professional_supporting",
           "sources": [
             "cv-2d-p2"
-          ]
+          ],
+          "atsSynonyms": [
+            "Koordination",
+            "Fachstellen",
+            "interne Organisationseinheiten",
+            "Geschäftsvorgänge"
+          ],
+          "status": "verified"
         }
       ],
       "sources": [
@@ -602,7 +791,14 @@
             "cms-web-process"
           ],
           "fillPriority": 1,
-          "preferredMaxChars": 92
+          "preferredMaxChars": 92,
+          "atsSynonyms": [
+            "training",
+            "web",
+            "digital-media",
+            "design"
+          ],
+          "status": "verified"
         },
         {
           "id": "optional-training-documentation-projects",
@@ -624,7 +820,13 @@
             "cms-web-process"
           ],
           "fillPriority": 2,
-          "preferredMaxChars": 88
+          "preferredMaxChars": 88,
+          "atsSynonyms": [
+            "training",
+            "documentation",
+            "projects"
+          ],
+          "status": "verified"
         }
       ],
       "supplementaryText": "Weitere mediamatikbezogene Ausbildungsinhalte und Praxiserfahrungen",
@@ -663,7 +865,13 @@
             "cms-web-process"
           ],
           "fillPriority": 1,
-          "preferredMaxChars": 78
+          "preferredMaxChars": 78,
+          "atsSynonyms": [
+            "livestream",
+            "event",
+            "technical-support"
+          ],
+          "status": "verified"
         },
         {
           "id": "optional-event-organization-operations",
@@ -684,7 +892,13 @@
             "administration-gever"
           ],
           "fillPriority": 2,
-          "preferredMaxChars": 75
+          "preferredMaxChars": 75,
+          "atsSynonyms": [
+            "event-organization",
+            "operations",
+            "coordination"
+          ],
+          "status": "verified"
         }
       ],
       "supplementaryText": "Weitere Aufgaben in Liveproduktion und Eventorganisation",
@@ -711,7 +925,13 @@
         "administration-gever",
         "cms-web-process"
       ],
-      "priority": 1
+      "priority": 1,
+      "category": "design-media",
+      "atsSynonyms": [
+        "Adobe Creative Cloud",
+        "Medienproduktion"
+      ],
+      "status": "verified"
     },
     {
       "id": "tool-ms-office",
@@ -731,7 +951,14 @@
         "administration-gever",
         "cms-web-process"
       ],
-      "priority": 2
+      "priority": 2,
+      "category": "administration-office",
+      "atsSynonyms": [
+        "Office",
+        "Bürosoftware",
+        "Dokumentation"
+      ],
+      "status": "verified"
     },
     {
       "id": "tool-canva",
@@ -750,7 +977,13 @@
         "administration-gever",
         "cms-web-process"
       ],
-      "priority": 3
+      "priority": 3,
+      "category": "design-media",
+      "atsSynonyms": [
+        "Design",
+        "Content Creation"
+      ],
+      "status": "verified"
     },
     {
       "id": "tool-chatgpt",
@@ -770,7 +1003,13 @@
         "administration-gever",
         "cms-web-process"
       ],
-      "priority": 4
+      "priority": 4,
+      "category": "analysis-ai",
+      "atsSynonyms": [
+        "KI-gestützte Prozesse",
+        "AI Assistance"
+      ],
+      "status": "verified"
     },
     {
       "id": "tool-google-analytics",
@@ -790,7 +1029,13 @@
         "administration-gever",
         "cms-web-process"
       ],
-      "priority": 5
+      "priority": 5,
+      "category": "analysis-ai",
+      "atsSynonyms": [
+        "Webanalyse",
+        "Analytics"
+      ],
+      "status": "verified"
     },
     {
       "id": "tool-acta-nova",
@@ -810,7 +1055,14 @@
         "administration-gever",
         "cms-web-process"
       ],
-      "priority": 6
+      "priority": 6,
+      "category": "administration-gever",
+      "atsSynonyms": [
+        "GEVER",
+        "digitales Geschäftsmanagement",
+        "Dokumentenmanagement"
+      ],
+      "status": "verified"
     },
     {
       "id": "tool-typo3",
@@ -830,7 +1082,14 @@
         "administration-gever",
         "cms-web-process"
       ],
-      "priority": 7
+      "priority": 7,
+      "category": "web-cms",
+      "atsSynonyms": [
+        "CMS",
+        "Content Management System",
+        "Webpflege"
+      ],
+      "status": "verified"
     },
     {
       "id": "tool-wordpress",
@@ -850,7 +1109,14 @@
         "administration-gever",
         "cms-web-process"
       ],
-      "priority": 8
+      "priority": 8,
+      "category": "web-cms",
+      "atsSynonyms": [
+        "CMS",
+        "Content Management System",
+        "Webpflege"
+      ],
+      "status": "verified"
     },
     {
       "id": "tool-grav",
@@ -870,7 +1136,13 @@
         "administration-gever",
         "cms-web-process"
       ],
-      "priority": 9
+      "priority": 9,
+      "category": "web-cms",
+      "atsSynonyms": [
+        "Flat-file CMS",
+        "CMS"
+      ],
+      "status": "verified"
     },
     {
       "id": "tool-magento",
@@ -890,7 +1162,14 @@
         "administration-gever",
         "cms-web-process"
       ],
-      "priority": 10
+      "priority": 10,
+      "category": "ecommerce-systems",
+      "atsSynonyms": [
+        "E-Commerce",
+        "Onlineshop",
+        "Shop-System"
+      ],
+      "status": "verified"
     },
     {
       "id": "tool-html-css",
@@ -909,7 +1188,14 @@
         "administration-gever",
         "cms-web-process"
       ],
-      "priority": 11
+      "priority": 11,
+      "category": "web-cms",
+      "atsSynonyms": [
+        "Webentwicklung",
+        "Markup",
+        "Stylesheets"
+      ],
+      "status": "verified"
     },
     {
       "id": "tool-adobe-indesign",
@@ -929,7 +1215,14 @@
         "general",
         "communication-content"
       ],
-      "priority": 30
+      "priority": 30,
+      "category": "design-media",
+      "atsSynonyms": [
+        "Layout",
+        "Desktop Publishing",
+        "Printproduktion"
+      ],
+      "status": "verified"
     },
     {
       "id": "tool-adobe-photoshop",
@@ -950,7 +1243,13 @@
         "communication-content",
         "cms-web-process"
       ],
-      "priority": 31
+      "priority": 31,
+      "category": "design-media",
+      "atsSynonyms": [
+        "Bildbearbeitung",
+        "Medienproduktion"
+      ],
+      "status": "verified"
     }
   ],
   "references": [

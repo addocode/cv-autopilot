@@ -62,6 +62,7 @@
   "fill": {
     "enabled": true,
     "minRemainingSpaceMm": 5,
-    "optionalBulletLimit": 2
+    "preferredOptionalBulletCount": 2,
+    "maxOptionalBullets": 5
   }
 }
