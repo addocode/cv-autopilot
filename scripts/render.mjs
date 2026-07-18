@@ -91,8 +91,9 @@ function applyVariant() {
   return {
     ...data,
     headline: variant.headline,
-    summaryText: variant.summaryKey === 'default' ? data.summary.default : data.summary.variants[variant.summaryKey],
-    summaryMeta: { targetLines: data.summary.targetLines || 4, selectedCandidateId: `${variant.summaryKey || 'default'}-base`, evidenceIds: ['cv-2d', 'linkedin-profile'], atsTerms: [variant.headline], jobSpecific: true },
+    summaryCandidates: data.summary.candidates?.[variant.summaryKey] || data.summary.candidates?.default || [{ id: `${variant.summaryKey || 'default'}-fallback`, text: variant.summaryKey === 'default' ? data.summary.default : data.summary.variants[variant.summaryKey], evidenceIds: ['cv-2d', 'linkedin-profile'], atsTerms: [variant.headline] }],
+    summaryText: (data.summary.candidates?.[variant.summaryKey] || data.summary.candidates?.default)?.[0]?.text || (variant.summaryKey === 'default' ? data.summary.default : data.summary.variants[variant.summaryKey]),
+    summaryMeta: { targetLines: data.summary.targetLines || 4, selectedCandidateId: '', evidenceIds: [], atsTerms: [variant.headline], jobSpecific: true, candidateMeasurements: [] },
     skillSections: sections,
     experiences,
     tools,
@@ -147,25 +148,18 @@ function toolColumns() {
 }
 
 
-function summaryHtmlText() {
-  const sentences = String(cv.summaryText).match(/[^.!?]+[.!?]/g) || [cv.summaryText];
-  const lines = sentences.slice(0, 4).map((line) => esc(line.trim()));
-  while (lines.length < 4) lines.push('');
-  return lines.join('<br>');
-}
-
 function html() {
   const [toolLeft, toolRight] = toolColumns();
-  const skillHtml = cv.skillSections.map((section) => `<section class="module skill-section" id="skill-${section.id}" data-check data-collision-group="skills"><div>${icon(section.id)}</div><div><h2>${esc(section.title)}</h2><ul>${section.items.map((item) => `<li id="${item.id}" data-check>${esc(item.text)}</li>`).join('')}</ul></div></section>`).join('');
+  const skillHtml = cv.skillSections.map((section) => `<section class="module skill-section" id="skill-${section.id}" data-check data-collision-group="skills"><div>${icon(section.id)}</div><div><h2 data-ats-required>${esc(section.title)}</h2><ul>${section.items.map((item) => `<li id="${item.id}" data-check>${esc(item.text)}</li>`).join('')}</ul></div></section>`).join('');
   const expHtml = cv.experiences.map((experience) => {
     const bullets = experience.bullets;
     const optionalHtml = experience.optionalCandidates.map((bullet) => `<li id="${bullet.id}" class="optional-fill" data-check data-fill-state="candidate" data-fill-kind="optional-bullet" data-experience-id="${experience.id}" data-fill-priority="${bullet.fillPriority ?? 99}" data-long-text="${esc(bullet.text)}" data-short-text="${esc(bullet.shortText || bullet.text)}" data-fill-id="${bullet.id}" hidden>${esc(bullet.text)}</li>`).join('');
     const indicatorAllowed = cv.supplementary.candidateItems.find((item) => item.type === 'experience' && item.experienceId === experience.id);
     const indicatorHtml = indicatorAllowed ? `<p class="supplementary experience-more" data-check data-fill-state="candidate" data-fill-kind="experience-indicator" data-experience-id="${experience.id}" data-fill-priority="${indicatorAllowed.priority ?? 99}" data-long-text="${esc(indicatorAllowed.text)}" data-short-text="${esc(indicatorAllowed.text)}" data-fill-id="${indicatorAllowed.id}" hidden>${esc(indicatorAllowed.text)}</p>` : '';
-    return `<article class="module experience" id="experience-${experience.id}" data-check data-collision-group="experiences"><div class="meta">${esc(experience.period)} <span>|</span> <strong>${esc(experience.role)}</strong></div><div class="employer">${experienceLine(experience)}</div>${experience.notes.map((note) => `<div class="note">${esc(note)}</div>`).join('')}<ul>${bullets.map((bullet) => `<li id="${bullet.id}" data-check>${esc(bullet.text)}</li>`).join('')}${optionalHtml}</ul>${indicatorHtml}</article>`;
+    return `<article class="module experience" id="experience-${experience.id}" data-check data-collision-group="experiences"><div class="meta" data-ats-required>${esc(experience.period)} <span>|</span> <strong>${esc(experience.role)}</strong></div><div class="employer" data-ats-required>${experienceLine(experience)}</div>${experience.notes.map((note) => `<div class="note">${esc(note)}</div>`).join('')}<ul>${bullets.map((bullet) => `<li id="${bullet.id}" data-check>${esc(bullet.text)}</li>`).join('')}${optionalHtml}</ul>${indicatorHtml}</article>`;
   }).join('');
   const toolIndicator = cv.supplementary.toolsIndicator ? `<p class="supplementary tools-more" data-check>${esc(cv.supplementary.toolsIndicator.text)}</p>` : '';
-  return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Lebenslauf ${esc(cv.person.name)} ${esc(variantId)}</title><link rel="stylesheet" href="../src/styles/tokens.css"><link rel="stylesheet" href="../src/styles/cv.css"></head><body><main class="cv" data-variant="${esc(variantId)}"><section class="cv-page" id="page-1"><div class="frame"><section class="hero-panel" id="hero-panel" data-check><img class="profile" src="../${esc(cv.person.profileImage)}" alt="Porträt von Adam Dolinsky"><header class="hero"><h1>${esc(cv.person.name)}</h1><p class="headline">${esc(cv.headline)}</p><p class="credential">${esc(cv.positioning.credential)}</p><p class="contact"><span>${esc(cv.person.location)}</span><br><a href="mailto:${esc(cv.person.email)}">${esc(cv.person.email)}</a></p><div class="link-buttons"><a href="${esc(cv.person.portfolio)}">dolinsky.ch</a><a href="${esc(cv.person.linkedin)}">LinkedIn</a></div></header><section class="module summary" id="summary" data-check data-summary-target-lines="${cv.summaryMeta.targetLines}"><h2>KURZPROFIL</h2><p id="summary-text">${summaryHtmlText()}</p></section></section><section class="competence-panel" id="competence-panel" data-check>${skillHtml}<section class="module languages-row" id="languages" data-check data-collision-group="skills"><div class="languages-label">SPRACHEN</div>${cv.languages.map((language) => `<div class="language"><span>${esc(language.name)}</span><strong>${esc(language.level)}</strong></div>`).join('')}</section></section></div><div class="counter">1/2</div></section><section class="cv-page" id="page-2"><div class="frame page-two"><section class="white-panel" id="page-two-panel" data-check><section class="experience-list" id="experience-list" data-check>${expHtml}</section><footer class="bottom-grid" id="bottom-grid" data-check data-collision-group="experiences"><section class="module tools" id="tools" data-check data-collision-group="bottom"><h2>${icon('tools')}<span>SOFTWARE & TOOLS</span></h2><div class="tool-cols"><div>${toolLeft.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}">${esc(tool.name)}</span>`).join('')}</div><div>${toolRight.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}">${esc(tool.name)}</span>`).join('')}</div></div>${toolIndicator}</section><section class="module refs" id="references" data-check data-collision-group="bottom"><h2>${icon('references')}<span>REFERENZEN</span></h2>${cv.references.map((reference) => `<p><strong>${esc(reference.name)}</strong><br>${esc(reference.role)}<br>${esc(reference.employer)}<br>${esc(reference.phone)}</p>`).join('')}</section><section class="module avail" id="availability" data-check data-collision-group="bottom"><h2>${icon('availability')}<span>EINTRITT</span></h2><p>${esc(cv.availability.text)}</p><h2><span>PENSUM</span></h2><p>${esc(cv.workload.text)}</p></section></footer></section></div><div class="counter">2/2</div></section></main></body></html>`;
+  return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Lebenslauf ${esc(cv.person.name)} ${esc(variantId)}</title><link rel="stylesheet" href="../src/styles/tokens.css"><link rel="stylesheet" href="../src/styles/cv.css"></head><body><main class="cv" data-variant="${esc(variantId)}"><section class="cv-page" id="page-1"><div class="frame"><section class="hero-panel" id="hero-panel" data-check><img class="profile" src="../${esc(cv.person.profileImage)}" alt="Porträt von Adam Dolinsky"><header class="hero"><h1 data-ats-required>${esc(cv.person.name)}</h1><p class="headline" data-ats-required>${esc(cv.headline)}</p><p class="credential">${esc(cv.positioning.credential)}</p><p class="contact"><span>${esc(cv.person.location)}</span><br><a href="mailto:${esc(cv.person.email)}" data-ats-required>${esc(cv.person.email)}</a></p><div class="link-buttons"><a href="${esc(cv.person.portfolio)}">dolinsky.ch</a><a href="${esc(cv.person.linkedin)}">LinkedIn</a></div></header><section class="module summary" id="summary" data-check data-summary-target-lines="${cv.summaryMeta.targetLines}"><h2>KURZPROFIL</h2><p id="summary-text">${esc(cv.summaryText)}</p></section></section><section class="competence-panel" id="competence-panel" data-check>${skillHtml}<section class="module languages-row" id="languages" data-check data-collision-group="skills"><div class="languages-label">SPRACHEN</div>${cv.languages.map((language) => `<div class="language"><span>${esc(language.name)}</span><strong>${esc(language.level)}</strong></div>`).join('')}</section></section></div><div class="counter">1/2</div></section><section class="cv-page" id="page-2"><div class="frame page-two"><section class="white-panel" id="page-two-panel" data-check><section class="experience-list" id="experience-list" data-check>${expHtml}</section><footer class="bottom-grid" id="bottom-grid" data-check data-collision-group="experiences"><section class="module tools" id="tools" data-check data-collision-group="bottom"><h2>${icon('tools')}<span>SOFTWARE & TOOLS</span></h2><div class="tool-cols"><div>${toolLeft.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div><div>${toolRight.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div></div>${toolIndicator}</section><section class="module refs" id="references" data-check data-collision-group="bottom"><h2>${icon('references')}<span>REFERENZEN</span></h2>${cv.references.map((reference) => `<p><strong data-ats-required>${esc(reference.name)}</strong><br>${esc(reference.role)}<br>${esc(reference.employer)}<br><span data-ats-required>${esc(reference.phone)}</span></p>`).join('')}</section><section class="module avail" id="availability" data-check data-collision-group="bottom"><h2>${icon('availability')}<span>EINTRITT</span></h2><p data-ats-required>${esc(cv.availability.text)}</p><h2><span>PENSUM</span></h2><p data-ats-required>${esc(cv.workload.text)}</p></section></footer></section></div><div class="counter">2/2</div></section></main></body></html>`;
 }
 
 const htmlPath = `dist/cv-${variantId}-preview.html`;
@@ -178,6 +172,31 @@ async function withPlaywright() {
   const fileUrl = new URL(htmlPath, `file://${process.cwd()}/`).href;
   await page.goto(fileUrl, { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
+
+  const selectedSummary = await page.evaluate(async ({ candidates, targetLines }) => {
+    const element = document.querySelector('#summary-text');
+    const countVisibleTextLines = (target) => {
+      const range = document.createRange();
+      range.selectNodeContents(target);
+      const tops = [...range.getClientRects()].filter((rect) => rect.width > 0 && rect.height > 0).map((rect) => Math.round(rect.top * 2) / 2);
+      return [...new Set(tops)].length;
+    };
+    const measurements = [];
+    for (const candidate of candidates) {
+      element.textContent = candidate.text;
+      await document.fonts.ready;
+      await new Promise((resolve) => requestAnimationFrame(() => resolve()));
+      const actualLines = countVisibleTextLines(element);
+      const accepted = actualLines === targetLines;
+      measurements.push({ id: candidate.id, actualLines, accepted });
+      if (accepted) return { ...candidate, actualLines, candidateMeasurements: measurements };
+    }
+    const fallback = candidates[candidates.length - 1];
+    element.textContent = fallback.text;
+    return { ...fallback, actualLines: measurements.at(-1)?.actualLines || 0, candidateMeasurements: measurements };
+  }, { candidates: cv.summaryCandidates, targetLines: cv.summaryMeta.targetLines });
+  cv.summaryText = selectedSummary.text;
+  cv.summaryMeta = { ...cv.summaryMeta, selectedCandidateId: selectedSummary.id, evidenceIds: selectedSummary.evidenceIds || [], atsTerms: selectedSummary.atsTerms || [], actualLines: selectedSummary.actualLines, candidateMeasurements: selectedSummary.candidateMeasurements || [] };
 
   const metrics = await page.evaluate(({ bgExists, variantMeta }) => {
     const rectOf = (element) => {
@@ -237,7 +256,7 @@ async function withPlaywright() {
       ats: { textExtractable: false, readingOrderValid: false, requiredTermsPresent: [], missingTerms: [], keywordCoverage: 0, keywordStuffingRisk: false, hiddenTextDetected: false },
       experienceQuality: { minimumBulletsPerStation: 2, stations: [] },
       toolsQuality: { minimumVisibleTools: 14, visibleToolCount: 0, visibleToolIds: [], duplicateToolIds: [], unverifiedVisibleToolIds: [] },
-      summary: { ...variantMeta.summary, actualLines: 0 },
+      summary: { ...variantMeta.summary },
       profile: {},
       reviewQueue: [],
       supplementary: variantMeta.supplementary,
@@ -317,7 +336,6 @@ async function withPlaywright() {
     out.toolsQuality.visibleToolIds = [...document.querySelectorAll('[data-tool-id]')].map((tool) => tool.dataset.toolId);
     out.toolsQuality.visibleToolCount = out.toolsQuality.visibleToolIds.length;
     out.toolsQuality.duplicateToolIds = out.toolsQuality.visibleToolIds.filter((id, index, arr) => arr.indexOf(id) !== index);
-    if (document.querySelector('.summary p').textContent.length > 430) out.warnings.push('Summary exceeds 430 characters.');
     if (!out.assets.profile.loaded) out.warnings.push('Profile image did not load.');
     if ([out.fonts.heading, out.fonts.body, out.fonts.slab, out.fonts.tools, out.fonts.employer].some((font) => /Times New Roman|Arial/i.test(font))) out.warnings.push('Chromium fell back to Arial or Times New Roman.');
     if (!out.fonts.slabLoaded || !/Roboto Slab/i.test(out.fonts.slab)) out.warnings.push('Roboto Slab did not load for the summary heading.');
@@ -329,7 +347,7 @@ async function withPlaywright() {
     return out;
   }, {
     bgExists: backgroundFileExists,
-    variantMeta: { supplementary: cv.supplementary, fill: cv.fill, summary: cv.summaryMeta },
+    variantMeta: { supplementary: cv.supplementary, fill: cv.fill, summary: cv.summaryMeta, summaryCandidates: cv.summaryCandidates },
   });
 
   async function measureLayout() {
@@ -486,6 +504,7 @@ async function withPlaywright() {
 
   metrics.visibleText = await page.evaluate(() => document.body.innerText.replace(/\s+/g, ' ').trim());
   metrics.ats.hiddenTextDetected = await page.evaluate(() => [...document.querySelectorAll('body *')].some((element) => { const style = getComputedStyle(element); const text = element.textContent?.trim(); return Boolean(text && style.visibility === 'hidden' && !element.closest('[hidden]')); }));
+  metrics.ats.requiredTerms = await page.locator('[data-ats-required]:not([hidden])').evaluateAll((elements) => elements.map((element) => element.textContent.replace(/\s+/g, ' ').trim()).filter(Boolean));
 
   await page.evaluate(() => document.fonts.ready);
   await page.pdf({ path: `dist/Lebenslauf_Adam-Dolinsky_${variantId}.pdf`, format: 'A4', printBackground: true, preferCSSPageSize: true });
@@ -511,14 +530,10 @@ try {
   pageCount = (pdf.match(/\/Type\s*\/Page\b/g) || []).length;
 } catch {}
 
-async function buildAtsReport(pdfPath, metrics) {
+async function buildAtsReport(pdfPath, metrics, requiredTerms) {
   const visibleText = metrics.visibleText || '';
-  const baseTerms = [cv.person.name, cv.headline, cv.person.email, 'Peter Wyss', '+41 58 489 20 03', cv.availability.text, cv.workload.text];
-  const employerTerms = cv.experiences.map((experience) => experience.employer.split('(')[0].trim()).filter(Boolean);
-  const periodTerms = cv.experiences.map((experience) => experience.period);
-  const toolTerms = cv.tools.map((tool) => tool.name);
-  const skillTerms = cv.skillSections.map((section) => section.title);
-  const required = [...new Set([...baseTerms, ...employerTerms, ...periodTerms, ...toolTerms, ...skillTerms])];
+  const required = [...new Set(requiredTerms || [])];
+  const joinStats = { fragmentJoinCount: 0, insertedSpaceCount: 0, insertedLineBreakCount: 0, fragmentJoinExamples: [] };
   let extractedText = visibleText;
   let textExtractable = false;
   try {
@@ -528,7 +543,7 @@ async function buildAtsReport(pdfPath, metrics) {
     for (let pageNo = 1; pageNo <= pdf.numPages; pageNo += 1) {
       const page = await pdf.getPage(pageNo);
       const content = await page.getTextContent();
-      pages.push(joinPdfTextItems(content.items));
+      pages.push(joinPdfTextItems(content.items, joinStats));
     }
     extractedText = pages.join('\n').trim();
     textExtractable = extractedText.length > 100;
@@ -553,6 +568,12 @@ async function buildAtsReport(pdfPath, metrics) {
     hiddenTextDetected: Boolean(metrics.ats.hiddenTextDetected),
     extractedCharCount: extractedText.length,
     normalization: atsNormalizationConfig,
+    requiredTermsSource: 'final-visible-dom',
+    pdfItemJoinMode: 'geometry-aware',
+    fragmentJoinCount: joinStats.fragmentJoinCount,
+    insertedSpaceCount: joinStats.insertedSpaceCount,
+    insertedLineBreakCount: joinStats.insertedLineBreakCount,
+    fragmentJoinExamples: joinStats.fragmentJoinExamples,
   };
 }
 
@@ -567,7 +588,7 @@ function buildReviewQueue() {
     .map((block) => ({ id: block.id, status: block.status || block.evidenceLevel, sources: block.sources || [], reason: 'manual review required before production visibility' }));
 }
 
-metrics.ats = await buildAtsReport(`dist/Lebenslauf_Adam-Dolinsky_${variantId}.pdf`, metrics);
+metrics.ats = await buildAtsReport(`dist/Lebenslauf_Adam-Dolinsky_${variantId}.pdf`, metrics, metrics.ats.requiredTerms);
 metrics.reviewQueue = buildReviewQueue();
 
 const report = {

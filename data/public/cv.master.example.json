@@ -28,7 +28,170 @@
       "administration-gever": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in digitaler Geschäftsvorgangsbearbeitung, Dokumentenmanagement und Prozessdokumentation. Ich verbinde strukturierte Arbeitsweise mit Systemverständnis und sorgfältiger Qualitätssicherung. Administrative Abläufe unterstütze ich zuverlässig, adressatengerecht und mit Blick für nachvollziehbare Informationen. Mehrsprachige Kommunikation und schnelle Einarbeitung in digitale Systeme gehören zu meiner Praxis.",
       "cms-web-process": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in CMS, Webpflege, Onlineshop-Management und digitalen Prozessen. Ich verbinde Content Administration mit technischem Verständnis, strukturierter Datenpflege und sauberer Dokumentation. Für Arbeitgeber halte ich Webinhalte, Systeme und Abläufe nachvollziehbar und aktuell. Meine Arbeitsweise ist analytisch, lösungsorientiert und zuverlässig in der Umsetzung."
     },
-    "candidates": []
+    "candidates": {
+      "default": [
+        {
+          "id": "general-long",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in Digital Marketing, Web, Content und KI-gestützten Prozessen. Ich verbinde strukturierte Umsetzung, visuelle Kommunikation und Systemverständnis mit zuverlässiger Koordination für gepflegte digitale Kanäle und nachvollziehbare Abläufe.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile"
+          ],
+          "atsTerms": [
+            "Digital Marketing",
+            "Web",
+            "Content",
+            "KI-gestützte Prozesse"
+          ]
+        },
+        {
+          "id": "general-medium",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in Digital Marketing, Web, Content und KI-gestützten Prozessen. Ich verbinde strukturierte Umsetzung mit visueller Kommunikation, Systemverständnis und zuverlässiger Koordination für klare Inhalte und gepflegte digitale Kanäle.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile"
+          ],
+          "atsTerms": [
+            "Digital Marketing",
+            "Web",
+            "Content"
+          ]
+        },
+        {
+          "id": "general-short",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in Digital Marketing, Web und Content. Ich arbeite strukturiert, koordiniere zuverlässig und pflege digitale Kanäle, Inhalte und Systeme mit Blick für Qualität und Nutzen.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile"
+          ],
+          "atsTerms": [
+            "Digital Marketing",
+            "Web",
+            "Content"
+          ]
+        }
+      ],
+      "communication-content": [
+        {
+          "id": "communication-long",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in Content, Medienproduktion, Kampagnen und visueller Aufbereitung. Ich verbinde zielgruppengerechte Kommunikation mit sicherem Umgang mit digitalen Kanälen, Gestaltungstools und koordinierter Umsetzung für konsistente Inhalte.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile"
+          ],
+          "atsTerms": [
+            "Content",
+            "Medienproduktion",
+            "Kampagnen"
+          ]
+        },
+        {
+          "id": "communication-medium",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in Content, Medienproduktion und Kampagnen. Ich bereite Informationen zielgruppengerecht auf, pflege digitale Kanäle und setze visuelle Inhalte strukturiert, konsistent und zuverlässig um.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile"
+          ],
+          "atsTerms": [
+            "Content",
+            "Medienproduktion"
+          ]
+        },
+        {
+          "id": "communication-short",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Praxis in Content, Kampagnen und visueller Kommunikation. Ich erstelle, pflege und koordiniere digitale Inhalte strukturiert und adressatengerecht.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile"
+          ],
+          "atsTerms": [
+            "Content",
+            "Kampagnen"
+          ]
+        }
+      ],
+      "administration-gever": [
+        {
+          "id": "administration-long",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in digitaler Geschäftsvorgangsbearbeitung, Dokumentenmanagement und Prozessdokumentation. Ich verbinde strukturierte Arbeitsweise, Systemverständnis und sorgfältige Qualitätssicherung mit zuverlässiger administrativer Unterstützung.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-acta-nova"
+          ],
+          "atsTerms": [
+            "GEVER",
+            "ACTA NOVA",
+            "Dokumentenmanagement"
+          ]
+        },
+        {
+          "id": "administration-medium",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in GEVER, ACTA NOVA, Dokumentenmanagement und Prozessdokumentation. Ich unterstütze administrative Abläufe sorgfältig, strukturiert und mit sicherem Verständnis für digitale Informationen.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-acta-nova"
+          ],
+          "atsTerms": [
+            "GEVER",
+            "ACTA NOVA",
+            "Prozessdokumentation"
+          ]
+        },
+        {
+          "id": "administration-short",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Praxis in GEVER, ACTA NOVA und Dokumentenmanagement. Ich arbeite strukturiert, sorgfältig und unterstütze digitale administrative Abläufe zuverlässig.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-acta-nova"
+          ],
+          "atsTerms": [
+            "GEVER",
+            "ACTA NOVA"
+          ]
+        }
+      ],
+      "cms-web-process": [
+        {
+          "id": "cms-long",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in CMS, Webpflege, Onlineshop-Management und digitalen Prozessen. Ich verbinde Content Administration, strukturierte Datenpflege und Dokumentation mit technischem Verständnis für nachvollziehbare Web- und Systemabläufe.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile"
+          ],
+          "atsTerms": [
+            "CMS",
+            "Webpflege",
+            "Onlineshop",
+            "Prozessdokumentation"
+          ]
+        },
+        {
+          "id": "cms-medium",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in CMS, Webpflege und Onlineshop-Management. Ich pflege digitale Inhalte, strukturiere Daten und dokumentiere Prozesse zuverlässig mit technischem Verständnis.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile"
+          ],
+          "atsTerms": [
+            "CMS",
+            "Webpflege",
+            "Onlineshop"
+          ]
+        },
+        {
+          "id": "cms-short",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Praxis in CMS, Webpflege und digitalen Prozessen. Ich pflege Inhalte, Systeme und Daten strukturiert, zuverlässig und dokumentationsstark.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile"
+          ],
+          "atsTerms": [
+            "CMS",
+            "Webpflege"
+          ]
+        }
+      ]
+    }
   },
   "skillSections": [
     {
