@@ -2,6 +2,9 @@ name: Render CV
 
 on:
   pull_request:
+  push:
+    branches:
+      - codex/arbeite-am-modularen-cv-framework
   workflow_dispatch:
 
 jobs:
@@ -11,9 +14,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
+          node-version: 22
+      - run: npm install --no-audit --no-fund
       - run: npx playwright install --with-deps chromium
       - run: npm run build
       - run: npm run validate
@@ -26,5 +28,5 @@ jobs:
           path: |
             dist/*.pdf
             dist/*.png
-            dist/render-report-*.json
             dist/*-preview.html
+            dist/render-report-*.json

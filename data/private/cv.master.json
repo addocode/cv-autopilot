@@ -23,7 +23,7 @@
   "skillSections": [
     {"id":"digital-marketing-web","title":"DIGITAL MARKETING & WEB","tags":["web","marketing","cms"],"items":[
       {"id":"skill-websites-cms-landing","text":"Erstellung und Betreuung von Websites (CMS, Landing Pages)","tags":["web","cms"],"evidenceLevel":"professional_core","sources":["cv-2d-p1"]},
-      {"id":"skill-online-campaigns","text":"Onlinekampagnen inkl. Monitoring und Erfolgskontrolle","tags":["marketing","analytics"],"evidenceLevel":"professional_core","sources":["cv-2d-p1"]},
+      {"id":"skill-online-campaigns","text":"Onlineshop-Management inkl. Content-, Struktur- und Produktpflege","tags":["marketing","analytics"],"evidenceLevel":"professional_core","sources":["cv-2d-p1"]},
       {"id":"skill-newsletter","text":"Newsletter-Konzeption und Umsetzung (Print & E-Mail)","tags":["communication","newsletter"],"evidenceLevel":"professional_core","sources":["cv-2d-p1"]},
       {"id":"skill-social-performance","text":"Social Media Betreuung inkl. Performance-Analyse","tags":["social","analytics"],"evidenceLevel":"professional_core","sources":["cv-2d-p1"]},
       {"id":"skill-google-analytics","text":"Google Analytics & Online-Tracking","tags":["analytics","web"],"evidenceLevel":"professional_supporting","sources":["cv-2d-p1"]}
@@ -56,7 +56,7 @@
     {"id":"lang-fr","name":"Französisch","level":"B1","sources":["cv-2d-p1"]}
   ],
   "experiences": [
-    {"id":"freelance-digital-marketing-media","period":"03/2026 – 07/2026","role":"Freelance Digital Marketing & Media Specialist","employer":"im europäischen Ausland (Frankreich), ab 07/2026 in Bern","location":"Frankreich / Bern","notes":[],"bullets":[
+    {"id":"freelance-digital-marketing-media","period":"03/2026 – 07/2026","role":"Freelance Digital Marketing & Media Specialist","employer":"bis 05/2026 Pazifikregion (Neukaledonien), ab 06/2026 in Bern","location":"Neukaledonien / Bern","notes":[],"bullets":[
       {"id":"bullet-freelance-project-marketing-media","text":"Projektbasierte Marketing- und Medienunterstützung im internationalen Umfeld","tags":["marketing","media","international"],"evidenceLevel":"professional_core","sources":["cv-2d-p2"]},
       {"id":"bullet-freelance-content-print-web","text":"Erstellung von Content für Print-, Web- und digitale Kommunikationskanäle","tags":["content","web","print"],"evidenceLevel":"professional_core","sources":["cv-2d-p2"]},
       {"id":"bullet-freelance-remote-stakeholders","text":"Remote-Zusammenarbeit mit Kunden, Partnern und internationalen Stakeholdern","tags":["remote","coordination"],"evidenceLevel":"professional_supporting","sources":["cv-2d-p2"]},
@@ -65,7 +65,7 @@
     ],"sources":["cv-2d-p2"]},
     {"id":"kunz-kunath-marketing-mediamatiker","period":"10/2021 – 02/2026","role":"Marketing-Mitarbeiter / Mediamatiker EFZ","employer":"Kunz Kunath AG","location":"Burgdorf","notes":[],"bullets":[
       {"id":"bullet-kunz-websites-landing","text":"Betreuung, Optimierung und Weiterentwicklung von Websites und Landing Pages","tags":["web","cms"],"evidenceLevel":"professional_core","sources":["cv-2d-p2"]},
-      {"id":"bullet-kunz-online-campaigns-monitoring","text":"Onlinekampagnen inkl. Monitoring und Erfolgskontrolle","tags":["marketing","analytics"],"evidenceLevel":"professional_core","sources":["cv-2d-p2"]},
+      {"id":"bullet-kunz-online-campaigns-monitoring","text":"Onlineshop-Management inkl. Content-, Struktur- und Produktpflege","tags":["marketing","analytics"],"evidenceLevel":"professional_core","sources":["cv-2d-p2"]},
       {"id":"bullet-kunz-guegg","text":"Eigenständige Produktion des Firmenmagazins «Gügg Grüggüü» (3 Ausgaben / Jahr)","tags":["editorial","print","content"],"evidenceLevel":"professional_core","sources":["cv-2d-p2"]},
       {"id":"bullet-kunz-campaigns","text":"Konzeption und Umsetzung von Print-, Newsletter- und Onlinekampagnen","tags":["campaigns","newsletter","print"],"evidenceLevel":"professional_core","sources":["cv-2d-p2"]},
       {"id":"bullet-kunz-photo-video-social-ci","text":"Foto-, Video- und Social-Media-Content für Marketing und Corporate Identity","tags":["video","social","brand"],"evidenceLevel":"professional_core","sources":["cv-2d-p2"]},
@@ -96,8 +96,8 @@
   ],
   "references": [
     {"id":"ref-peter-stadelmann","name":"Peter Stadelmann","role":"ehem. CEO & Marketingleiter","employer":"Kunz Kunath AG","phone":"+41 79 208 90 74","sources":["cv-2d-p2"]},
-    {"id":"ref-peter-wyss","name":"Peter Wyss","role":"Chef Spedition","employer":"Personelles der Armee","phone":"+51 58 489 20 03","sources":["cv-2d-p2"]}
+    {"id":"ref-peter-wyss","name":"Peter Wyss","role":"Chef Spedition","employer":"Personelles der Armee","phone":"+51 58 489 20 03","manualVerificationRequired":true,"sources":["cv-2d-p2"]}
   ],
   "availability": {"label":"Eintritt","text":"nach Vereinbarung oder sofort","sources":["cv-2d-p2"]},
-  "workload": {"label":"Pensum","text":"60 - 100 % oder nach Absprache","sources":["cv-2d-p2"]}
+  "workload": {"label":"Pensum","text":"60–100 % flexibel nach Absprache","sources":["cv-2d-p2"]}
 }

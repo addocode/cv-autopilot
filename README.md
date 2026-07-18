@@ -70,10 +70,10 @@ Der Hauptrenderer ist `scripts/render.mjs` mit Playwright/Chromium. Er misst `sc
 
 ## GitHub Actions
 
-Der Workflow `.github/workflows/render-cv.yml` führt auf GitHub aus:
+Der Workflow `.github/workflows/render-cv.yml` läuft auf Pull Requests, manueller Auslösung und Pushes auf `codex/arbeite-am-modularen-cv-framework`. Da aktuell kein `package-lock.json` vorhanden ist, verwendet er vorläufig `npm install --no-audit --no-fund` statt `npm ci` und kein npm-Cache in `actions/setup-node`. Er führt aus:
 
 ```bash
-npm ci
+npm install --no-audit --no-fund
 npx playwright install --with-deps chromium
 npm run build
 npm run validate
