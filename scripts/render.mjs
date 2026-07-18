@@ -1,5 +1,6 @@
 import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { performance } from 'node:perf_hooks';
+import { normalizeAtsText, atsNormalizationConfig } from '../src/lib/ats-normalize.mjs';
 
 const load = (path) => JSON.parse(readFileSync(path, 'utf8'));
 const esc = (value) => String(value).replace(/[&<>]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[char]);
@@ -466,18 +467,19 @@ async function buildAtsReport(pdfPath, metrics) {
       const content = await page.getTextContent();
       pages.push(content.items.map((item) => item.str).join(' '));
     }
-    extractedText = pages.join(' ').replace(/\s+/g, ' ').trim();
+    extractedText = pages.join(' ').trim();
     textExtractable = extractedText.length > 100;
   } catch {
     textExtractable = visibleText.length > 100;
   }
-  const missingTerms = required.filter((term) => term && !extractedText.includes(term));
-  const requiredTermsPresent = required.filter((term) => term && extractedText.includes(term));
-  const lower = extractedText.toLowerCase();
+  const normalizedPdfText = normalizeAtsText(extractedText);
+  const missingTerms = required.filter((term) => term && !normalizedPdfText.includes(normalizeAtsText(term)));
+  const requiredTermsPresent = required.filter((term) => term && normalizedPdfText.includes(normalizeAtsText(term)));
+  const lower = normalizedPdfText;
   const keywordTerms = [...new Set(cv.skillSections.flatMap((section) => section.items.flatMap((item) => item.atsSynonyms || item.tags || [])))];
-  const keywordHits = keywordTerms.filter((term) => lower.includes(String(term).toLowerCase()));
-  const orderChecks = [cv.person.name, cv.person.email, cv.experiences[0]?.period, cv.experiences[1]?.employer].filter(Boolean);
-  const readingOrderValid = orderChecks.every((term, index) => index === 0 || extractedText.indexOf(orderChecks[index - 1]) <= extractedText.indexOf(term));
+  const keywordHits = keywordTerms.filter((term) => lower.includes(normalizeAtsText(term)));
+  const orderChecks = [cv.person.name, cv.person.email, cv.experiences[0]?.period, cv.experiences[1]?.employer].filter(Boolean).map((term) => normalizeAtsText(term));
+  const readingOrderValid = orderChecks.every((term, index) => index === 0 || normalizedPdfText.indexOf(orderChecks[index - 1]) <= normalizedPdfText.indexOf(term));
   return {
     textExtractable,
     readingOrderValid,
@@ -487,6 +489,7 @@ async function buildAtsReport(pdfPath, metrics) {
     keywordStuffingRisk: /(\b\w+\b)(?:\s+\1){3,}/i.test(extractedText),
     hiddenTextDetected: Boolean(metrics.ats.hiddenTextDetected),
     extractedCharCount: extractedText.length,
+    normalization: atsNormalizationConfig,
   };
 }
 
