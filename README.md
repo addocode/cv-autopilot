@@ -108,7 +108,9 @@ Der Playwright-Renderer prüft:
 - Links,
 - verwendete Schriftfamilien,
 - Times-New-Roman-Fallback-Warnung,
-- Button-Normal-, Hover- und Focus-Zustand.
+- Button-Normal-, Hover- und Focus-Zustand,
+- adaptive Fill-Entscheidungen inklusive akzeptierter/abgelehnter Kandidaten,
+- zusätzliche verifizierte Master-Tools und datengetriebene Tool-Hinweise.
 
 ## GitHub Actions
 
@@ -121,7 +123,7 @@ Er installiert Node.js 22, npm-Abhängigkeiten und Chromium, führt Build, Valid
 
 ## Intelligente Zusatz- und Fill-Logik
 
-Die Varianten zeigen zunächst die definierten Kerninhalte. Wenn verifizierte Masterdaten wegen Variantenfokus, Tool-Limit oder Platzbudget ausgeblendet werden, ergänzt der Renderer nur datengetriebene Hinweise wie `+ weitere mediamatikbezogene Tools und Systeme` oder variantenspezifische Hinweise zu weiteren Kompetenzen. Optionale Zusatzpunkte für Ausbildung und Eventstation besitzen stabile IDs, Tags, Evidence-Level, Quellen, Variantenrelevanz und Fill-Priorität; sie werden im Render Report unter `supplementary` und `fill` dokumentiert. Der Produktionsrender darf keine erfundenen Fähigkeiten verwenden und muss weiterhin ohne Overflows oder Collisions abschließen.
+Die Varianten zeigen zunächst die definierten Kerninhalte. Danach führt der Playwright-Renderer einen kontrollierten Mess-Fill aus: Er misst den Baseline-Abstand zwischen Berufserfahrung und Bottom-Grid, blendet optionale verifizierte Kandidaten nach `fillPriority` einzeln ein, misst erneut und behält einen Kandidaten nur, wenn keine Overflows/Collisions entstehen, weiterhin exakt zwei Seiten vorhanden sind und die Mindestreserve eingehalten bleibt. Wenn verifizierte Masterdaten wegen Variantenfokus, Tool-Limit oder Platzbudget ausgeblendet werden, ergänzt der Renderer nur datengetriebene Hinweise wie `+ weitere mediamatikbezogene Tools und Systeme` oder priorisierte Erfahrungshinweise bis `maxPerVariant`. Optionale Zusatzpunkte und zusätzliche Tools besitzen stabile IDs, Tags, Evidence-Level, Quellen, Variantenrelevanz, Priorität und Sichtbarkeitsmetadaten; Entscheidungen werden im Render Report unter `supplementary` und `fill` dokumentiert.
 
 ## Typografie
 

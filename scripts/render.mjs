@@ -5,8 +5,6 @@ const load = (path) => JSON.parse(readFileSync(path, 'utf8'));
 const esc = (value) => String(value).replace(/[&<>]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[char]);
 const arg = process.argv.indexOf('--variant');
 const variantId = arg >= 0 ? process.argv[arg + 1] : 'general';
-const allToolCount = 11;
-
 mkdirSync('dist', { recursive: true });
 
 const data = load('data/private/cv.master.json');
@@ -27,10 +25,16 @@ function applyVariant() {
       items: section.items.slice(0, Math.ceil(variant.budgets.pageOneMaxSkillItems / variant.skillSectionOrder.length) + 2),
     }));
 
-  const optionalLimit = variant.fill?.enabled ? variant.fill.optionalBulletLimit ?? 0 : 0;
-  let optionalUsed = 0;
   const supplementaryItems = [];
   const experienceIndicatorText = data.supplementaryIndicators?.experience?.[variantId] || data.supplementaryIndicators?.experience?.general;
+  const maxExperienceIndicators = variant.supplementaryIndicators?.experience?.enabled ? variant.supplementaryIndicators.experience.maxPerVariant ?? 0 : 0;
+  const experienceIndicatorPriority = new Map([
+    ['mediamatiker-ausbildung-army-bict', 1],
+    ['schachfestival-livestream-event', 2],
+    ['kunz-kunath-marketing-mediamatiker', 3],
+    ['rekrutenschule-triage-fuehrungsdienst', 4],
+    ['freelance-digital-marketing-media', 5],
+  ]);
 
   const experiences = data.experiences.map((experience) => {
     const included = experience.bullets
@@ -40,32 +44,33 @@ function applyVariant() {
     const omittedMandatory = experience.bullets.filter((bullet) => !included.some((item) => item.id === bullet.id));
     const optionalCandidates = (experience.optionalBullets || [])
       .filter((bullet) => (bullet.variantRelevance || []).includes(variantId))
-      .sort((a, b) => (a.fillPriority ?? 99) - (b.fillPriority ?? 99));
-    const optionalVisible = [];
-    for (const bullet of optionalCandidates) {
-      if (optionalUsed >= optionalLimit) break;
-      optionalVisible.push(bullet);
-      optionalUsed += 1;
-    }
-    const omittedOptional = optionalCandidates.filter((bullet) => !optionalVisible.some((item) => item.id === bullet.id));
-    const omitted = [...omittedMandatory, ...omittedOptional];
-    const showSupplementary = Boolean(experience.showSupplementaryWhenOmitted && omitted.length > 0 && experienceIndicatorText);
-    if (showSupplementary) {
-      supplementaryItems.push({
-        type: 'experience',
-        experienceId: experience.id,
-        text: experience.supplementaryText || experienceIndicatorText,
-        omittedBulletIds: omitted.map((bullet) => bullet.id),
-      });
-    }
+      .sort((a, b) => (a.fillPriority ?? 99) - (b.fillPriority ?? 99))
+      .map((bullet) => ({ ...bullet, experienceId: experience.id, candidateType: 'optional-bullet' }));
+    const omitted = [...omittedMandatory, ...optionalCandidates];
     return {
       ...experience,
       bullets: included,
-      optionalVisible,
-      supplementaryText: showSupplementary ? (experience.supplementaryText || experienceIndicatorText) : '',
+      optionalCandidates,
+      supplementaryText: experience.showSupplementaryWhenOmitted && omitted.length > 0 ? (experience.supplementaryText || experienceIndicatorText) : '',
       omittedBulletIds: omitted.map((bullet) => bullet.id),
+      indicatorPriority: experienceIndicatorPriority.get(experience.id) ?? 99,
     };
   });
+
+  const experienceIndicators = experiences
+    .filter((experience) => experience.supplementaryText && experience.omittedBulletIds.length > 0)
+    .sort((a, b) => a.indicatorPriority - b.indicatorPriority)
+    .slice(0, maxExperienceIndicators)
+    .map((experience, index) => ({
+      type: 'experience',
+      experienceId: experience.id,
+      text: experience.supplementaryText,
+      omittedBulletIds: experience.omittedBulletIds,
+      priority: index + 1,
+      candidateType: 'experience-indicator',
+      id: `supplementary-${experience.id}`,
+    }));
+  supplementaryItems.push(...experienceIndicators);
 
   const toolMap = new Map(data.tools.map((tool) => [tool.id, tool]));
   const tools = variant.toolOrder.map((id) => toolMap.get(id)).filter(Boolean).slice(0, variant.maxTools);
@@ -84,19 +89,25 @@ function applyVariant() {
     tools,
     supplementary: {
       items: supplementaryItems,
-      optionalVisibleBulletIds: experiences.flatMap((experience) => experience.optionalVisible.map((bullet) => bullet.id)),
+      optionalCandidates: experiences.flatMap((experience) => experience.optionalCandidates.map((bullet) => ({ ...bullet, text: bullet.text }))),
+      optionalVisibleBulletIds: [],
       omittedToolIds: omittedTools.map((tool) => tool.id),
       toolsIndicator,
+      maxExperienceIndicators,
     },
     fill: {
       enabled: Boolean(variant.fill?.enabled),
-      optionalBulletLimit: optionalLimit,
-      optionalBulletsUsed: optionalUsed,
+      optionalBulletLimit: variant.fill?.optionalBulletLimit ?? 0,
+      optionalBulletsUsed: 0,
       minRemainingSpaceMm: variant.fill?.minRemainingSpaceMm ?? 5,
+      baselineGapPx: 0,
+      finalGapPx: 0,
+      consideredOptionalBulletIds: [],
+      acceptedOptionalBulletIds: [],
+      rejectedOptionalBulletIds: [],
     },
   };
 }
-
 const cv = applyVariant();
 
 function icon(id) {
@@ -127,8 +138,11 @@ function html() {
   const [toolLeft, toolRight] = toolColumns();
   const skillHtml = cv.skillSections.map((section) => `<section class="module skill-section" id="skill-${section.id}" data-check data-collision-group="skills"><div>${icon(section.id)}</div><div><h2>${esc(section.title)}</h2><ul>${section.items.map((item) => `<li id="${item.id}" data-check>${esc(item.text)}</li>`).join('')}</ul></div></section>`).join('');
   const expHtml = cv.experiences.map((experience) => {
-    const bullets = [...experience.bullets, ...experience.optionalVisible];
-    return `<article class="module experience" id="experience-${experience.id}" data-check data-collision-group="experiences"><div class="meta">${esc(experience.period)} <span>|</span> <strong>${esc(experience.role)}</strong></div><div class="employer">${experienceLine(experience)}</div>${experience.notes.map((note) => `<div class="note">${esc(note)}</div>`).join('')}<ul>${bullets.map((bullet) => `<li id="${bullet.id}" data-check>${esc(bullet.text)}</li>`).join('')}</ul>${experience.supplementaryText ? `<p class="supplementary experience-more" data-check>${esc(experience.supplementaryText)}</p>` : ''}</article>`;
+    const bullets = experience.bullets;
+    const optionalHtml = experience.optionalCandidates.map((bullet) => `<li id="${bullet.id}" class="optional-fill" data-check data-fill-state="candidate" data-fill-id="${bullet.id}" hidden>${esc(bullet.text)}</li>`).join('');
+    const indicatorAllowed = cv.supplementary.items.find((item) => item.type === 'experience' && item.experienceId === experience.id);
+    const indicatorHtml = indicatorAllowed ? `<p class="supplementary experience-more" data-check data-fill-state="candidate" data-fill-id="${indicatorAllowed.id}" hidden>${esc(indicatorAllowed.text)}</p>` : '';
+    return `<article class="module experience" id="experience-${experience.id}" data-check data-collision-group="experiences"><div class="meta">${esc(experience.period)} <span>|</span> <strong>${esc(experience.role)}</strong></div><div class="employer">${experienceLine(experience)}</div>${experience.notes.map((note) => `<div class="note">${esc(note)}</div>`).join('')}<ul>${bullets.map((bullet) => `<li id="${bullet.id}" data-check>${esc(bullet.text)}</li>`).join('')}${optionalHtml}</ul>${indicatorHtml}</article>`;
   }).join('');
   const toolIndicator = cv.supplementary.toolsIndicator ? `<p class="supplementary tools-more" data-check>${esc(cv.supplementary.toolsIndicator.text)}</p>` : '';
   return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Lebenslauf ${esc(cv.person.name)} ${esc(variantId)}</title><link rel="stylesheet" href="../src/styles/tokens.css"><link rel="stylesheet" href="../src/styles/cv.css"></head><body><main class="cv" data-variant="${esc(variantId)}"><section class="cv-page" id="page-1"><div class="frame"><section class="hero-panel" id="hero-panel" data-check><img class="profile" src="../${esc(cv.person.profileImage)}" alt="Porträt von Adam Dolinsky"><header class="hero"><h1>${esc(cv.person.name)}</h1><p class="headline">${esc(cv.headline)}</p><p class="credential">${esc(cv.positioning.credential)}</p><p class="contact"><span>${esc(cv.person.location)}</span><br><a href="mailto:${esc(cv.person.email)}">${esc(cv.person.email)}</a></p><div class="link-buttons"><a href="${esc(cv.person.portfolio)}">dolinsky.ch</a><a href="${esc(cv.person.linkedin)}">LinkedIn</a></div></header><section class="module summary" id="summary" data-check><h2>KURZPROFIL</h2><p>${esc(cv.summaryText)}</p></section></section><section class="competence-panel" id="competence-panel" data-check>${skillHtml}<section class="module languages" id="languages" data-check data-collision-group="skills"><h2>SPRACHEN</h2>${cv.languages.map((language) => `<div><span>${esc(language.name)}</span><strong>${esc(language.level)}</strong></div>`).join('')}</section></section></div><div class="counter">1/2</div></section><section class="cv-page" id="page-2"><div class="frame page-two"><section class="white-panel" id="page-two-panel" data-check><section class="experience-list" id="experience-list" data-check>${expHtml}</section><footer class="bottom-grid" id="bottom-grid" data-check data-collision-group="experiences"><section class="module tools" id="tools" data-check data-collision-group="bottom"><h2>${icon('tools')}<span>SOFTWARE & TOOLS</span></h2><div class="tool-cols"><div>${toolLeft.map((tool) => `<span id="${tool.id}">${esc(tool.name)}</span>`).join('')}</div><div>${toolRight.map((tool) => `<span id="${tool.id}">${esc(tool.name)}</span>`).join('')}</div></div>${toolIndicator}</section><section class="module refs" id="references" data-check data-collision-group="bottom"><h2>${icon('references')}<span>REFERENZEN</span></h2>${cv.references.map((reference) => `<p><strong>${esc(reference.name)}</strong><br>${esc(reference.role)}<br>${esc(reference.employer)}<br>${esc(reference.phone)}</p>`).join('')}</section><section class="module avail" id="availability" data-check data-collision-group="bottom"><h2>${icon('availability')}<span>EINTRITT</span></h2><p>${esc(cv.availability.text)}</p><h2><span>PENSUM</span></h2><p>${esc(cv.workload.text)}</p></section></footer></section></div><div class="counter">2/2</div></section></main></body></html>`;
@@ -145,7 +159,7 @@ async function withPlaywright() {
   await page.goto(fileUrl, { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
 
-  const metrics = await page.evaluate((bgExists, variantMeta) => {
+  const metrics = await page.evaluate(({ bgExists, variantMeta }) => {
     const rectOf = (element) => {
       const rect = element.getBoundingClientRect();
       return { id: element.id || element.className, left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width, height: rect.height, scrollHeight: element.scrollHeight, clientHeight: element.clientHeight, pageId: element.closest('.cv-page')?.id };
@@ -233,7 +247,78 @@ async function withPlaywright() {
     if (!out.fonts.slabLoaded || !/Roboto Slab/i.test(out.fonts.slab)) out.warnings.push('Roboto Slab did not load for the summary heading.');
     if (!out.assets.background.exists || !out.assets.background.computed || !out.assets.background.rendered || !out.assets.background.coversFullPage || !out.assets.background.bottomZoneNotGray) out.warnings.push('Background image did not cover the full page.');
     return out;
-  }, backgroundFileExists, { supplementary: cv.supplementary, fill: cv.fill });
+  }, {
+    bgExists: backgroundFileExists,
+    variantMeta: { supplementary: cv.supplementary, fill: cv.fill },
+  });
+
+  async function measureLayout() {
+    return page.evaluate(() => {
+      const rectOf = (element) => {
+        const rect = element.getBoundingClientRect();
+        return { id: element.id || element.dataset.fillId || element.className, left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, scrollHeight: element.scrollHeight, clientHeight: element.clientHeight, pageId: element.closest('.cv-page')?.id };
+      };
+      const overflows = [];
+      const collisions = [];
+      for (const element of document.querySelectorAll('[data-check]:not([hidden])')) {
+        const rect = rectOf(element);
+        const currentPage = rectOf(element.closest('.cv-page'));
+        const panel = element.closest('.competence-panel,.hero-panel,.white-panel,.bottom-grid') || element.closest('.cv-page');
+        const panelRect = rectOf(panel);
+        if (rect.bottom > currentPage.bottom || rect.top < currentPage.top || rect.left < currentPage.left || rect.right > currentPage.right) overflows.push({ elementId: rect.id, overflowPixels: Math.ceil(Math.max(0, rect.bottom - currentPage.bottom, currentPage.top - rect.top, currentPage.left - rect.left, rect.right - currentPage.right)) });
+        if (rect.bottom > panelRect.bottom + 1 || rect.top < panelRect.top - 1 || rect.left < panelRect.left - 1 || rect.right > panelRect.right + 1) overflows.push({ elementId: rect.id, overflowPixels: Math.ceil(Math.max(0, rect.bottom - panelRect.bottom, panelRect.top - rect.top, panelRect.left - rect.left, rect.right - panelRect.right)) });
+        if (element.scrollHeight > element.clientHeight + 1) overflows.push({ elementId: rect.id, overflowPixels: element.scrollHeight - element.clientHeight });
+      }
+      const collisionElements = [...document.querySelectorAll('[data-collision-group]:not([hidden])')];
+      const collisionRects = collisionElements.map((element, index) => ({ ...rectOf(element), index }));
+      for (let i = 0; i < collisionRects.length; i += 1) {
+        for (let j = i + 1; j < collisionRects.length; j += 1) {
+          const a = collisionRects[i];
+          const b = collisionRects[j];
+          const ea = collisionElements[a.index];
+          const eb = collisionElements[b.index];
+          if (ea.contains(eb) || eb.contains(ea) || a.pageId !== b.pageId) continue;
+          const width = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
+          const height = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+          if (width * height > 4) collisions.push({ elementA: a.id, elementB: b.id, overlapWidth: Math.round(width), overlapHeight: Math.round(height), overlapArea: Math.round(width * height) });
+        }
+      }
+      const experienceList = document.querySelector('#experience-list')?.getBoundingClientRect();
+      const bottomGrid = document.querySelector('#bottom-grid')?.getBoundingClientRect();
+      const gapPx = experienceList && bottomGrid ? Math.round(bottomGrid.top - experienceList.bottom) : 0;
+      return { overflows, collisions, gapPx, pageCount: document.querySelectorAll('.cv-page').length };
+    });
+  }
+
+  if (metrics.fill.enabled) {
+    const minGapPx = Math.ceil(metrics.fill.minRemainingSpaceMm * 96 / 25.4);
+    const baseline = await measureLayout();
+    metrics.fill.baselineGapPx = baseline.gapPx;
+    const optionalCandidates = await page.locator('[data-fill-state="candidate"]').evaluateAll((elements) => elements.map((element) => element.dataset.fillId));
+    metrics.fill.consideredOptionalBulletIds = optionalCandidates;
+    for (const id of optionalCandidates) {
+      const locator = page.locator(`[data-fill-id="${id}"]`).first();
+      await locator.evaluate((element) => { element.hidden = false; element.dataset.fillState = 'accepted'; });
+      const measured = await measureLayout();
+      const accepted = measured.overflows.length === 0 && measured.collisions.length === 0 && measured.pageCount === 2 && measured.gapPx >= minGapPx;
+      if (accepted) {
+        metrics.fill.acceptedOptionalBulletIds.push(id);
+        if (id.startsWith('optional-')) metrics.supplementary.optionalVisibleBulletIds.push(id);
+        metrics.fill.finalGapPx = measured.gapPx;
+      } else {
+        await locator.evaluate((element) => { element.hidden = true; element.dataset.fillState = 'rejected'; });
+        const reason = measured.overflows.length ? 'overflow' : measured.collisions.length ? 'collision' : measured.pageCount !== 2 ? 'page-count' : 'minimum-gap';
+        metrics.fill.rejectedOptionalBulletIds.push({ id, reason, gapPx: measured.gapPx });
+      }
+    }
+    const finalLayout = await measureLayout();
+    metrics.fill.finalGapPx = finalLayout.gapPx;
+    metrics.fill.optionalBulletsUsed = metrics.fill.acceptedOptionalBulletIds.filter((id) => id.startsWith('optional-')).length;
+    metrics.overflows = finalLayout.overflows;
+    metrics.collisions = finalLayout.collisions;
+  }
+
+  writeFileSync(htmlPath, await page.content());
 
   const target = page.locator('.link-buttons a').first();
   const readButton = async () => target.evaluate((element) => {

@@ -703,7 +703,15 @@
       "evidenceLevel": "professional_core",
       "sources": [
         "cv-2d-p2"
-      ]
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "general",
+        "communication-content",
+        "administration-gever",
+        "cms-web-process"
+      ],
+      "priority": 1
     },
     {
       "id": "tool-ms-office",
@@ -715,7 +723,15 @@
       "evidenceLevel": "professional_supporting",
       "sources": [
         "cv-2d-p2"
-      ]
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "general",
+        "communication-content",
+        "administration-gever",
+        "cms-web-process"
+      ],
+      "priority": 2
     },
     {
       "id": "tool-canva",
@@ -726,7 +742,15 @@
       "evidenceLevel": "professional_supporting",
       "sources": [
         "cv-2d-p2"
-      ]
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "general",
+        "communication-content",
+        "administration-gever",
+        "cms-web-process"
+      ],
+      "priority": 3
     },
     {
       "id": "tool-chatgpt",
@@ -738,7 +762,15 @@
       "evidenceLevel": "project_experience",
       "sources": [
         "cv-2d-p2"
-      ]
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "general",
+        "communication-content",
+        "administration-gever",
+        "cms-web-process"
+      ],
+      "priority": 4
     },
     {
       "id": "tool-google-analytics",
@@ -750,7 +782,15 @@
       "evidenceLevel": "professional_supporting",
       "sources": [
         "cv-2d-p2"
-      ]
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "general",
+        "communication-content",
+        "administration-gever",
+        "cms-web-process"
+      ],
+      "priority": 5
     },
     {
       "id": "tool-acta-nova",
@@ -762,7 +802,15 @@
       "evidenceLevel": "professional_supporting",
       "sources": [
         "cv-2d-p2"
-      ]
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "general",
+        "communication-content",
+        "administration-gever",
+        "cms-web-process"
+      ],
+      "priority": 6
     },
     {
       "id": "tool-typo3",
@@ -774,7 +822,15 @@
       "evidenceLevel": "professional_core",
       "sources": [
         "cv-2d-p2"
-      ]
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "general",
+        "communication-content",
+        "administration-gever",
+        "cms-web-process"
+      ],
+      "priority": 7
     },
     {
       "id": "tool-wordpress",
@@ -786,7 +842,15 @@
       "evidenceLevel": "professional_core",
       "sources": [
         "cv-2d-p2"
-      ]
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "general",
+        "communication-content",
+        "administration-gever",
+        "cms-web-process"
+      ],
+      "priority": 8
     },
     {
       "id": "tool-grav",
@@ -798,7 +862,15 @@
       "evidenceLevel": "professional_core",
       "sources": [
         "cv-2d-p2"
-      ]
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "general",
+        "communication-content",
+        "administration-gever",
+        "cms-web-process"
+      ],
+      "priority": 9
     },
     {
       "id": "tool-magento",
@@ -810,7 +882,15 @@
       "evidenceLevel": "professional_core",
       "sources": [
         "cv-2d-p2"
-      ]
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "general",
+        "communication-content",
+        "administration-gever",
+        "cms-web-process"
+      ],
+      "priority": 10
     },
     {
       "id": "tool-html-css",
@@ -821,7 +901,56 @@
       "evidenceLevel": "professional_core",
       "sources": [
         "cv-2d-p2"
-      ]
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "general",
+        "communication-content",
+        "administration-gever",
+        "cms-web-process"
+      ],
+      "priority": 11
+    },
+    {
+      "id": "tool-adobe-indesign",
+      "name": "Adobe InDesign",
+      "tags": [
+        "layout",
+        "print",
+        "adobe"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "cv-2d-p2",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": false,
+      "allowedVariants": [
+        "general",
+        "communication-content"
+      ],
+      "priority": 30
+    },
+    {
+      "id": "tool-adobe-photoshop",
+      "name": "Adobe Photoshop",
+      "tags": [
+        "image-editing",
+        "media",
+        "adobe"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "cv-2d-p2",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": false,
+      "allowedVariants": [
+        "general",
+        "communication-content",
+        "cms-web-process"
+      ],
+      "priority": 31
     }
   ],
   "references": [

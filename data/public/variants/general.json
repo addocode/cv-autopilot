@@ -56,7 +56,7 @@
   },
   "supplementaryIndicators": {
     "tools": {
-      "enabled": false,
+      "enabled": true,
       "text": "+ weitere mediamatikbezogene Tools und Systeme"
     },
     "experience": {
