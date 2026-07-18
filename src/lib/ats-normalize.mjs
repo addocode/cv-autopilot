@@ -15,3 +15,11 @@ export const atsNormalizationConfig = {
   hyphenatedLineBreaksJoined: true,
   whitespaceCollapsed: true,
 };
+
+
+export function joinPdfTextItems(items) {
+  return items
+    .map((item) => `${item.str}${item.hasEOL ? '\n' : ' '}`)
+    .join('')
+    .trim();
+}

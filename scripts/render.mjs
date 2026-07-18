@@ -1,6 +1,6 @@
 import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { performance } from 'node:perf_hooks';
-import { normalizeAtsText, atsNormalizationConfig } from '../src/lib/ats-normalize.mjs';
+import { normalizeAtsText, atsNormalizationConfig, joinPdfTextItems } from '../src/lib/ats-normalize.mjs';
 
 const load = (path) => JSON.parse(readFileSync(path, 'utf8'));
 const esc = (value) => String(value).replace(/[&<>]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[char]);
@@ -465,9 +465,9 @@ async function buildAtsReport(pdfPath, metrics) {
     for (let pageNo = 1; pageNo <= pdf.numPages; pageNo += 1) {
       const page = await pdf.getPage(pageNo);
       const content = await page.getTextContent();
-      pages.push(content.items.map((item) => item.str).join(' '));
+      pages.push(joinPdfTextItems(content.items));
     }
-    extractedText = pages.join(' ').trim();
+    extractedText = pages.join('\n').trim();
     textExtractable = extractedText.length > 100;
   } catch {
     textExtractable = visibleText.length > 100;
