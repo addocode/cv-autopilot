@@ -1,0 +1,1 @@
+{"type":"object","required":["person","summary","competencies","experiences","tools","references"],"properties":{"person":{"type":"object","required":["name","email","location"]}}}

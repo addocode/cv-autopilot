@@ -1,0 +1,3 @@
+export type EvidenceLevel='professional_core'|'professional_supporting'|'project_experience'|'training_exposure'|'basic'|'historical'|'do_not_surface_automatically';
+export interface CvData{person:{name:string;location:string;email:string;phone?:string;portfolio:string;linkedin:string;profileImage:string};summary:string;competencies:{id:string;title:string;items:string[];tags:string[];evidenceLevel:EvidenceLevel}[];languages:{name:string;level:string}[];experiences:{id:string;period:string;role:string;employer:string;bullets:string[];tags:string[];sources:string[]}[];tools:string[];references:{name:string;role:string;employer:string;contact:string}[];availability:string;workload:string}
+export interface Variant{id:string;headline:string;priorityTags:string[]}

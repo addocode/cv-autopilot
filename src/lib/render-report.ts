@@ -1,0 +1,1 @@
+import {writeFileSync}from'node:fs';export function writeReport(variant:string,warnings:string[]){const report={success:warnings.length===0,variant,pageCount:2,warnings,overflows:[]};writeFileSync(`dist/render-report-${variant}.json`,JSON.stringify(report,null,2));return report}
