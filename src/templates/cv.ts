@@ -1,0 +1,2 @@
+import type{CvData,Variant}from'../types/cv.js';
+export function renderHtml(data:CvData&{headline?:string;summaryText?:string},variant:Variant){return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>${data.person.name} ${variant.id}</title></head><body><main><h1>${data.person.name}</h1><p>${data.headline??variant.headline}</p><p>${data.summaryText??data.summary.default}</p></main></body></html>`}
