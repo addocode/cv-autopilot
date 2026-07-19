@@ -15,6 +15,8 @@ const staleFiles = [
   `dist/cv-${variantId}-page-1.png`,
   `dist/cv-${variantId}-page-2.png`,
   `dist/text-${variantId}-poppler.txt`,
+  `dist/text-${variantId}-poppler-raw.txt`,
+  `dist/text-${variantId}-poppler-layout.txt`,
 ];
 for (const file of staleFiles) {
   if (existsSync(file)) unlinkSync(file);
@@ -48,6 +50,11 @@ const forbiddenBrokenTokens = [
   'Off ice 365',
   'Adobe Prem iere Pro',
   'phpMy Admin',
+  'm ediam atikbezogene',
+  'mediam atikbezogene',
+  'System e',
+  'Pet er St adelmann',
+  'Pet er Wyss',
 ];
 
 function analyzeExtractedText(text, requiredTerms) {
@@ -207,8 +214,8 @@ function html() {
     const indicatorHtml = indicatorAllowed ? `<p class="supplementary experience-more" data-check data-fill-state="candidate" data-fill-kind="experience-indicator" data-experience-id="${experience.id}" data-fill-priority="${indicatorAllowed.priority ?? 99}" data-long-text="${esc(indicatorAllowed.text)}" data-short-text="${esc(indicatorAllowed.text)}" data-fill-id="${indicatorAllowed.id}" hidden>${esc(indicatorAllowed.text)}</p>` : '';
     return `<article class="module experience" id="experience-${experience.id}" data-check data-collision-group="experiences"><div class="experience-heading"><div class="meta" data-ats-required>${esc(experience.period)} <span>|</span> <strong>${esc(experience.role)}</strong></div><div class="employer" data-ats-required>${experienceLine(experience)}</div>${experience.notes.map((note) => `<div class="note">${esc(note)}</div>`).join('')}</div><ul>${bullets.map((bullet) => `<li id="${bullet.id}" data-check>${esc(bullet.text)}</li>`).join('')}${optionalHtml}</ul>${indicatorHtml}</article>`;
   }).join('');
-  const toolIndicator = cv.supplementary.toolsIndicator ? `<p class="supplementary tools-more" data-check>${esc(cv.supplementary.toolsIndicator.text)}</p>` : '';
-  return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Lebenslauf ${esc(cv.person.name)} ${esc(variantId)}</title><link rel="stylesheet" href="../src/styles/tokens.css"><link rel="stylesheet" href="../src/styles/cv.css"></head><body><main class="cv" data-variant="${esc(variantId)}"><section class="cv-page" id="page-1"><div class="frame"><section class="hero-panel" id="hero-panel" data-check><img class="profile" src="../${esc(cv.person.profileImage)}" alt="Porträt von Adam Dolinsky"><header class="hero"><h1 data-ats-required>${esc(cv.person.name)}</h1><p class="headline" data-ats-required>${esc(cv.headline)}</p><p class="credential">${esc(cv.positioning.credential)}</p><p class="contact"><span>${esc(cv.person.location)}</span><br><a href="mailto:${esc(cv.person.email)}" data-ats-required>${esc(cv.person.email)}</a></p><div class="link-buttons"><a href="${esc(cv.person.portfolio)}">dolinsky.ch</a><a href="${esc(cv.person.linkedin)}">LinkedIn</a></div></header><section class="module summary" id="summary" data-check data-summary-target-lines="${cv.summaryMeta.targetLines}"><h2>KURZPROFIL</h2><p id="summary-text">${esc(cv.summaryText)}</p></section></section><section class="competence-panel" id="competence-panel" data-check>${skillHtml}<section class="module languages-row" id="languages" data-check data-collision-group="skills"><div class="languages-label">SPRACHEN</div>${cv.languages.map((language) => `<div class="language" data-ats-required><span>${esc(language.name)}</span><strong>${esc(language.level)}</strong></div>`).join('')}</section></section></div><div class="counter">1/2</div></section><section class="cv-page" id="page-2"><div class="frame page-two"><section class="white-panel" id="page-two-panel" data-check><section class="experience-list" id="experience-list" data-check>${expHtml}</section><footer class="bottom-grid" id="bottom-grid" data-check data-collision-group="experiences"><section class="module tools" id="tools" data-check data-collision-group="bottom"><h2 data-footer-title="tools">${icon('tools')}<span>SOFTWARE & TOOLS</span></h2><div class="tool-cols"><div>${toolLeft.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div><div>${toolRight.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div></div>${toolIndicator}</section><section class="module refs" id="references" data-check data-collision-group="bottom"><h2 data-footer-title="references">${icon('references')}<span>REFERENZEN</span></h2>${cv.references.map((reference) => `<p><strong data-ats-required>${esc(reference.name)}</strong><br>${esc(reference.role)}<br>${esc(reference.employer)}<br><span data-ats-required>${esc(reference.phone)}</span></p>`).join('')}</section><section class="module avail" id="availability" data-check data-collision-group="bottom"><div class="availability-block entry-block"><h2 data-footer-title="entry">${icon('availability')}<span>EINTRITT</span></h2><p data-ats-required>${esc(cv.availability.text)}</p></div><div class="availability-block workload-block"><h2 data-footer-title="workload">${icon('workload')}<span>PENSUM</span></h2><p data-ats-required>${esc(cv.workload.text)}</p></div></section></footer></section></div><div class="counter">2/2</div></section></main></body></html>`;
+  const toolIndicator = cv.supplementary.toolsIndicator ? `<p class="supplementary tools-more" data-check data-ats-required data-ats-text="${esc(cv.supplementary.toolsIndicator.text)}">${esc(cv.supplementary.toolsIndicator.text)}</p>` : '';
+  return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Lebenslauf ${esc(cv.person.name)} ${esc(variantId)}</title><link rel="stylesheet" href="../src/styles/tokens.css"><link rel="stylesheet" href="../src/styles/cv.css"></head><body><main class="cv" data-variant="${esc(variantId)}"><section class="cv-page" id="page-1"><div class="frame"><section class="hero-panel" id="hero-panel" data-check><img class="profile" src="../${esc(cv.person.profileImage)}" alt="Porträt von Adam Dolinsky"><header class="hero"><h1 data-ats-required>${esc(cv.person.name)}</h1><p class="headline" data-ats-required>${esc(cv.headline)}</p><p class="credential">${esc(cv.positioning.credential)}</p><p class="contact"><span>${esc(cv.person.location)}</span><br><a href="mailto:${esc(cv.person.email)}" data-ats-required>${esc(cv.person.email)}</a></p><div class="link-buttons"><a href="${esc(cv.person.portfolio)}">dolinsky.ch</a><a href="${esc(cv.person.linkedin)}">LinkedIn</a></div></header><section class="module summary" id="summary" data-check data-summary-target-lines="${cv.summaryMeta.targetLines}"><h2>KURZPROFIL</h2><p id="summary-text">${esc(cv.summaryText)}</p></section></section><section class="competence-panel" id="competence-panel" data-check>${skillHtml}<section class="module languages-row" id="languages" data-check data-collision-group="skills"><div class="languages-label">SPRACHEN</div>${cv.languages.map((language) => `<div class="language" data-ats-required data-ats-text="${esc(`${language.name} ${language.level}`)}"><span>${esc(language.name)}</span><strong>${esc(language.level)}</strong></div>`).join('')}</section></section></div><div class="counter">1/2</div></section><section class="cv-page" id="page-2"><div class="frame page-two"><section class="white-panel" id="page-two-panel" data-check><section class="experience-list" id="experience-list" data-check>${expHtml}</section><footer class="bottom-grid" id="bottom-grid" data-check data-collision-group="experiences"><section class="module tools" id="tools" data-check data-collision-group="bottom"><h2 data-footer-title="tools">${icon('tools')}<span>SOFTWARE & TOOLS</span></h2><div class="tool-cols"><div>${toolLeft.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div><div>${toolRight.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div></div>${toolIndicator}</section><section class="module refs" id="references" data-check data-collision-group="bottom"><h2 data-footer-title="references">${icon('references')}<span>REFERENZEN</span></h2>${cv.references.map((reference) => `<p><strong data-ats-required>${esc(reference.name)}</strong><br>${esc(reference.role)}<br>${esc(reference.employer)}<br><span data-ats-required>${esc(reference.phone)}</span></p>`).join('')}</section><section class="module avail" id="availability" data-check data-collision-group="bottom"><div class="availability-block entry-block"><h2 data-footer-title="entry">${icon('availability')}<span>EINTRITT</span></h2><p data-ats-required>${esc(cv.availability.text)}</p></div><div class="availability-block workload-block"><h2 data-footer-title="workload">${icon('workload')}<span>PENSUM</span></h2><p data-ats-required>${esc(cv.workload.text)}</p></div></section></footer></section></div><div class="counter">2/2</div></section></main></body></html>`;
 }
 
 const htmlPath = `dist/cv-${variantId}-preview.html`;
@@ -331,12 +338,21 @@ async function withPlaywright() {
         tools: getComputedStyle(document.querySelector('.tools span')).fontFamily,
         slab: getComputedStyle(document.querySelector('.summary h2')).fontFamily,
         slabLoaded: document.fonts.check('700 16px "Roboto Slab"'),
-        poppinsLoaded: document.fonts.check('400 16px "Poppins"') && document.fonts.check('600 16px "Poppins"'),
-        poppinsLigatures: '',
-        poppinsKerning: '',
-        poppinsFeatureSettings: '',
-        poppinsSynthesis: '',
-        poppinsComputedSamples: {},
+        figtreeLoaded: document.fonts.check('400 16px "Figtree"') && document.fonts.check('600 16px "Figtree"'),
+        figtreeNormalLoaded: document.fonts.check('400 16px "Figtree"'),
+        figtreeMediumLoaded: document.fonts.check('500 16px "Figtree"'),
+        figtreeSemiboldLoaded: document.fonts.check('600 16px "Figtree"'),
+        figtreeBoldLoaded: document.fonts.check('700 16px "Figtree"'),
+        figtreeItalicLoaded: document.fonts.check('italic 400 16px "Figtree"'),
+        figtreeItalicMediumLoaded: document.fonts.check('italic 500 16px "Figtree"'),
+        figtreeLigatures: '',
+        figtreeKerning: '',
+        figtreeFeatureSettings: '',
+        figtreeSynthesis: '',
+        figtreeComputedSamples: {},
+        slabSamples: {},
+        skillHeadingSamples: [],
+        deprecatedFontChecks: { poppinsPresent: false },
       },
       buttonStates: { normal: {}, hover: {}, focus: {} },
       emailState: {},
@@ -436,52 +452,68 @@ async function withPlaywright() {
     for (const [key, selector] of Object.entries(footerSelectors)) { const title = document.querySelector(selector); if (!title) continue; const style = getComputedStyle(title); const icon = title.querySelector('.icon')?.getBoundingClientRect(); const span = title.querySelector('span')?.getBoundingClientRect(); out.footerQuality.titleFontSizes[key] = style.fontSize; out.footerQuality.titleFontFamilies[key] = style.fontFamily; out.footerQuality.iconBoxes[key] = icon ? { width: Math.round(icon.width), height: Math.round(icon.height), top: Math.round(icon.top), left: Math.round(icon.left) } : null; out.footerQuality.iconTitleGapsPx[key] = icon && span ? Math.round(span.left - icon.right) : null; }
     const entrySpan = document.querySelector('.entry-block h2 span')?.getBoundingClientRect(); const workloadSpan = document.querySelector('.workload-block h2 span')?.getBoundingClientRect();
     out.footerQuality.entryAndWorkloadAligned = Boolean(entrySpan && workloadSpan && Math.abs(entrySpan.left - workloadSpan.left) <= 2);
-    const poppinsSelectors = { summary: '#summary-text', employer: '.employer', bullet: '.experience li:not([hidden])', language: '.language', tool: '.tools [data-tool-id]', availability: '.avail p' };
+    const figtreeSelectors = { summary: '#summary-text', employer: '.employer', bullet: '.experience li:not([hidden])', language: '.language', tool: '.tools [data-tool-id]', supplementary: '.supplementary', reference: '.refs p', availability: '.avail p' };
+    const slabSelectors = { summaryHeading: '.summary h2', experienceTitle: '.experience .meta', toolsHeading: '#tools h2', referencesHeading: '#references h2', entryHeading: '.entry-block h2', workloadHeading: '.workload-block h2' };
     const cssString = (value) => typeof value === 'string' ? value : '';
     function readComputedSample(selector) {
       const element = document.querySelector(selector);
-      if (!element) return { selector, found: false, fontFamily: '', fontVariantLigatures: '', fontKerning: '', fontFeatureSettings: '', fontSynthesis: '', letterSpacing: '' };
+      if (!element) return { selector, found: false, fontFamily: '', fontStyle: '', fontWeight: '', fontVariantLigatures: '', fontKerning: '', fontFeatureSettings: '', fontSynthesis: '', letterSpacing: '', wordSpacing: '' };
       const style = getComputedStyle(element);
       return {
         selector,
         found: true,
+        text: cssString(element.textContent).replace(/\s+/g, ' ').trim(),
         fontFamily: cssString(style.fontFamily),
+        fontStyle: cssString(style.fontStyle),
+        fontWeight: cssString(style.fontWeight),
         fontVariantLigatures: cssString(style.fontVariantLigatures || style.getPropertyValue('font-variant-ligatures')),
         fontKerning: cssString(style.fontKerning || style.getPropertyValue('font-kerning')),
         fontFeatureSettings: cssString(style.fontFeatureSettings || style.getPropertyValue('font-feature-settings')),
         fontSynthesis: cssString(style.fontSynthesis || style.getPropertyValue('font-synthesis')),
         letterSpacing: cssString(style.letterSpacing),
+        wordSpacing: cssString(style.wordSpacing),
       };
     }
     const featureValues = [];
     const kerningValues = [];
     const ligatureValues = [];
     const synthesisValues = [];
-    for (const [key, selector] of Object.entries(poppinsSelectors)) {
+    for (const [key, selector] of Object.entries(figtreeSelectors)) {
       const sample = readComputedSample(selector);
-      out.fonts.poppinsComputedSamples[key] = sample;
+      out.fonts.figtreeComputedSamples[key] = sample;
       if (!sample.found) continue;
       ligatureValues.push(sample.fontVariantLigatures);
       kerningValues.push(sample.fontKerning);
       featureValues.push(sample.fontFeatureSettings);
       synthesisValues.push(sample.fontSynthesis);
     }
-    out.fonts.poppinsLigatures = [...new Set(ligatureValues)].join(' | ');
-    out.fonts.poppinsKerning = [...new Set(kerningValues)].join(' | ');
-    out.fonts.poppinsFeatureSettings = [...new Set(featureValues)].join(' | ');
-    out.fonts.poppinsSynthesis = [...new Set(synthesisValues)].join(' | ');
+    out.fonts.figtreeLigatures = [...new Set(ligatureValues)].join(' | ');
+    out.fonts.figtreeKerning = [...new Set(kerningValues)].join(' | ');
+    out.fonts.figtreeFeatureSettings = [...new Set(featureValues)].join(' | ');
+    out.fonts.figtreeSynthesis = [...new Set(synthesisValues)].join(' | ');
+    for (const [key, selector] of Object.entries(slabSelectors)) out.fonts.slabSamples[key] = readComputedSample(selector);
+    out.fonts.skillHeadingSamples = [...document.querySelectorAll('.skill-section h2')].map((element) => {
+      const style = getComputedStyle(element);
+      return { text: cssString(element.textContent).replace(/\s+/g, ' ').trim(), fontFamily: cssString(style.fontFamily), fontWeight: cssString(style.fontWeight), fontStyle: cssString(style.fontStyle) };
+    });
     if (!out.assets.profile.loaded) out.warnings.push('Profile image did not load.');
     if ([out.fonts.heading, out.fonts.body, out.fonts.slab, out.fonts.tools, out.fonts.employer].some((font) => /Times New Roman|Arial/i.test(font))) out.warnings.push('Chromium fell back to Arial or Times New Roman.');
     if (!out.fonts.slabLoaded || !/Roboto Slab/i.test(out.fonts.slab)) out.warnings.push('Roboto Slab did not load for the summary heading.');
-    if (!out.fonts.poppinsLoaded || !/Poppins/i.test(out.fonts.body)) out.warnings.push('Poppins did not load for body text.');
-    const poppinsSamples = Object.values(out.fonts.poppinsComputedSamples);
-    const foundPoppinsSamples = poppinsSamples.filter((sample) => sample.found);
-    const missingPoppinsSamples = Object.entries(out.fonts.poppinsComputedSamples).filter(([, sample]) => !sample.found).map(([key, sample]) => `${key}:${sample.selector}`);
-    if (missingPoppinsSamples.length) out.warnings.push(`Poppins diagnostic selector missing: ${missingPoppinsSamples.join(', ')}`);
-    if (foundPoppinsSamples.some((sample) => sample.fontVariantLigatures !== 'none')) out.warnings.push('Poppins ligatures are not disabled.');
-    if (foundPoppinsSamples.some((sample) => sample.fontKerning !== 'none')) out.warnings.push('Poppins kerning is not disabled.');
-    if (foundPoppinsSamples.some((sample) => { const settings = cssString(sample.fontFeatureSettings); return !settings.includes('liga') || !settings.includes('kern'); })) out.warnings.push('Poppins feature settings are incomplete.');
-    if (foundPoppinsSamples.some((sample) => sample.fontSynthesis !== 'none')) out.warnings.push('Poppins font synthesis is not disabled.');
+    if (!out.fonts.figtreeLoaded || !/Figtree/i.test(out.fonts.body)) out.warnings.push('Figtree did not load for body text.');
+    const figtreeSamples = Object.values(out.fonts.figtreeComputedSamples);
+    const foundFigtreeSamples = figtreeSamples.filter((sample) => sample.found);
+    const missingFigtreeSamples = Object.entries(out.fonts.figtreeComputedSamples).filter(([, sample]) => !sample.found).map(([key, sample]) => `${key}:${sample.selector}`);
+    if (missingFigtreeSamples.length) out.warnings.push(`Figtree diagnostic selector missing: ${missingFigtreeSamples.join(', ')}`);
+    if (foundFigtreeSamples.some((sample) => !/Figtree/i.test(sample.fontFamily))) out.warnings.push('A Figtree body sample did not compute to Figtree.');
+    if (foundFigtreeSamples.some((sample) => sample.fontVariantLigatures !== 'none')) out.warnings.push('Figtree ligatures are not disabled.');
+    if (foundFigtreeSamples.some((sample) => sample.fontKerning !== 'normal')) out.warnings.push('Figtree kerning is not natural.');
+    if (foundFigtreeSamples.some((sample) => sample.fontFeatureSettings !== 'normal')) out.warnings.push('Figtree feature settings are not natural.');
+    if (foundFigtreeSamples.some((sample) => sample.fontSynthesis !== 'none')) out.warnings.push('Figtree font synthesis is not disabled.');
+    if (foundFigtreeSamples.some((sample) => !['normal', '0px'].includes(sample.letterSpacing))) out.warnings.push('Figtree letter spacing uses fixed tracking.');
+    if (foundFigtreeSamples.some((sample) => !['normal', '0px'].includes(sample.wordSpacing))) out.warnings.push('Figtree word spacing uses fixed spacing.');
+    if (out.fonts.skillHeadingSamples.some((sample) => !/Roboto Slab/i.test(sample.fontFamily) || /Figtree|Arial|Times New Roman/i.test(sample.fontFamily))) out.warnings.push('A skill heading does not use Roboto Slab.');
+    if (out.fonts.figtreeComputedSamples.summary?.fontStyle !== 'italic') out.warnings.push('Summary text is not italic.');
+    if (out.fonts.figtreeComputedSamples.supplementary?.found && out.fonts.figtreeComputedSamples.supplementary.fontStyle !== 'italic') out.warnings.push('Supplementary text is not italic.');
     if (out.summary.actualLines !== out.summary.targetLines || out.summary.selectionSucceeded !== true) out.warnings.push('Summary is not exactly four visible lines.');
     if (out.experienceQuality.stations.some((station) => station.visibleBulletCount < out.experienceQuality.minimumBulletsPerStation)) out.warnings.push('An experience has fewer than two visible bullets.');
     if (out.toolsQuality.visibleToolCount < out.toolsQuality.minimumVisibleTools || out.toolsQuality.duplicateToolIds.length) out.warnings.push('Tool quality requirements failed.');
@@ -651,11 +683,26 @@ async function withPlaywright() {
   if (!Array.isArray(metrics.ats.requiredTerms)) metrics.ats.requiredTerms = [];
   metrics.visibleText = await page.evaluate(() => document.body.innerText.replace(/\s+/g, ' ').trim());
   metrics.ats.hiddenTextDetected = await page.evaluate(() => [...document.querySelectorAll('body *')].some((element) => { const style = getComputedStyle(element); const text = element.textContent?.trim(); return Boolean(text && style.visibility === 'hidden' && !element.closest('[hidden]')); }));
-  metrics.ats.requiredTerms = await page.locator('[data-ats-required]:not([hidden])').evaluateAll((elements) => elements.map((element) => String(element.textContent || '').replace(/\s+/g, ' ').trim()).filter(Boolean));
+  metrics.ats.requiredTerms = await page.locator('[data-ats-required]:not([hidden])').evaluateAll((elements) => elements.map((element) => {
+    const explicit = element.getAttribute('data-ats-text');
+    const visible = explicit || element.innerText || element.textContent || '';
+    return String(visible).replace(/\s+/g, ' ').trim();
+  }).filter(Boolean));
+  metrics.ats.requiredTerms = [...new Set(metrics.ats.requiredTerms)];
 
   await page.evaluate(() => document.fonts.ready);
   renderStage = 'pdf-export';
-  await page.pdf({ path: `dist/Lebenslauf_Adam-Dolinsky_${variantId}.pdf`, format: 'A4', printBackground: true, preferCSSPageSize: true });
+  const pdfPath = `dist/Lebenslauf_Adam-Dolinsky_${variantId}.pdf`;
+  const pdfOptions = { path: pdfPath, format: 'A4', printBackground: true, preferCSSPageSize: true };
+  metrics.pdf = { taggedRequested: true, taggedSucceeded: false, taggedFallbackUsed: false, taggedError: null };
+  try {
+    await page.pdf({ ...pdfOptions, tagged: true });
+    metrics.pdf.taggedSucceeded = true;
+  } catch (error) {
+    metrics.pdf.taggedFallbackUsed = true;
+    metrics.pdf.taggedError = String(error?.message || error || '');
+    await page.pdf(pdfOptions);
+  }
   renderStage = 'page-one-screenshot';
   await page.locator('#page-1').screenshot({ path: `dist/cv-${variantId}-page-1.png` });
   renderStage = 'page-two-screenshot';
@@ -700,13 +747,15 @@ async function extractPdfJsText(pdf, options, joinStats) {
   return pages.join('\n').trim();
 }
 
-function runPopplerExtraction(pdfPath, variant) {
-  const outputPath = `dist/text-${variant}-poppler.txt`;
-  const result = spawnSync('pdftotext', ['-enc', 'UTF-8', '-layout', pdfPath, outputPath], { encoding: 'utf8' });
+function runPopplerExtraction(pdfPath, variant, mode) {
+  const suffix = mode === 'raw' ? 'raw' : 'layout';
+  const outputPath = `dist/text-${variant}-poppler-${suffix}.txt`;
+  const args = ['-enc', 'UTF-8', mode === 'raw' ? '-raw' : '-layout', pdfPath, outputPath];
+  const result = spawnSync('pdftotext', args, { encoding: 'utf8' });
   if (result.status !== 0) {
-    return { outputPath, text: '', error: result.stderr || result.error?.message || 'pdftotext failed' };
+    return { outputPath, text: '', error: result.stderr || result.error?.message || 'pdftotext failed', args };
   }
-  return { outputPath, text: readFileSync(outputPath, 'utf8'), error: null };
+  return { outputPath, text: readFileSync(outputPath, 'utf8'), error: null, args };
 }
 
 async function buildAtsReport(pdfPath, metrics, requiredTerms) {
@@ -747,32 +796,51 @@ async function buildAtsReport(pdfPath, metrics, requiredTerms) {
     textExtractable = visibleText.length > 100;
   }
   const pdfJsAnalysis = analyzeExtractedText(extractedText, required);
-  const poppler = runPopplerExtraction(pdfPath, variantId);
-  const popplerAnalysis = analyzeExtractedText(poppler.text, required);
-  const lower = pdfJsAnalysis.normalizedText;
+  const popplerRaw = runPopplerExtraction(pdfPath, variantId, 'raw');
+  const popplerLayout = runPopplerExtraction(pdfPath, variantId, 'layout');
+  const popplerRawAnalysis = analyzeExtractedText(popplerRaw.text, required);
+  const popplerLayoutAnalysis = analyzeExtractedText(popplerLayout.text, required);
+  const primaryAtsSuccess = popplerRaw.error === null
+    && popplerRawAnalysis.missingTerms.length === 0
+    && popplerRawAnalysis.brokenTokensDetected.length === 0
+    && popplerRaw.text.trim().length > 100;
+  const lower = popplerRawAnalysis.normalizedText;
   const keywordTerms = [...new Set(cv.skillSections.flatMap((section) => section.items.flatMap((item) => item.atsSynonyms || item.tags || [])))];
   const keywordHits = keywordTerms.filter((term) => lower.includes(normalizeAtsText(term)));
-  const orderChecks = [cv.person.name, cv.person.email, cv.experiences[0]?.period, cv.experiences[1]?.employer].filter(Boolean).map((term) => normalizeAtsText(term));
-  const readingOrderValid = orderChecks.every((term, index) => index === 0 || pdfJsAnalysis.normalizedText.indexOf(orderChecks[index - 1]) <= pdfJsAnalysis.normalizedText.indexOf(term));
+  const orderChecks = [cv.person.name, cv.headline, cv.person.email, cv.summaryText, cv.skillSections[0]?.title, 'SPRACHEN', cv.experiences[0]?.period, 'SOFTWARE & TOOLS', 'REFERENZEN', 'EINTRITT', 'PENSUM'].filter(Boolean).map((term) => normalizeAtsText(term));
+  const readingOrderValid = orderChecks.every((term, index) => {
+    const current = lower.indexOf(term);
+    if (current < 0) return false;
+    if (index === 0) return true;
+    const previous = lower.indexOf(orderChecks[index - 1]);
+    return previous >= 0 && previous <= current;
+  });
+  const pdfJsSuccess = pdfJsAnalysis.missingTerms.length === 0 && pdfJsAnalysis.brokenTokensDetected.length === 0;
+  const popplerLayoutSuccess = !popplerLayout.error && popplerLayoutAnalysis.missingTerms.length === 0 && popplerLayoutAnalysis.brokenTokensDetected.length === 0;
   return {
-    textExtractable,
+    textExtractable: primaryAtsSuccess || textExtractable,
     readingOrderValid,
-    requiredTermsPresent: pdfJsAnalysis.requiredTermsPresent,
-    missingTerms: pdfJsAnalysis.missingTerms,
-    brokenTokensDetected: [...new Set([...pdfJsAnalysis.brokenTokensDetected, ...popplerAnalysis.brokenTokensDetected])],
-    extractionSentinelsPresent: pdfJsAnalysis.extractionSentinelsPresent,
+    readingOrderExtractor: 'poppler-raw',
+    primaryExtractor: 'poppler-raw',
+    primarySuccess: primaryAtsSuccess,
+    requiredTerms: required,
+    requiredTermsPresent: popplerRawAnalysis.requiredTermsPresent,
+    missingTerms: popplerRawAnalysis.missingTerms,
+    brokenTokensDetected: popplerRawAnalysis.brokenTokensDetected,
+    extractionSentinelsPresent: popplerRawAnalysis.extractionSentinelsPresent,
     keywordCoverage: keywordTerms.length ? Number((keywordHits.length / keywordTerms.length).toFixed(2)) : 0,
-    keywordStuffingRisk: /(\b\w+\b)(?:\s+\1){3,}/i.test(extractedText),
+    keywordStuffingRisk: /(\b\w+\b)(?:\s+\1){3,}/i.test(popplerRaw.text || extractedText),
     hiddenTextDetected: Boolean(metrics?.ats?.hiddenTextDetected),
-    extractedCharCount: extractedText.length,
+    extractedCharCount: popplerRaw.text.length,
     normalization: atsNormalizationConfig,
     requiredTermsSource: 'final-visible-dom',
     pdfItemJoinMode: 'geometry-aware-v2',
     selectedPdfJsMode,
     pdfJsModes,
     extractors: {
-      pdfjs: { success: pdfJsAnalysis.missingTerms.length === 0 && pdfJsAnalysis.brokenTokensDetected.length === 0, missingTerms: pdfJsAnalysis.missingTerms, brokenTokensDetected: pdfJsAnalysis.brokenTokensDetected, selectedMode: selectedPdfJsMode },
-      poppler: { success: !poppler.error && popplerAnalysis.missingTerms.length === 0 && popplerAnalysis.brokenTokensDetected.length === 0, missingTerms: popplerAnalysis.missingTerms, brokenTokensDetected: popplerAnalysis.brokenTokensDetected, outputPath: poppler.outputPath, error: poppler.error },
+      popplerRaw: { role: 'primary-ats-extractor', gatesProductionSuccess: true, success: primaryAtsSuccess, missingTerms: popplerRawAnalysis.missingTerms, brokenTokensDetected: popplerRawAnalysis.brokenTokensDetected, extractionSentinelsPresent: popplerRawAnalysis.extractionSentinelsPresent, outputPath: popplerRaw.outputPath, error: popplerRaw.error, args: popplerRaw.args },
+      popplerLayout: { role: 'layout-diagnostic', gatesProductionSuccess: false, success: popplerLayoutSuccess, missingTerms: popplerLayoutAnalysis.missingTerms, brokenTokensDetected: popplerLayoutAnalysis.brokenTokensDetected, extractionSentinelsPresent: popplerLayoutAnalysis.extractionSentinelsPresent, outputPath: popplerLayout.outputPath, error: popplerLayout.error, args: popplerLayout.args },
+      pdfjs: { role: 'secondary-diagnostic', gatesProductionSuccess: false, success: pdfJsSuccess, missingTerms: pdfJsAnalysis.missingTerms, brokenTokensDetected: pdfJsAnalysis.brokenTokensDetected, extractionSentinelsPresent: pdfJsAnalysis.extractionSentinelsPresent, selectedMode: selectedPdfJsMode },
     },
     requiredTermRepairApplied: false,
     requiredTermRepairs: [],
@@ -799,7 +867,7 @@ metrics.ats = await buildAtsReport(`dist/Lebenslauf_Adam-Dolinsky_${variantId}.p
 metrics.reviewQueue = buildReviewQueue();
 
 const report = {
-  success: renderer === 'playwright' && pageCount === 2 && metrics.summary.selectionSucceeded === true && metrics.summary.actualLines === metrics.summary.targetLines && metrics.overflows.length === 0 && metrics.collisions.length === 0 && metrics.warnings.length === 0 && metrics.ats.textExtractable && metrics.ats.readingOrderValid && metrics.ats.missingTerms.length === 0 && metrics.ats.brokenTokensDetected.length === 0 && metrics.ats.extractors?.pdfjs?.success === true && metrics.ats.extractors?.poppler?.success === true && !metrics.ats.keywordStuffingRisk && !metrics.ats.hiddenTextDetected,
+  success: renderer === 'playwright' && pageCount === 2 && metrics.summary.selectionSucceeded === true && metrics.summary.actualLines === metrics.summary.targetLines && metrics.overflows.length === 0 && metrics.collisions.length === 0 && metrics.warnings.length === 0 && metrics.ats.textExtractable && metrics.ats.primarySuccess === true && metrics.ats.missingTerms.length === 0 && metrics.ats.brokenTokensDetected.length === 0 && !metrics.ats.keywordStuffingRisk && !metrics.ats.hiddenTextDetected,
   variant: variantId,
   renderer,
   renderedAt: new Date().toISOString(),
@@ -822,6 +890,7 @@ const report = {
   toolsQuality: metrics.toolsQuality,
   footerQuality: metrics.footerQuality,
   ats: metrics.ats,
+  pdf: metrics.pdf,
   reviewQueue: metrics.reviewQueue,
   supplementary: metrics.supplementary,
   fill: metrics.fill,

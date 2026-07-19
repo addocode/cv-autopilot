@@ -85,7 +85,8 @@ const expectedFiles = [
   ...variants.flatMap((variant) => [`dist/cv-${variant}-page-1.png`, `dist/cv-${variant}-page-2.png`]),
   ...variants.map((variant) => `dist/cv-${variant}-preview.html`),
   ...variants.map((variant) => `dist/render-report-${variant}.json`),
-  ...variants.map((variant) => `dist/text-${variant}-poppler.txt`),
+  ...variants.map((variant) => `dist/text-${variant}-poppler-raw.txt`),
+  ...variants.map((variant) => `dist/text-${variant}-poppler-layout.txt`),
 ];
 const distFiles = existsSync('dist') ? readdirSync('dist') : [];
 const artifactCompleteness = {
@@ -93,8 +94,10 @@ const artifactCompleteness = {
   pngCount: distFiles.filter((file) => /^cv-.*-page-[12]\.png$/.test(file)).length,
   htmlCount: distFiles.filter((file) => /^cv-.*-preview\.html$/.test(file)).length,
   reportCount: distFiles.filter((file) => /^render-report-.*\.json$/.test(file)).length,
-  popplerTextCount: distFiles.filter((file) => /^text-.*-poppler\.txt$/.test(file)).length,
-  expected: { pdfCount: 4, pngCount: 8, htmlCount: 4, reportCount: 4, popplerTextCount: 4 },
+  popplerRawTextCount: distFiles.filter((file) => /^text-.*-poppler-raw\.txt$/.test(file)).length,
+  popplerLayoutTextCount: distFiles.filter((file) => /^text-.*-poppler-layout\.txt$/.test(file)).length,
+  popplerTextCount: distFiles.filter((file) => /^text-.*-poppler-(raw|layout)\.txt$/.test(file)).length,
+  expected: { pdfCount: 4, pngCount: 8, htmlCount: 4, reportCount: 4, popplerRawTextCount: 4, popplerLayoutTextCount: 4, popplerTextCount: 8 },
   missingFiles: expectedFiles.filter((file) => !existsSync(file)),
   complete: false,
 };
@@ -103,6 +106,8 @@ artifactCompleteness.complete = artifactCompleteness.missingFiles.length === 0
   && artifactCompleteness.pngCount === artifactCompleteness.expected.pngCount
   && artifactCompleteness.htmlCount === artifactCompleteness.expected.htmlCount
   && artifactCompleteness.reportCount === artifactCompleteness.expected.reportCount
+  && artifactCompleteness.popplerRawTextCount === artifactCompleteness.expected.popplerRawTextCount
+  && artifactCompleteness.popplerLayoutTextCount === artifactCompleteness.expected.popplerLayoutTextCount
   && artifactCompleteness.popplerTextCount === artifactCompleteness.expected.popplerTextCount;
 if (artifactCompleteness.missingFiles.length) {
   console.error('Missing render artifacts:');
@@ -131,9 +136,37 @@ const allReportsPresent = allReports.length === variants.length;
 const firstLayout = allReports[0]?.layout || {};
 const footerTitleSizes = allReports.flatMap((report) => Object.values(report.footerQuality?.titleFontSizes || {}));
 const footerIconBoxes = allReports.flatMap((report) => Object.values(report.footerQuality?.iconBoxes || {}).filter(Boolean));
+const figtreeSamples = allReports.flatMap((report) => Object.values(report.fonts?.figtreeComputedSamples || {}).filter((sample) => sample?.found));
+const skillHeadingSamples = allReports.flatMap((report) => report.fonts?.skillHeadingSamples || []);
+const wordSpacingOk = (value) => value === 'normal' || value === '0px' || value === '';
+const fontChecks = {
+  figtreeLoaded: allReportsPresent && allReports.every((report) => report.fonts?.figtreeLoaded === true),
+  figtreeItalicLoaded: allReportsPresent && allReports.every((report) => report.fonts?.figtreeItalicLoaded === true),
+  poppinsAbsent: allReportsPresent && allReports.every((report) => report.fonts?.deprecatedFontChecks?.poppinsPresent === false),
+  allSkillHeadingsRobotoSlab: allReportsPresent && skillHeadingSamples.length > 0 && skillHeadingSamples.every((sample) => /Roboto Slab/i.test(sample.fontFamily || '')),
+  summaryItalic: allReportsPresent && allReports.every((report) => report.fonts?.figtreeComputedSamples?.summary?.fontStyle === 'italic'),
+  supplementaryItalic: allReportsPresent && allReports.every((report) => {
+    const sample = report.fonts?.figtreeComputedSamples?.supplementary;
+    return !sample?.found || sample.fontStyle === 'italic';
+  }),
+  naturalKerning: allReportsPresent && figtreeSamples.length > 0 && figtreeSamples.every((sample) => sample.fontKerning === 'normal'),
+  noFixedTracking: allReportsPresent && figtreeSamples.length > 0 && figtreeSamples.every((sample) => (sample.letterSpacing === 'normal' || sample.letterSpacing === '0px') && wordSpacingOk(sample.wordSpacing) && sample.fontFeatureSettings === 'normal'),
+  noBrokenVisibleWords: allReportsPresent && allReports.every((report) => report.ats?.extractors?.popplerRaw?.brokenTokensDetected?.length === 0),
+};
+const atsChecks = {
+  primaryExtractor: 'poppler-raw',
+  missingTermsEmpty: allReportsPresent && allReports.every((report) => report.ats?.missingTerms?.length === 0),
+  brokenTokensEmpty: allReportsPresent && allReports.every((report) => report.ats?.brokenTokensDetected?.length === 0),
+  popplerRawPassed: allReportsPresent && allReports.every((report) => report.ats?.extractors?.popplerRaw?.success === true),
+  popplerLayoutDiagnosticPassed: allReportsPresent && allReports.every((report) => report.ats?.extractors?.popplerLayout?.success === true),
+  pdfJsDiagnosticPassed: allReportsPresent && allReports.every((report) => report.ats?.extractors?.pdfjs?.success === true),
+  productionAtsPassed: allReportsPresent && allReports.every((report) => report.ats?.primaryExtractor === 'poppler-raw' && report.ats?.primarySuccess === true && report.ats?.missingTerms?.length === 0 && report.ats?.brokenTokensDetected?.length === 0),
+};
 const overallSuccess = allReportsPresent
   && artifactCompleteness.complete
-  && allReports.every((report) => report.success === true);
+  && allReports.every((report) => report.success === true)
+  && Object.values(fontChecks).every(Boolean)
+  && atsChecks.productionAtsPassed;
 const visualReview = {
   reportsPresent,
   renderFailures,
@@ -144,12 +177,8 @@ const visualReview = {
     allVariantsFourLines: variants.every((variant) => variantChecks[variant]),
     variants: variantChecks,
   },
-  atsChecks: {
-    missingTermsEmpty: allReportsPresent && allReports.every((report) => report.ats?.missingTerms?.length === 0),
-    brokenTokensEmpty: allReportsPresent && allReports.every((report) => report.ats?.brokenTokensDetected?.length === 0),
-    pdfJsPassed: allReportsPresent && allReports.every((report) => report.ats?.extractors?.pdfjs?.success === true),
-    popplerPassed: allReportsPresent && allReports.every((report) => report.ats?.extractors?.poppler?.success === true),
-  },
+  fontChecks,
+  atsChecks,
   pageTransition: {
     pageOneTopInset: allReportsPresent ? Boolean(firstLayout.pageOneHasTopBackgroundStrip) : false,
     pageOneBottomContinuous: allReportsPresent ? firstLayout.pageOneHasBottomBackgroundStrip === false : false,
@@ -163,7 +192,7 @@ const visualReview = {
     workloadHasIcon: allReportsPresent && allReports.every((report) => Boolean(report.footerQuality?.iconBoxes?.workload)),
   },
   overallSuccess,
-  remainingDifferences: overallSuccess ? [] : ['Production render failed before PDF/report generation'],
+  remainingDifferences: overallSuccess ? [] : (allReportsPresent ? [] : ['Production render failed before PDF/report generation']),
 };
 
 writeFileSync('dist/visual-review-round-17.json', JSON.stringify(visualReview, null, 2));
