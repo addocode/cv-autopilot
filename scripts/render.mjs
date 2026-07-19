@@ -246,16 +246,22 @@ function applyVariant() {
       .sort((a, b) => (priority.get(a.id) ?? 99) - (priority.get(b.id) ?? 99))
       .slice(0, variant.maxBulletsPerExperience);
     const omittedMandatory = experience.bullets.filter((bullet) => !included.some((item) => item.id === bullet.id));
-    const optionalCandidates = (targetRoleFamily === 'non-mediamatik-core' ? [] : (experience.optionalBullets || []))
+    const substantiveOptionalCandidates = (experience.optionalBullets || [])
       .filter((bullet) => (bullet.variantRelevance || []).includes(variantId))
       .sort((a, b) => (a.fillPriority ?? 99) - (b.fillPriority ?? 99))
       .map((bullet) => ({ ...bullet, experienceId: experience.id, candidateType: 'optional-bullet' }));
-    const minimumFillers = [...experience.bullets, ...optionalCandidates]
+    const optionalCandidates = targetRoleFamily === 'non-mediamatik-core' ? [] : substantiveOptionalCandidates;
+    const minimumFillers = [...experience.bullets, ...substantiveOptionalCandidates]
       .filter((bullet) => !included.some((item) => item.id === bullet.id) && !hidden.has(bullet.id) && bullet.status !== 'inferred_review_required' && bullet.evidenceLevel !== 'inferred_review_required')
       .sort((a, b) => (priority.get(a.id) ?? a.fillPriority ?? 99) - (priority.get(b.id) ?? b.fillPriority ?? 99));
+    const seenSubstantiveTexts = new Set(included.map((bullet) => normalizeAtsText(bullet.shortText || bullet.text || '')));
     while (included.length < 2 && minimumFillers.length > 0) {
       const filler = minimumFillers.shift();
-      included.push({ ...filler, text: filler.shortText || filler.text, minimumFallback: true });
+      const text = filler.shortText || filler.text;
+      const semanticKey = normalizeAtsText(text || '');
+      if (seenSubstantiveTexts.has(semanticKey)) continue;
+      seenSubstantiveTexts.add(semanticKey);
+      included.push({ ...filler, text, minimumFallback: true });
     }
     if (targetRoleFamily === 'non-mediamatik-core' && !included.some((item) => item.crossDomain)) included.push(createCrossDomainBullet(experience));
     const omitted = [...omittedMandatory, ...optionalCandidates].filter((bullet) => !included.some((item) => item.id === bullet.id));
@@ -551,6 +557,9 @@ async function withPlaywright() {
         wordSpacing: cssString(style.wordSpacing),
       };
     }
+    const rootElement = document.documentElement;
+    const rootStyle = getComputedStyle(rootElement);
+
     const rectOf = (element) => {
       const rect = element.getBoundingClientRect();
       return { id: element.id || element.className, left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width, height: rect.height, scrollHeight: element.scrollHeight, clientHeight: element.clientHeight, pageId: element.closest('.cv-page')?.id };
@@ -701,7 +710,6 @@ async function withPlaywright() {
     const labelStyle = getComputedStyle(document.querySelector('.languages-label'));
     out.layout.languageHorizontalDividerCount = (Number.parseFloat(languageStyle.borderTopWidth) > 0 ? 1 : 0) + (Number.parseFloat(languageStyle.borderBottomWidth) > 0 ? 1 : 0);
     out.layout.languageVerticalDividerCount = Number.parseFloat(labelStyle.borderRightWidth) > 0 ? 1 : 0;
-    const rootStyle = getComputedStyle(document.documentElement);
     const summaryRange = document.createRange();
     summaryRange.selectNodeContents(document.querySelector('#summary-text'));
     out.summary.actualLines = [...new Set([...summaryRange.getClientRects()].filter((rect) => rect.width > 0 && rect.height > 0).map((rect) => Math.round(rect.top * 2) / 2))].length;
@@ -752,9 +760,23 @@ async function withPlaywright() {
     const crossByExperience = [...document.querySelectorAll('.experience')].map((experience) => {
       const visibleBullets = [...experience.querySelectorAll('li:not([hidden])')];
       const matches = visibleBullets.filter((li) => li.dataset.crossDomainBullet === 'mediamatik-marketing');
-      return { experienceId: experience.id.replace('experience-', ''), count: matches.length, last: visibleBullets.at(-1)?.dataset.crossDomainBullet === 'mediamatik-marketing', position: matches.length ? visibleBullets.indexOf(matches[0]) + 1 : null, total: visibleBullets.length };
+      const substantiveBullets = visibleBullets.filter((li) => li.dataset.crossDomainBullet !== 'mediamatik-marketing');
+      return {
+        experienceId: experience.id.replace('experience-', ''),
+        count: matches.length,
+        last: visibleBullets.at(-1)?.dataset.crossDomainBullet === 'mediamatik-marketing',
+        position: matches.length ? visibleBullets.indexOf(matches[0]) + 1 : null,
+        total: visibleBullets.length,
+        substantiveBulletCount: substantiveBullets.length,
+        crossDomainBulletCount: matches.length,
+        totalVisibleBulletCount: visibleBullets.length,
+        crossDomainBulletLast: visibleBullets.at(-1)?.dataset.crossDomainBullet === 'mediamatik-marketing',
+        substantiveBulletIds: substantiveBullets.map((li) => li.id),
+        crossDomainBulletId: matches[0]?.id || '',
+      };
     });
-    out.experienceQuality.crossDomainBullet = { enabled: variantMeta.targetRoleFamily === 'non-mediamatik-core', targetRoleFamily: variantMeta.targetRoleFamily, canonicalText: variantMeta.crossDomainBulletText, expectedStationCount: variantMeta.targetRoleFamily === 'non-mediamatik-core' ? crossByExperience.length : 0, renderedStationCount: crossDomainBullets.length, missingExperienceIds: crossByExperience.filter((item) => variantMeta.targetRoleFamily === 'non-mediamatik-core' && item.count === 0).map((item) => item.experienceId), duplicateExperienceIds: crossByExperience.filter((item) => item.count > 1).map((item) => item.experienceId), allRenderedLast: variantMeta.targetRoleFamily !== 'non-mediamatik-core' ? crossDomainBullets.length === 0 : crossByExperience.every((item) => item.count === 1 && item.last), byExperience: crossByExperience };
+    const insufficientSubstantiveExperienceIds = crossByExperience.filter((item) => variantMeta.targetRoleFamily === 'non-mediamatik-core' && item.substantiveBulletCount < 2).map((item) => item.experienceId);
+    out.experienceQuality.crossDomainBullet = { enabled: variantMeta.targetRoleFamily === 'non-mediamatik-core', targetRoleFamily: variantMeta.targetRoleFamily, canonicalText: variantMeta.crossDomainBulletText, expectedStationCount: variantMeta.targetRoleFamily === 'non-mediamatik-core' ? crossByExperience.length : 0, renderedStationCount: crossDomainBullets.length, missingExperienceIds: crossByExperience.filter((item) => variantMeta.targetRoleFamily === 'non-mediamatik-core' && item.count === 0).map((item) => item.experienceId), duplicateExperienceIds: crossByExperience.filter((item) => item.count > 1).map((item) => item.experienceId), allRenderedLast: variantMeta.targetRoleFamily !== 'non-mediamatik-core' ? crossDomainBullets.length === 0 : crossByExperience.every((item) => item.count === 1 && item.last), allStationsHaveMinimumSubstantiveBullets: variantMeta.targetRoleFamily !== 'non-mediamatik-core' ? true : insufficientSubstantiveExperienceIds.length === 0, minimumSubstantiveBulletsPerStation: 2, insufficientSubstantiveExperienceIds, byExperience: crossByExperience };
     out.experienceQuality.structuralRepeatedText = { crossDomainExperienceCount: crossDomainBullets.length, approved: crossDomainBullets.every((li) => li.dataset.structuralRepeat === 'cross-domain-experience') };
     out.toolsQuality.visibleToolIds = [...document.querySelectorAll('[data-tool-id]')].map((tool) => tool.dataset.toolId);
     out.toolsQuality.visibleToolCount = out.toolsQuality.visibleToolIds.length;
@@ -896,7 +918,7 @@ async function withPlaywright() {
     if (out.summary.actualLines !== out.summary.targetLines || out.summary.selectionSucceeded !== true) out.warnings.push('Summary is not exactly four visible lines.');
     if (out.experienceQuality.stations.some((station) => station.visibleBulletCount < out.experienceQuality.minimumBulletsPerStation)) out.warnings.push('An experience has fewer than two visible bullets.');
     if (!out.skillsetsQuality.allSkillsetsPresent || !out.skillsetsQuality.allBulletCountsWithinRange || !out.skillsetsQuality.allBulletsEvidenceBacked || !out.skillsetsQuality.allIconsUsedExactlyOnce || !out.skillsetsQuality.allIconsLoaded || !out.skillsetsQuality.largestSafeIconSizeSelected || !out.skillsetsQuality.textWidthMaximized) out.warnings.push('Skillset quality requirements failed.');
-    if (out.experienceQuality.crossDomainBullet.enabled && (out.experienceQuality.crossDomainBullet.renderedStationCount !== out.experienceQuality.crossDomainBullet.expectedStationCount || out.experienceQuality.crossDomainBullet.allRenderedLast !== true)) out.warnings.push('Cross-domain experience bullet policy failed.');
+    if (out.experienceQuality.crossDomainBullet.enabled && (out.experienceQuality.crossDomainBullet.renderedStationCount !== out.experienceQuality.crossDomainBullet.expectedStationCount || out.experienceQuality.crossDomainBullet.allRenderedLast !== true || out.experienceQuality.crossDomainBullet.allStationsHaveMinimumSubstantiveBullets !== true || out.experienceQuality.crossDomainBullet.insufficientSubstantiveExperienceIds.length > 0)) out.warnings.push('Cross-domain experience bullet policy failed.');
     if (!out.toolsQuality.withinAllowedRange || out.toolsQuality.duplicateToolIds.length || out.toolsQuality.unverifiedVisibleToolIds.length) out.warnings.push('Tool quality requirements failed.');
     if (!out.assets.background.exists || !out.assets.background.computed || !out.assets.background.rendered || !out.assets.background.coversFullPage || !out.assets.background.bottomZoneNotGray) out.warnings.push('Background image did not cover the full page.');
     return out;
@@ -1315,7 +1337,7 @@ if (!metrics.fonts.pdfEmbeddedFamilies.some((family) => /Arial-Italic|Liberation
 metrics.reviewQueue = buildReviewQueue();
 
 const report = {
-  success: renderer === 'playwright' && pageCount === 2 && metrics.summary.selectionSucceeded === true && metrics.summary.actualLines === metrics.summary.targetLines && metrics.overflows.length === 0 && metrics.collisions.length === 0 && metrics.warnings.length === 0 && metrics.ats.textExtractable && metrics.ats.primaryContentSuccess === true && metrics.ats.readingOrderValid === true && metrics.ats.primarySuccess === true && metrics.ats.missingTerms.length === 0 && metrics.ats.brokenTokensDetected.length === 0 && !metrics.ats.keywordStuffingRisk && !metrics.ats.hiddenTextDetected && metrics.skillsetsQuality?.renderedSkillsetCount === 4 && metrics.skillsetsQuality?.allBulletCountsWithinRange === true && metrics.skillsetsQuality?.allBulletsEvidenceBacked === true && metrics.skillsetsQuality?.uniqueIconCount === 4 && metrics.skillsetsQuality?.allIconsUsedExactlyOnce === true && metrics.skillsetsQuality?.allIconsLoaded === true && metrics.skillsetsQuality?.largestSafeIconSizeSelected === true && metrics.skillsetsQuality?.textWidthMaximized === true && (metrics.experienceQuality?.crossDomainBullet?.enabled !== true || (metrics.experienceQuality.crossDomainBullet.renderedStationCount === metrics.experienceQuality.crossDomainBullet.expectedStationCount && metrics.experienceQuality.crossDomainBullet.allRenderedLast === true)),
+  success: renderer === 'playwright' && pageCount === 2 && metrics.summary.selectionSucceeded === true && metrics.summary.actualLines === metrics.summary.targetLines && metrics.overflows.length === 0 && metrics.collisions.length === 0 && metrics.warnings.length === 0 && metrics.ats.textExtractable && metrics.ats.primaryContentSuccess === true && metrics.ats.readingOrderValid === true && metrics.ats.primarySuccess === true && metrics.ats.missingTerms.length === 0 && metrics.ats.brokenTokensDetected.length === 0 && !metrics.ats.keywordStuffingRisk && !metrics.ats.hiddenTextDetected && metrics.skillsetsQuality?.renderedSkillsetCount === 4 && metrics.skillsetsQuality?.allBulletCountsWithinRange === true && metrics.skillsetsQuality?.allBulletsEvidenceBacked === true && metrics.skillsetsQuality?.uniqueIconCount === 4 && metrics.skillsetsQuality?.allIconsUsedExactlyOnce === true && metrics.skillsetsQuality?.allIconsLoaded === true && metrics.skillsetsQuality?.largestSafeIconSizeSelected === true && metrics.skillsetsQuality?.textWidthMaximized === true && (metrics.experienceQuality?.crossDomainBullet?.enabled !== true || (metrics.experienceQuality.crossDomainBullet.renderedStationCount === metrics.experienceQuality.crossDomainBullet.expectedStationCount && metrics.experienceQuality.crossDomainBullet.allRenderedLast === true && metrics.experienceQuality.crossDomainBullet.allStationsHaveMinimumSubstantiveBullets === true && metrics.experienceQuality.crossDomainBullet.insufficientSubstantiveExperienceIds.length === 0)),
   variant: variantId,
   renderer,
   renderedAt: new Date().toISOString(),
