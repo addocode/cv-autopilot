@@ -560,6 +560,17 @@ async function withPlaywright() {
     const rootElement = document.documentElement;
     const rootStyle = getComputedStyle(rootElement);
 
+    function normalizeBrowserAtsText(value) {
+      return String(value)
+        .normalize('NFKC')
+        .replace(/\u00a0/g, ' ')
+        .replace(/[-‐‑‒–—]\s*\r?\n\s*/g, '-')
+        .replace(/[\r\n]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLocaleLowerCase('de-CH');
+    }
+
     const rectOf = (element) => {
       const rect = element.getBoundingClientRect();
       return { id: element.id || element.className, left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width, height: rect.height, scrollHeight: element.scrollHeight, clientHeight: element.clientHeight, pageId: element.closest('.cv-page')?.id };
@@ -717,7 +728,7 @@ async function withPlaywright() {
     const skillIconElements = [...document.querySelectorAll('[data-skill-icon]')];
     const skillIconIdsRendered = skillIconElements.map((icon) => icon.dataset.skillIcon);
     const skillBulletIds = skillSections.flatMap((section) => [...section.querySelectorAll('li:not([hidden])')].map((li) => li.id));
-    const skillBulletTexts = skillSections.flatMap((section) => [...section.querySelectorAll('li:not([hidden])')].map((li) => normalizeAtsText(li.innerText || li.textContent || '')));
+    const skillBulletTexts = skillSections.flatMap((section) => [...section.querySelectorAll('li:not([hidden])')].map((li) => normalizeBrowserAtsText(li.innerText || li.textContent || '')));
     const duplicateBulletIds = skillBulletIds.filter((id, index, arr) => arr.indexOf(id) !== index);
     const semanticDuplicatePairs = [];
     for (let i = 0; i < skillBulletTexts.length; i += 1) for (let j = i + 1; j < skillBulletTexts.length; j += 1) if (skillBulletTexts[i] && skillBulletTexts[i] === skillBulletTexts[j]) semanticDuplicatePairs.push([skillBulletIds[i], skillBulletIds[j]]);
