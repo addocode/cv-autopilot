@@ -1,0 +1,31 @@
+:root{
+  --brand-blue:#15519f;
+  --brand-blue-dark:#0e3f7d;
+  --paper-white:#fffefa;
+  --text-primary:#101820;
+  --muted:#6f7378;
+  --rule:#9b9b9b;
+  --rule-width-current:1px;
+  --rule-width:0.5px;
+  --profile-border-width:1px;
+  --font-slab:"Roboto Slab",Rockwell,Georgia,serif;
+  --font-sans:"Figtree",Arial,sans-serif;
+  --font-body:var(--font-sans);
+  --font-display:var(--font-slab);
+  --font-heading:var(--font-slab);
+  --space-1:1mm;--space-2:2mm;--space-3:3mm;--space-4:4mm;--space-5:5mm;--space-6:6mm;--space-7:7mm;--space-8:8mm;
+  --page-width:210mm;--page-height:297mm;
+  --background-size:cover;
+  --background-position-page-1:left top;
+  --background-position-page-2:left top;
+  --frame-offset-x:10mm;
+  --frame-offset-top:9mm;
+  --frame-offset-bottom:10mm;
+  --frame-offset-top-page-1:9mm;
+  --frame-offset-bottom-page-1:0mm;
+  --frame-offset-top-page-2:0mm;
+  --frame-offset-bottom-page-2:10mm;
+  --side-rail-width:10mm;
+  --page-two-footer-height:28mm;
+  --body-line-height:1.25;
+}

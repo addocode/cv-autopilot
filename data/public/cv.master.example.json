@@ -1,0 +1,2181 @@
+{
+  "person": {
+    "name": "Adam Dolinsky",
+    "location": "3007 Bern",
+    "email": "adam@dolinsky.ch",
+    "portfolio": "https://dolinsky.ch",
+    "linkedin": "https://linkedin.com/in/adam-dolinsky",
+    "profileImage": "assets/profile_img.png",
+    "backgroundImage": "assets/bg_img.jpeg"
+  },
+  "positioning": {
+    "defaultHeadline": "Digital Marketing · Web · Content · KI-gestützte Prozesse",
+    "credential": "Mediamatiker EFZ mit Berufsmaturität"
+  },
+  "summary": {
+    "targetLines": 4,
+    "jobAnalysis": {
+      "company": "Basisvariante",
+      "role": "Lebenslauf",
+      "mustHaveTerms": [],
+      "preferredTerms": [],
+      "topRequirements": [],
+      "selectedEvidenceIds": []
+    },
+    "default": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in Digital Marketing, Web, Content und KI-gestützten Prozessen. Ich verbinde strukturierte Umsetzung mit visueller Kommunikation, Systemverständnis und zuverlässiger Koordination. Für Arbeitgeber schaffe ich klare Inhalte, gepflegte digitale Kanäle und nachvollziehbare Arbeitsabläufe. Meine Arbeitsweise ist selbstständig, sorgfältig und auf sichtbaren Nutzen ausgerichtet.",
+    "variants": {
+      "communication-content": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in Content, Medienproduktion, Kampagnen und visueller Aufbereitung. Ich verbinde zielgruppengerechte Kommunikation mit sicherem Umgang mit digitalen Kanälen und Gestaltungstools. Für Teams und Arbeitgeber bereite ich Informationen verständlich, konsistent und markengerecht auf. Meine Arbeitsweise ist kreativ, strukturiert und zuverlässig in der Umsetzung.",
+      "administration-gever": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in digitaler Geschäftsvorgangsbearbeitung, Dokumentenmanagement und Prozessdokumentation. Ich verbinde strukturierte Arbeitsweise mit Systemverständnis und sorgfältiger Qualitätssicherung. Administrative Abläufe unterstütze ich zuverlässig, adressatengerecht und mit Blick für nachvollziehbare Informationen. Mehrsprachige Kommunikation und schnelle Einarbeitung in digitale Systeme gehören zu meiner Praxis.",
+      "cms-web-process": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in CMS, Webpflege, Onlineshop-Management und digitalen Prozessen. Ich verbinde Content Administration mit technischem Verständnis, strukturierter Datenpflege und sauberer Dokumentation. Für Arbeitgeber halte ich Webinhalte, Systeme und Abläufe nachvollziehbar und aktuell. Meine Arbeitsweise ist analytisch, lösungsorientiert und zuverlässig in der Umsetzung."
+    },
+    "candidates": {
+      "default": [
+        {
+          "id": "general-figtree-extended",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in Digital Marketing, Web, Content, CMS und KI-gestützten Prozessen. Ich verbinde strukturierte Umsetzung mit visueller Kommunikation, technischem Verständnis, zuverlässiger Koordination und Blick für Qualität. Für Arbeitgeber pflege ich digitale Kanäle und technische Systeme nachvollziehbar, setze Inhalte adressatengerecht um und sichere Wissen in klarer Prozessdokumentation.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile"
+          ],
+          "atsTerms": [
+            "Digital Marketing",
+            "Web",
+            "Content",
+            "CMS",
+            "digitale Kanäle",
+            "technische Systeme",
+            "Koordination",
+            "Prozessdokumentation",
+            "Wissenssicherung",
+            "Qualität"
+          ]
+        },
+        {
+          "id": "general-figtree-balanced",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in Digital Marketing, Web, Content und KI-gestützten Prozessen. Ich verbinde strukturierte Umsetzung mit visueller Kommunikation, technischem Verständnis und zuverlässiger Koordination. Für Arbeitgeber pflege ich digitale Kanäle und Systeme nachvollziehbar, setze Inhalte adressatengerecht um und sichere Wissen in klar dokumentierten Abläufen.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile"
+          ],
+          "atsTerms": [
+            "Digital Marketing",
+            "Web",
+            "Content",
+            "CMS",
+            "digitale Kanäle",
+            "technische Systeme",
+            "Koordination",
+            "Prozessdokumentation",
+            "Wissenssicherung",
+            "Qualität"
+          ]
+        },
+        {
+          "id": "general-figtree-compact",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in Digital Marketing, Web, Content und CMS. Ich verbinde visuelle Kommunikation, technisches Verständnis und Koordination mit sauberer Umsetzung. Für Arbeitgeber pflege ich digitale Kanäle und technische Systeme zuverlässig, dokumentiere Abläufe nachvollziehbar und sichere Qualität sowie Wissen.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile"
+          ],
+          "atsTerms": [
+            "Digital Marketing",
+            "Web",
+            "Content",
+            "CMS",
+            "digitale Kanäle",
+            "technische Systeme",
+            "Koordination",
+            "Prozessdokumentation",
+            "Wissenssicherung",
+            "Qualität"
+          ]
+        },
+        {
+          "id": "general-long",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in Digital Marketing, Web, Content und KI-gestützten Prozessen. Ich verbinde strukturierte Umsetzung, visuelle Kommunikation und Systemverständnis mit zuverlässiger Koordination für gepflegte digitale Kanäle und nachvollziehbare Abläufe.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile"
+          ],
+          "atsTerms": [
+            "Digital Marketing",
+            "Web",
+            "Content",
+            "KI-gestützte Prozesse"
+          ]
+        },
+        {
+          "id": "general-medium",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in Digital Marketing, Web, Content und KI-gestützten Prozessen. Ich verbinde strukturierte Umsetzung mit visueller Kommunikation, Systemverständnis und zuverlässiger Koordination für klare Inhalte und gepflegte digitale Kanäle.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile"
+          ],
+          "atsTerms": [
+            "Digital Marketing",
+            "Web",
+            "Content"
+          ]
+        },
+        {
+          "id": "general-short",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in Digital Marketing, Web und Content. Ich arbeite strukturiert, koordiniere zuverlässig und pflege digitale Kanäle, Inhalte und Systeme mit Blick für Qualität und Nutzen.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile"
+          ],
+          "atsTerms": [
+            "Digital Marketing",
+            "Web",
+            "Content"
+          ]
+        }
+      ],
+      "communication-content": [
+        {
+          "id": "communication-figtree-extended",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in Content, Medienproduktion, Kampagnen, Corporate Identity und visueller Kommunikation. Ich konzipiere und realisiere Inhalte für Print, Web, Newsletter und Social Media, koordiniere externe Partner und achte auf konsistente Markenauftritte. Meine Arbeitsweise verbindet kreative Umsetzung mit strukturierter Planung, zuverlässiger Kanalpflege und sauberer Dokumentation.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile"
+          ],
+          "atsTerms": [
+            "Content",
+            "Medienproduktion",
+            "Kampagnen",
+            "Print",
+            "Web",
+            "Newsletter",
+            "Social Media",
+            "Corporate Identity",
+            "externe Partner",
+            "Dokumentation"
+          ]
+        },
+        {
+          "id": "communication-figtree-balanced",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in Content, Medienproduktion, Kampagnen und visueller Kommunikation. Ich konzipiere und realisiere Inhalte für Print, Web, Newsletter und Social Media, koordiniere externe Partner und achte auf konsistente Markenauftritte. Meine Arbeitsweise verbindet kreative Umsetzung mit strukturierter Planung, zuverlässiger Kanalpflege und sauberer Dokumentation.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile"
+          ],
+          "atsTerms": [
+            "Content",
+            "Medienproduktion",
+            "Kampagnen",
+            "Print",
+            "Web",
+            "Newsletter",
+            "Social Media",
+            "Corporate Identity",
+            "externe Partner",
+            "Dokumentation"
+          ]
+        },
+        {
+          "id": "communication-figtree-compact",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in Content, Medienproduktion, Kampagnen und Corporate Identity. Ich erstelle Inhalte für Print, Web, Newsletter und Social Media, koordiniere externe Partner und pflege Kanäle zuverlässig. Kreative Umsetzung verbinde ich mit strukturierter Planung und sauberer Dokumentation.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile"
+          ],
+          "atsTerms": [
+            "Content",
+            "Medienproduktion",
+            "Kampagnen",
+            "Print",
+            "Web",
+            "Newsletter",
+            "Social Media",
+            "Corporate Identity",
+            "externe Partner",
+            "Dokumentation"
+          ]
+        },
+        {
+          "id": "communication-long",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in Content, Medienproduktion, Kampagnen und visueller Aufbereitung. Ich verbinde zielgruppengerechte Kommunikation mit sicherem Umgang mit digitalen Kanälen, Gestaltungstools und koordinierter Umsetzung für konsistente Inhalte.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile"
+          ],
+          "atsTerms": [
+            "Content",
+            "Medienproduktion",
+            "Kampagnen"
+          ]
+        },
+        {
+          "id": "communication-medium",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in Content, Medienproduktion und Kampagnen. Ich bereite Informationen zielgruppengerecht auf, pflege digitale Kanäle und setze visuelle Inhalte strukturiert, konsistent und zuverlässig um.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile"
+          ],
+          "atsTerms": [
+            "Content",
+            "Medienproduktion"
+          ]
+        },
+        {
+          "id": "communication-short",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Praxis in Content, Kampagnen und visueller Kommunikation. Ich erstelle, pflege und koordiniere digitale Inhalte strukturiert und adressatengerecht.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile"
+          ],
+          "atsTerms": [
+            "Content",
+            "Kampagnen"
+          ]
+        }
+      ],
+      "administration-gever": [
+        {
+          "id": "administration-figtree-extended",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in GEVER, ACTA NOVA, Dokumentenmanagement, Qualitätssicherung und digitaler Geschäftsvorgangsbearbeitung. Ich arbeite strukturiert, sorgfältig und qualitätsbewusst, koordiniere administrative Abläufe und bereite Informationen nachvollziehbar auf. Dank rascher Einarbeitung unterstütze ich digitale Systeme, interne Fachstellen und administrative Aufgaben zuverlässig.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-acta-nova"
+          ],
+          "atsTerms": [
+            "GEVER",
+            "ACTA NOVA",
+            "Dokumentenmanagement",
+            "Geschäftsvorgangsbearbeitung",
+            "Qualitätssicherung",
+            "administrative Unterstützung",
+            "Koordination",
+            "interne Fachstellen",
+            "digitale Systeme"
+          ]
+        },
+        {
+          "id": "administration-figtree-balanced",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in GEVER, ACTA NOVA, Dokumentenmanagement und digitaler Geschäftsvorgangsbearbeitung. Ich arbeite strukturiert, sorgfältig und qualitätsbewusst, koordiniere administrative Abläufe und bereite Informationen nachvollziehbar auf. Dank rascher Einarbeitung unterstütze ich digitale Systeme und interne Fachstellen zuverlässig.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-acta-nova"
+          ],
+          "atsTerms": [
+            "GEVER",
+            "ACTA NOVA",
+            "Dokumentenmanagement",
+            "Geschäftsvorgangsbearbeitung",
+            "Qualitätssicherung",
+            "administrative Unterstützung",
+            "Koordination",
+            "interne Fachstellen",
+            "digitale Systeme"
+          ]
+        },
+        {
+          "id": "administration-figtree-compact",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in GEVER, ACTA NOVA, Dokumentenmanagement und Geschäftsvorgangsbearbeitung. Ich arbeite sorgfältig, koordiniere administrative Unterstützung und bereite Informationen nachvollziehbar auf. Digitale Systeme, Qualitätssicherung und interne Fachstellen unterstütze ich zuverlässig.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-acta-nova"
+          ],
+          "atsTerms": [
+            "GEVER",
+            "ACTA NOVA",
+            "Dokumentenmanagement",
+            "Geschäftsvorgangsbearbeitung",
+            "Qualitätssicherung",
+            "administrative Unterstützung",
+            "Koordination",
+            "interne Fachstellen",
+            "digitale Systeme"
+          ]
+        },
+        {
+          "id": "administration-long",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in digitaler Geschäftsvorgangsbearbeitung, Dokumentenmanagement und Prozessdokumentation. Ich verbinde strukturierte Arbeitsweise, Systemverständnis und sorgfältige Qualitätssicherung mit zuverlässiger administrativer Unterstützung.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-acta-nova"
+          ],
+          "atsTerms": [
+            "GEVER",
+            "ACTA NOVA",
+            "Dokumentenmanagement"
+          ]
+        },
+        {
+          "id": "administration-medium",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in GEVER, ACTA NOVA, Dokumentenmanagement und Prozessdokumentation. Ich unterstütze administrative Abläufe sorgfältig, strukturiert und mit sicherem Verständnis für digitale Informationen.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-acta-nova"
+          ],
+          "atsTerms": [
+            "GEVER",
+            "ACTA NOVA",
+            "Prozessdokumentation"
+          ]
+        },
+        {
+          "id": "administration-short",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Praxis in GEVER, ACTA NOVA und Dokumentenmanagement. Ich arbeite strukturiert, sorgfältig und unterstütze digitale administrative Abläufe zuverlässig.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-acta-nova"
+          ],
+          "atsTerms": [
+            "GEVER",
+            "ACTA NOVA"
+          ]
+        }
+      ],
+      "cms-web-process": [
+        {
+          "id": "cms-extended",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in CMS, Webpflege, Onlineshop-Management und digitalen Prozessen. Ich verbinde Content Administration mit technischem Verständnis, strukturierter Datenpflege und sauberer Dokumentation. Für Arbeitgeber halte ich Webinhalte, Systeme und digitale Abläufe zuverlässig, nachvollziehbar und aktuell.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile",
+            "cv-2b"
+          ],
+          "atsTerms": [
+            "CMS",
+            "Webpflege",
+            "Onlineshop-Management",
+            "digitale Prozesse",
+            "Datenpflege",
+            "Dokumentation"
+          ]
+        },
+        {
+          "id": "cms-expanded",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in CMS, Webpflege, Onlineshop-Management, Prozessdokumentation und digitalen Systemen. Ich verbinde Content Administration, strukturierte Datenpflege und Qualitätssicherung mit technischem Verständnis. In der Zusammenarbeit mit internen und externen Partnern halte ich Webinhalte, Systeme und Abläufe nachvollziehbar und aktuell.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile",
+            "cv-2b"
+          ],
+          "atsTerms": [
+            "CMS",
+            "Webpflege",
+            "Onlineshop-Management",
+            "Prozessdokumentation",
+            "Systempflege",
+            "Qualitätssicherung"
+          ]
+        },
+        {
+          "id": "cms-long",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in CMS, Webpflege, Onlineshop-Management und digitalen Prozessen. Ich verbinde Content Administration, strukturierte Datenpflege und Dokumentation mit technischem Verständnis für nachvollziehbare Web- und Systemabläufe.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile"
+          ],
+          "atsTerms": [
+            "CMS",
+            "Webpflege",
+            "Onlineshop",
+            "Prozessdokumentation"
+          ]
+        },
+        {
+          "id": "cms-medium",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Erfahrung in CMS, Webpflege und Onlineshop-Management. Ich pflege digitale Inhalte, strukturiere Daten und dokumentiere Prozesse zuverlässig mit technischem Verständnis.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile"
+          ],
+          "atsTerms": [
+            "CMS",
+            "Webpflege",
+            "Onlineshop"
+          ]
+        },
+        {
+          "id": "cms-short",
+          "text": "Mediamatiker EFZ mit Berufsmaturität und Praxis in CMS, Webpflege und digitalen Prozessen. Ich pflege Inhalte, Systeme und Daten strukturiert, zuverlässig und dokumentationsstark.",
+          "evidenceIds": [
+            "cv-2d",
+            "linkedin-profile"
+          ],
+          "atsTerms": [
+            "CMS",
+            "Webpflege"
+          ]
+        }
+      ]
+    }
+  },
+  "skillSections": [
+    {
+      "id": "digital-marketing-web",
+      "title": "DIGITAL MARKETING & WEB",
+      "tags": [
+        "web",
+        "marketing",
+        "cms"
+      ],
+      "items": [
+        {
+          "id": "skill-websites-cms-landing",
+          "text": "Erstellung und Betreuung von Websites (CMS, Landing Pages)",
+          "tags": [
+            "web",
+            "cms"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1"
+          ],
+          "atsSynonyms": [
+            "web",
+            "cms"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "skill-online-campaigns",
+          "text": "Onlineshop-Management inkl. Content-, Struktur- und Produktpflege",
+          "tags": [
+            "marketing",
+            "analytics"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1"
+          ],
+          "atsSynonyms": [
+            "marketing",
+            "analytics"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "skill-newsletter",
+          "text": "Newsletter-Konzeption und Umsetzung (Print & E-Mail)",
+          "tags": [
+            "communication",
+            "newsletter"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1"
+          ],
+          "atsSynonyms": [
+            "communication",
+            "newsletter"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "skill-social-performance",
+          "text": "Social Media Betreuung inkl. Performance-Analyse",
+          "tags": [
+            "social",
+            "analytics"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1"
+          ],
+          "atsSynonyms": [
+            "social",
+            "analytics"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "skill-google-analytics",
+          "text": "Google Analytics & Online-Tracking",
+          "tags": [
+            "analytics",
+            "web"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p1"
+          ],
+          "atsSynonyms": [
+            "analytics",
+            "web"
+          ],
+          "status": "verified"
+        }
+      ]
+    },
+    {
+      "id": "content-media",
+      "title": "CONTENT & MEDIENPRODUKTION",
+      "tags": [
+        "content",
+        "media",
+        "communication"
+      ],
+      "items": [
+        {
+          "id": "skill-flyers-magazines-rollups",
+          "text": "Konzeption und Design von Flyern, Magazinen und Rollups",
+          "tags": [
+            "print",
+            "design"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1"
+          ],
+          "atsSynonyms": [
+            "print",
+            "design"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "skill-photo-video",
+          "text": "Foto- und Videoproduktion (Storyboard, Schnitt, Ton)",
+          "tags": [
+            "video",
+            "photo"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1"
+          ],
+          "atsSynonyms": [
+            "video",
+            "photo"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "skill-cicd-materials",
+          "text": "CI/CD-konforme Umsetzung von Marketingmaterialien",
+          "tags": [
+            "design",
+            "brand"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1"
+          ],
+          "atsSynonyms": [
+            "design",
+            "brand"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "skill-presentations-docs",
+          "text": "Präsentations- und Dokumentationsgestaltung",
+          "tags": [
+            "documentation",
+            "design"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p1"
+          ],
+          "atsSynonyms": [
+            "documentation",
+            "design"
+          ],
+          "status": "verified"
+        }
+      ]
+    },
+    {
+      "id": "technik-systeme",
+      "title": "TECHNIK & SYSTEME",
+      "tags": [
+        "systems",
+        "cms",
+        "gever"
+      ],
+      "items": [
+        {
+          "id": "skill-cms-admin",
+          "text": "CMS-Administration (TYPO3, WordPress, Grav)",
+          "tags": [
+            "cms",
+            "web"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1"
+          ],
+          "atsSynonyms": [
+            "cms",
+            "web"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "skill-shop-payments",
+          "text": "Onlineshop-Management inkl. Zahlungsprozessen",
+          "tags": [
+            "shop",
+            "process"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1"
+          ],
+          "atsSynonyms": [
+            "shop",
+            "process"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "skill-ms-office-docs",
+          "text": "MS Office & strukturierte Dokumentenverwaltung",
+          "tags": [
+            "office",
+            "documentation"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p1"
+          ],
+          "atsSynonyms": [
+            "office",
+            "documentation"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "skill-acta-nova",
+          "text": "GEVER-System ACTA NOVA",
+          "tags": [
+            "gever",
+            "administration"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p1",
+            "cv-2d-p2"
+          ],
+          "atsSynonyms": [
+            "gever",
+            "administration"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "skill-webhosters",
+          "text": "Zusammenarbeit mit Webhostern und externen Dienstleistern",
+          "tags": [
+            "web",
+            "coordination"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1"
+          ],
+          "atsSynonyms": [
+            "web",
+            "coordination"
+          ],
+          "status": "verified"
+        }
+      ]
+    },
+    {
+      "id": "arbeitsweise",
+      "title": "ARBEITSWEISE",
+      "tags": [
+        "process",
+        "coordination"
+      ],
+      "items": [
+        {
+          "id": "skill-structured-projects",
+          "text": "Strukturierte und selbstständige Projektumsetzung",
+          "tags": [
+            "project",
+            "process"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1"
+          ],
+          "atsSynonyms": [
+            "project",
+            "process"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "skill-process-documentation",
+          "text": "Prozessdokumentation & Wissenssicherung",
+          "tags": [
+            "documentation",
+            "process"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1",
+            "cv-2d-p2"
+          ],
+          "atsSynonyms": [
+            "documentation",
+            "process"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "skill-fast-onboarding",
+          "text": "Rasche Einarbeitung in neue Systeme",
+          "tags": [
+            "learning",
+            "systems"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p1"
+          ],
+          "atsSynonyms": [
+            "learning",
+            "systems"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "skill-responsibility-quality",
+          "text": "Hohe Eigenverantwortung & Qualitätsbewusstsein",
+          "tags": [
+            "quality",
+            "responsibility"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p1"
+          ],
+          "atsSynonyms": [
+            "quality",
+            "responsibility"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "skill-de-fr-context",
+          "text": "Sicheres Arbeiten in DE- und FR-sprachigen Umfeldern",
+          "tags": [
+            "languages",
+            "coordination"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p1"
+          ],
+          "atsSynonyms": [
+            "languages",
+            "coordination"
+          ],
+          "status": "verified"
+        }
+      ]
+    }
+  ],
+  "languages": [
+    {
+      "id": "lang-de",
+      "name": "Deutsch",
+      "level": "C2",
+      "sources": [
+        "cv-2d-p1"
+      ]
+    },
+    {
+      "id": "lang-en",
+      "name": "Englisch",
+      "level": "C1",
+      "sources": [
+        "cv-2d-p1"
+      ]
+    },
+    {
+      "id": "lang-fr",
+      "name": "Französisch",
+      "level": "B1",
+      "sources": [
+        "cv-2d-p1"
+      ]
+    },
+    {
+      "id": "lang-pl",
+      "name": "Polnisch",
+      "level": "C2",
+      "sources": [
+        "cv-2d-p1"
+      ]
+    }
+  ],
+  "experiences": [
+    {
+      "id": "freelance-digital-marketing-media",
+      "period": "03/2026 – heute",
+      "role": "Freelance Digital Marketing & Media Specialist",
+      "employer": "bis 05/2026 Pazifikregion (Neukaledonien), ab 06/2026 in Bern",
+      "location": "Neukaledonien / Bern",
+      "notes": [],
+      "bullets": [
+        {
+          "id": "bullet-freelance-project-marketing-media",
+          "text": "Projektbasierte Marketing- und Medienunterstützung im internationalen Umfeld",
+          "tags": [
+            "marketing",
+            "media",
+            "international"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p2"
+          ],
+          "atsSynonyms": [
+            "marketing",
+            "media",
+            "international"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "bullet-freelance-content-print-web",
+          "text": "Erstellung von Content für Print-, Web- und digitale Kommunikationskanäle",
+          "tags": [
+            "content",
+            "web",
+            "print"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p2"
+          ],
+          "atsSynonyms": [
+            "content",
+            "web",
+            "print"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "bullet-freelance-remote-stakeholders",
+          "text": "Remote-Zusammenarbeit mit Kunden, Partnern und internationalen Stakeholdern",
+          "tags": [
+            "remote",
+            "coordination"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p2"
+          ],
+          "atsSynonyms": [
+            "remote",
+            "coordination"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "bullet-freelance-french",
+          "text": "Vertiefung der Französischkenntnisse im internationalen Berufsalltag",
+          "tags": [
+            "languages",
+            "french"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p2"
+          ],
+          "atsSynonyms": [
+            "languages",
+            "french"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "bullet-freelance-self-organization",
+          "text": "Selbstständige Projektorganisation und schnelle Anpassung an neue Kulturen",
+          "tags": [
+            "organization",
+            "international"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p2"
+          ],
+          "atsSynonyms": [
+            "organization",
+            "international"
+          ],
+          "status": "verified"
+        }
+      ],
+      "sources": [
+        "cv-2d-p2"
+      ]
+    },
+    {
+      "id": "kunz-kunath-marketing-mediamatiker",
+      "period": "10/2021 – 02/2026",
+      "role": "Marketing-Mitarbeiter / Mediamatiker EFZ",
+      "employer": "Kunz Kunath AG",
+      "location": "Burgdorf",
+      "notes": [],
+      "bullets": [
+        {
+          "id": "bullet-kunz-websites-landing",
+          "text": "Betreuung, Optimierung und Weiterentwicklung von Websites und Landing Pages",
+          "tags": [
+            "web",
+            "cms"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p2"
+          ],
+          "atsSynonyms": [
+            "web",
+            "cms"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "bullet-kunz-online-campaigns-monitoring",
+          "text": "Onlineshop-Management inkl. Content-, Struktur- und Produktpflege",
+          "tags": [
+            "marketing",
+            "analytics"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p2"
+          ],
+          "atsSynonyms": [
+            "marketing",
+            "analytics"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "bullet-kunz-guegg",
+          "text": "Eigenständige Produktion des Firmenmagazins «Gügg Grüggüü» (3 Ausgaben / Jahr)",
+          "tags": [
+            "editorial",
+            "print",
+            "content"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p2"
+          ],
+          "atsSynonyms": [
+            "editorial",
+            "print",
+            "content"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "bullet-kunz-campaigns",
+          "text": "Konzeption und Umsetzung von Print-, Newsletter- und Onlinekampagnen",
+          "tags": [
+            "campaigns",
+            "newsletter",
+            "print"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p2"
+          ],
+          "atsSynonyms": [
+            "campaigns",
+            "newsletter",
+            "print"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "bullet-kunz-photo-video-social-ci",
+          "text": "Foto-, Video- und Social-Media-Content für Marketing und Corporate Identity",
+          "tags": [
+            "video",
+            "social",
+            "brand"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p2"
+          ],
+          "atsSynonyms": [
+            "video",
+            "social",
+            "brand"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "bullet-kunz-external-partners",
+          "text": "Koordination externer Partner (Druckereien, Agenturen, Webhoster)",
+          "tags": [
+            "coordination",
+            "vendors"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p2"
+          ],
+          "atsSynonyms": [
+            "coordination",
+            "vendors"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "bullet-kunz-process-handover",
+          "text": "Prozessdokumentation, Wissenssicherung und strukturierte Übergaben für nachhaltige Abläufe",
+          "tags": [
+            "process",
+            "documentation"
+          ],
+          "evidenceLevel": "professional_core",
+          "sources": [
+            "cv-2d-p2"
+          ],
+          "atsSynonyms": [
+            "Prozessdokumentation",
+            "Wissensmanagement",
+            "Übergaben",
+            "strukturierte Abläufe"
+          ],
+          "status": "verified"
+        }
+      ],
+      "sources": [
+        "cv-2d-p2"
+      ]
+    },
+    {
+      "id": "rekrutenschule-triage-fuehrungsdienst",
+      "period": "11/2022 – 03/2023",
+      "role": "Rekrutenschule – Triage & Führungsdienst",
+      "employer": "Stab Personelles der Armee",
+      "location": "Bern",
+      "notes": [],
+      "bullets": [
+        {
+          "id": "bullet-rs-acta-nova",
+          "text": "Digitale Geschäftsvorgangsbearbeitung und Dokumentenmanagement im GEVER-System ACTA NOVA",
+          "tags": [
+            "gever",
+            "administration"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p2"
+          ],
+          "atsSynonyms": [
+            "GEVER",
+            "ACTA NOVA",
+            "digitales Dokumentenmanagement",
+            "Geschäftsvorgangsbearbeitung"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "bullet-rs-quality",
+          "text": "Qualitätsprüfung und formale Kontrolle von Schriftverkehr und Entscheidungsgrundlagen",
+          "tags": [
+            "quality",
+            "administration"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p2"
+          ],
+          "atsSynonyms": [
+            "Qualitätssicherung",
+            "Schriftverkehr",
+            "Entscheidungsgrundlagen",
+            "formale Kontrolle"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "bullet-rs-doc-management",
+          "text": "Strukturierte Dokumentenverwaltung und administrative Unterstützung der Führungsstelle",
+          "tags": [
+            "documentation",
+            "leadership-support"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p2"
+          ],
+          "atsSynonyms": [
+            "Dokumentenverwaltung",
+            "administrative Unterstützung",
+            "strukturierte Ablage"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "bullet-rs-coordination",
+          "text": "Koordination von Geschäftsvorgängen zwischen internen Organisationseinheiten und zuständigen Fachstellen",
+          "tags": [
+            "coordination",
+            "administration"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p2"
+          ],
+          "atsSynonyms": [
+            "Koordination",
+            "Fachstellen",
+            "interne Organisationseinheiten",
+            "Geschäftsvorgänge"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "bullet-rs-admin-support-summary",
+          "text": "Administrative und organisatorische Unterstützung in einem strukturierten Bundesumfeld",
+          "shortText": "Administrative Unterstützung im Bundesumfeld",
+          "tags": [
+            "administration",
+            "organisation",
+            "bundesumfeld"
+          ],
+          "evidenceLevel": "defensible_inference",
+          "sources": [
+            "cv-2d",
+            "linkedin-acta-nova"
+          ],
+          "sourceIds": [
+            "bullet-rs-acta-nova",
+            "bullet-rs-doc-management",
+            "bullet-rs-coordination"
+          ],
+          "variantRelevance": [
+            "communication-content",
+            "cms-web-process",
+            "general"
+          ],
+          "atsSynonyms": [
+            "Administration",
+            "Organisation",
+            "Führungsunterstützung"
+          ],
+          "status": "defensible_inference",
+          "inferenceRationale": "Fasst belegte ACTA-NOVA-, Dokumentenverwaltungs-, Koordinations- und Führungsdienst-Unterstützung zusammen."
+        },
+        {
+          "id": "bullet-rs-digital-information-summary",
+          "text": "Koordination und qualitätsgesicherte Aufbereitung digitaler Informationen",
+          "shortText": "Qualitätsgesicherte Aufbereitung digitaler Informationen",
+          "tags": [
+            "quality",
+            "coordination",
+            "digital-information"
+          ],
+          "evidenceLevel": "defensible_inference",
+          "sources": [
+            "cv-2d",
+            "linkedin-acta-nova"
+          ],
+          "sourceIds": [
+            "bullet-rs-quality",
+            "bullet-rs-doc-management",
+            "bullet-rs-coordination"
+          ],
+          "variantRelevance": [
+            "communication-content",
+            "cms-web-process",
+            "administration-gever"
+          ],
+          "atsSynonyms": [
+            "Qualitätssicherung",
+            "digitale Informationen",
+            "Koordination"
+          ],
+          "status": "defensible_inference",
+          "inferenceRationale": "Verdichtet belegte Qualitätssicherung, Dokumentenmanagement und Koordination ohne zusätzliche Verantwortung."
+        }
+      ],
+      "sources": [
+        "cv-2d-p2"
+      ]
+    },
+    {
+      "id": "mediamatiker-ausbildung-army-bict",
+      "period": "08/2017 – 08/2021",
+      "role": "Mediamatiker in Ausbildung",
+      "employer": "Digitale Medien der Armee (ehemals ZEM), Bern & BiCT AG",
+      "location": "Bern",
+      "notes": [],
+      "bullets": [],
+      "sources": [
+        "cv-2d-p2"
+      ],
+      "optionalBullets": [
+        {
+          "id": "optional-training-web-digital-media",
+          "text": "Ausbildungs- und Praxiserfahrung in Web, digitalen Medien und Gestaltung",
+          "shortText": "Web, digitale Medien und Gestaltung in Ausbildung und Praxis",
+          "tags": [
+            "training",
+            "web",
+            "digital-media",
+            "design"
+          ],
+          "evidenceLevel": "training_verified",
+          "sources": [
+            "cv-2d-p2",
+            "cv-2b",
+            "linkedin"
+          ],
+          "variantRelevance": [
+            "general",
+            "communication-content",
+            "administration-gever",
+            "cms-web-process"
+          ],
+          "fillPriority": 1,
+          "preferredMaxChars": 92,
+          "atsSynonyms": [
+            "training",
+            "web",
+            "digital-media",
+            "design"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "optional-training-documentation-projects",
+          "text": "Dokumentation und Projektarbeit in mediamatikbezogenen Lern- und Praxisprojekten",
+          "shortText": "Dokumentation und mediamatikbezogene Projektarbeit",
+          "tags": [
+            "training",
+            "documentation",
+            "projects"
+          ],
+          "evidenceLevel": "training_verified",
+          "sources": [
+            "cv-2b",
+            "linkedin"
+          ],
+          "variantRelevance": [
+            "general",
+            "communication-content",
+            "administration-gever",
+            "cms-web-process"
+          ],
+          "fillPriority": 2,
+          "preferredMaxChars": 88,
+          "atsSynonyms": [
+            "training",
+            "documentation",
+            "projects"
+          ],
+          "status": "verified"
+        }
+      ],
+      "supplementaryText": "Weitere mediamatikbezogene Ausbildungsinhalte und Praxiserfahrungen",
+      "showSupplementaryWhenOmitted": true,
+      "minRemainingSpaceMm": 5
+    },
+    {
+      "id": "schachfestival-livestream-event",
+      "period": "Juli 2019 / 2020",
+      "role": "Livestream-Operator & Assistent Eventorganisation",
+      "employer": "Internationales Schachfestival",
+      "location": "Biel-Bienne",
+      "notes": [],
+      "bullets": [],
+      "sources": [
+        "cv-2d-p2"
+      ],
+      "optionalBullets": [
+        {
+          "id": "optional-event-livestream-operations",
+          "text": "Technische Unterstützung von Livestreaming und Veranstaltungsbetrieb",
+          "shortText": "Livestreaming und Veranstaltungsbetrieb technisch unterstützt",
+          "tags": [
+            "livestream",
+            "event",
+            "technical-support"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p2",
+            "cv-2b"
+          ],
+          "variantRelevance": [
+            "general",
+            "communication-content",
+            "administration-gever",
+            "cms-web-process"
+          ],
+          "fillPriority": 1,
+          "preferredMaxChars": 78,
+          "atsSynonyms": [
+            "livestream",
+            "event",
+            "technical-support"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "optional-event-organization-operations",
+          "text": "Mitarbeit in Eventorganisation und operativer Durchführung",
+          "shortText": "Eventorganisation und operative Durchführung unterstützt",
+          "tags": [
+            "event-organization",
+            "operations",
+            "coordination"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "cv-2d-p2",
+            "cv-2b"
+          ],
+          "variantRelevance": [
+            "general",
+            "communication-content",
+            "administration-gever",
+            "cms-web-process"
+          ],
+          "fillPriority": 2,
+          "preferredMaxChars": 75,
+          "atsSynonyms": [
+            "event-organization",
+            "operations",
+            "coordination"
+          ],
+          "status": "verified"
+        }
+      ],
+      "supplementaryText": "Weitere Aufgaben in Liveproduktion und Eventorganisation",
+      "showSupplementaryWhenOmitted": true,
+      "minRemainingSpaceMm": 5
+    }
+  ],
+  "tools": [
+    {
+      "id": "tool-adobe-cc",
+      "name": "Adobe CC",
+      "tags": [
+        "design",
+        "media"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "cv-2d-p2"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "general",
+        "communication-content",
+        "administration-gever",
+        "cms-web-process"
+      ],
+      "priority": 1,
+      "category": "design-media",
+      "atsSynonyms": [
+        "Adobe Creative Cloud",
+        "Medienproduktion"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-ms-office",
+      "name": "MS Office",
+      "tags": [
+        "office",
+        "documentation"
+      ],
+      "evidenceLevel": "professional_supporting",
+      "sources": [
+        "cv-2d-p2"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "general",
+        "communication-content",
+        "administration-gever",
+        "cms-web-process"
+      ],
+      "priority": 2,
+      "category": "administration-office",
+      "atsSynonyms": [
+        "Office",
+        "Bürosoftware",
+        "Dokumentation"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-canva",
+      "name": "Canva",
+      "tags": [
+        "design"
+      ],
+      "evidenceLevel": "professional_supporting",
+      "sources": [
+        "cv-2d-p2"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "general",
+        "communication-content",
+        "administration-gever",
+        "cms-web-process"
+      ],
+      "priority": 3,
+      "category": "design-media",
+      "atsSynonyms": [
+        "Design",
+        "Content Creation"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-chatgpt",
+      "name": "ChatGPT",
+      "tags": [
+        "ai",
+        "process"
+      ],
+      "evidenceLevel": "project_experience",
+      "sources": [
+        "cv-2d-p2"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "general",
+        "communication-content",
+        "administration-gever",
+        "cms-web-process"
+      ],
+      "priority": 4,
+      "category": "analysis-ai",
+      "atsSynonyms": [
+        "KI-gestützte Prozesse",
+        "AI Assistance"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-google-analytics",
+      "name": "Google Analytics",
+      "tags": [
+        "analytics",
+        "web"
+      ],
+      "evidenceLevel": "professional_supporting",
+      "sources": [
+        "cv-2d-p2"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "general",
+        "communication-content",
+        "administration-gever",
+        "cms-web-process"
+      ],
+      "priority": 5,
+      "category": "analysis-ai",
+      "atsSynonyms": [
+        "Webanalyse",
+        "Analytics"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-acta-nova",
+      "name": "ACTA NOVA",
+      "tags": [
+        "gever",
+        "administration"
+      ],
+      "evidenceLevel": "professional_supporting",
+      "sources": [
+        "cv-2d-p2"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "general",
+        "communication-content",
+        "administration-gever",
+        "cms-web-process"
+      ],
+      "priority": 6,
+      "category": "administration-gever",
+      "atsSynonyms": [
+        "GEVER",
+        "digitales Geschäftsmanagement",
+        "Dokumentenmanagement"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-typo3",
+      "name": "TYPO 3",
+      "tags": [
+        "cms",
+        "web"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "cv-2d-p2"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "general",
+        "communication-content",
+        "administration-gever",
+        "cms-web-process"
+      ],
+      "priority": 7,
+      "category": "web-cms",
+      "atsSynonyms": [
+        "CMS",
+        "Content Management System",
+        "Webpflege"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-wordpress",
+      "name": "WordPress",
+      "tags": [
+        "cms",
+        "web"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "cv-2d-p2"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "general",
+        "communication-content",
+        "administration-gever",
+        "cms-web-process"
+      ],
+      "priority": 8,
+      "category": "web-cms",
+      "atsSynonyms": [
+        "CMS",
+        "Content Management System",
+        "Webpflege"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-grav",
+      "name": "Grav",
+      "tags": [
+        "cms",
+        "web"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "cv-2d-p2"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "general",
+        "communication-content",
+        "administration-gever",
+        "cms-web-process"
+      ],
+      "priority": 9,
+      "category": "web-cms",
+      "atsSynonyms": [
+        "Flat-file CMS",
+        "CMS"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-magento",
+      "name": "Magento",
+      "tags": [
+        "shop",
+        "web"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "cv-2d-p2"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "general",
+        "communication-content",
+        "administration-gever",
+        "cms-web-process"
+      ],
+      "priority": 10,
+      "category": "ecommerce-systems",
+      "atsSynonyms": [
+        "E-Commerce",
+        "Onlineshop",
+        "Shop-System"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-html-css",
+      "name": "HTML / CSS",
+      "tags": [
+        "web"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "cv-2d-p2"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "general",
+        "communication-content",
+        "administration-gever",
+        "cms-web-process"
+      ],
+      "priority": 11,
+      "category": "web-cms",
+      "atsSynonyms": [
+        "Webentwicklung",
+        "Markup",
+        "Stylesheets"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-adobe-indesign",
+      "name": "Adobe InDesign",
+      "tags": [
+        "layout",
+        "print",
+        "adobe"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "cv-2d-p2",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": false,
+      "allowedVariants": [
+        "general",
+        "communication-content"
+      ],
+      "priority": 30,
+      "category": "design-media",
+      "atsSynonyms": [
+        "Layout",
+        "Desktop Publishing",
+        "Printproduktion"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-adobe-photoshop",
+      "name": "Adobe Photoshop",
+      "tags": [
+        "image-editing",
+        "media",
+        "adobe"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "cv-2d-p2",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": false,
+      "allowedVariants": [
+        "general",
+        "communication-content",
+        "cms-web-process"
+      ],
+      "priority": 31,
+      "category": "design-media",
+      "atsSynonyms": [
+        "Bildbearbeitung",
+        "Medienproduktion"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-adobe-illustrator",
+      "name": "Adobe Illustrator",
+      "category": "design-media",
+      "tags": [
+        "design",
+        "vector",
+        "adobe"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "communication-content",
+        "cms-web-process",
+        "general"
+      ],
+      "priority": 32,
+      "atsSynonyms": [
+        "Adobe Illustrator",
+        "design",
+        "vector",
+        "adobe"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-adobe-premiere-pro",
+      "name": "Adobe Premiere Pro",
+      "category": "design-media",
+      "tags": [
+        "video",
+        "media",
+        "adobe"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "communication-content",
+        "general"
+      ],
+      "priority": 33,
+      "atsSynonyms": [
+        "Adobe Premiere Pro",
+        "video",
+        "media",
+        "adobe"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-adobe-audition",
+      "name": "Adobe Audition",
+      "category": "design-media",
+      "tags": [
+        "audio",
+        "media",
+        "adobe"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "communication-content",
+        "general"
+      ],
+      "priority": 34,
+      "atsSynonyms": [
+        "Adobe Audition",
+        "audio",
+        "media",
+        "adobe"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-adobe-after-effects",
+      "name": "Adobe After Effects",
+      "category": "design-media",
+      "tags": [
+        "motion",
+        "media",
+        "adobe"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "communication-content",
+        "general"
+      ],
+      "priority": 35,
+      "atsSynonyms": [
+        "Adobe After Effects",
+        "motion",
+        "media",
+        "adobe"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-ms-word",
+      "name": "Microsoft Word",
+      "category": "admin-office",
+      "tags": [
+        "office",
+        "documentation"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "administration-gever",
+        "general"
+      ],
+      "priority": 36,
+      "atsSynonyms": [
+        "Microsoft Word",
+        "office",
+        "documentation"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-ms-excel",
+      "name": "Microsoft Excel",
+      "category": "admin-office",
+      "tags": [
+        "office",
+        "data"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "administration-gever",
+        "general"
+      ],
+      "priority": 37,
+      "atsSynonyms": [
+        "Microsoft Excel",
+        "office",
+        "data"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-ms-powerpoint",
+      "name": "Microsoft PowerPoint",
+      "category": "admin-office",
+      "tags": [
+        "office",
+        "presentation"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "administration-gever",
+        "communication-content",
+        "general"
+      ],
+      "priority": 38,
+      "atsSynonyms": [
+        "Microsoft PowerPoint",
+        "office",
+        "presentation"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-ms-outlook",
+      "name": "Microsoft Outlook",
+      "category": "admin-office",
+      "tags": [
+        "office",
+        "communication"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "administration-gever",
+        "general"
+      ],
+      "priority": 39,
+      "atsSynonyms": [
+        "Microsoft Outlook",
+        "office",
+        "communication"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-ms-onenote",
+      "name": "Microsoft OneNote",
+      "category": "admin-office",
+      "tags": [
+        "office",
+        "documentation"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "administration-gever",
+        "general"
+      ],
+      "priority": 40,
+      "atsSynonyms": [
+        "Microsoft OneNote",
+        "office",
+        "documentation"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-office-365",
+      "name": "Office 365",
+      "category": "admin-office",
+      "tags": [
+        "office",
+        "collaboration"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "administration-gever",
+        "general"
+      ],
+      "priority": 41,
+      "atsSynonyms": [
+        "Office 365",
+        "office",
+        "collaboration"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-github",
+      "name": "GitHub",
+      "category": "web-cms",
+      "tags": [
+        "development",
+        "version-control"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "cms-web-process",
+        "general"
+      ],
+      "priority": 42,
+      "atsSynonyms": [
+        "GitHub",
+        "development",
+        "version-control"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-phpmyadmin",
+      "name": "phpMyAdmin",
+      "category": "web-cms",
+      "tags": [
+        "database",
+        "web"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "cms-web-process",
+        "general"
+      ],
+      "priority": 43,
+      "atsSynonyms": [
+        "phpMyAdmin",
+        "database",
+        "web"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-mysql",
+      "name": "MySQL",
+      "category": "web-cms",
+      "tags": [
+        "database",
+        "web"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "cms-web-process",
+        "general"
+      ],
+      "priority": 44,
+      "atsSynonyms": [
+        "MySQL",
+        "database",
+        "web"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-wirecast-pro",
+      "name": "Wirecast Pro",
+      "category": "media-production",
+      "tags": [
+        "livestream",
+        "video"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "communication-content",
+        "general"
+      ],
+      "priority": 45,
+      "atsSynonyms": [
+        "Wirecast Pro",
+        "livestream",
+        "video"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-crealogix-stage",
+      "name": "Crealogix STAGE",
+      "category": "web-cms",
+      "tags": [
+        "web",
+        "cms"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "cms-web-process",
+        "administration-gever",
+        "general"
+      ],
+      "priority": 46,
+      "atsSynonyms": [
+        "Crealogix STAGE",
+        "web",
+        "cms"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tool-windows-server",
+      "name": "Windows Server",
+      "category": "systems",
+      "tags": [
+        "server",
+        "it"
+      ],
+      "evidenceLevel": "professional_core",
+      "sources": [
+        "linkedin-tools",
+        "cv-2b"
+      ],
+      "surfaceAutomatically": true,
+      "allowedVariants": [
+        "cms-web-process",
+        "general"
+      ],
+      "priority": 47,
+      "atsSynonyms": [
+        "Windows Server",
+        "server",
+        "it"
+      ],
+      "status": "verified"
+    }
+  ],
+  "references": [
+    {
+      "id": "ref-peter-stadelmann",
+      "name": "Peter Stadelmann",
+      "role": "ehem. CEO & Marketingleiter",
+      "employer": "Kunz Kunath AG",
+      "phone": "+41 79 208 90 74",
+      "sources": [
+        "cv-2d-p2"
+      ]
+    },
+    {
+      "id": "ref-peter-wyss",
+      "name": "Peter Wyss",
+      "role": "Chef Spedition",
+      "employer": "Personelles der Armee",
+      "phone": "+41 58 489 20 03",
+      "sources": [
+        "cv-2d-p2"
+      ]
+    }
+  ],
+  "availability": {
+    "label": "Eintritt",
+    "text": "nach Vereinbarung oder sofort",
+    "sources": [
+      "cv-2d-p2"
+    ]
+  },
+  "workload": {
+    "label": "Pensum",
+    "text": "60–100 % flexibel nach Absprache",
+    "sources": [
+      "cv-2d-p2"
+    ]
+  },
+  "supplementaryIndicators": {
+    "tools": {
+      "enabled": true,
+      "text": "+ weitere mediamatikbezogene Tools und Systeme"
+    },
+    "experience": {
+      "general": "Weitere mediamatikbezogene Aufgaben und Kompetenzen vorhanden",
+      "communication-content": "Weitere Kompetenzen in Web, Systemen und digitalen Prozessen",
+      "administration-gever": "Zusätzliche Kompetenzen in Kommunikation, Gestaltung und digitalen Medien",
+      "cms-web-process": "Weitere mediamatikbezogene Kompetenzen in Content und Medienproduktion"
+    }
+  }
+}
