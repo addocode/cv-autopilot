@@ -3,7 +3,6 @@ import { spawnSync } from 'node:child_process';
 
 const variants = ['general', 'communication-content', 'administration-gever', 'cms-web-process'];
 mkdirSync('dist', { recursive: true });
-let failed = false;
 const renderResults = {};
 
 for (const variant of variants) {
@@ -31,7 +30,6 @@ for (const variant of variants) {
   if (success) {
     console.log(`[${variant}] render succeeded`);
   } else {
-    failed = true;
     console.error(`[${variant}] render failed with exit code ${result.status}`);
   }
 }
@@ -261,4 +259,13 @@ const visualReview = {
 
 writeFileSync('dist/visual-review-round-17.json', JSON.stringify(visualReview, null, 2));
 
-if (failed || !visualReview.overallSuccess) process.exit(1);
+const anyRenderFailed = Object.values(renderResults).some((result) => result.success !== true);
+const exitDecision = {
+  anyRenderFailed,
+  visualReviewOverallSuccess: visualReview.overallSuccess,
+  reportsSuccessful: allReportsPresent && allReports.every((report) => report.success === true),
+  shouldFail: anyRenderFailed || visualReview.overallSuccess !== true,
+  timestamp: new Date().toISOString(),
+};
+writeFileSync('dist/render-all-exit-diagnostic.json', JSON.stringify(exitDecision, null, 2));
+process.exitCode = exitDecision.shouldFail ? 1 : 0;

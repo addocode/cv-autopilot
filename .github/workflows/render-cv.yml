@@ -27,12 +27,40 @@ jobs:
       - run: npm run build
       - run: npm run validate
       - run: npm run test:data
-      - id: render_all
-        continue-on-error: true
-        run: npm run render:all
-      - id: render_tests
-        continue-on-error: true
-        run: npm run test:render
+      - name: Run render all with captured exit code
+        id: render_all
+        shell: bash
+        run: |
+          mkdir -p dist
+          set +e
+          set -o pipefail
+          npm run render:all \
+            2>&1 | \
+            tee dist/render-all-command.log
+          code=${PIPESTATUS[0]}
+          echo "exit_code=${code}" >> "$GITHUB_OUTPUT"
+          echo "render:all exit code: ${code}"
+          exit 0
+      - name: Run render tests with captured exit code
+        id: render_tests
+        shell: bash
+        run: |
+          mkdir -p dist
+          set +e
+          set -o pipefail
+          npm run test:render \
+            2>&1 | \
+            tee dist/render-tests-command.log
+          code=${PIPESTATUS[0]}
+          echo "exit_code=${code}" >> "$GITHUB_OUTPUT"
+          echo "test:render exit code: ${code}"
+          exit 0
+      - name: Write command status
+        if: always()
+        env:
+          RENDER_ALL_EXIT_CODE: ${{ steps.render_all.outputs.exit_code }}
+          RENDER_TESTS_EXIT_CODE: ${{ steps.render_tests.outputs.exit_code }}
+        run: node scripts/write-command-status.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -50,6 +78,25 @@ jobs:
             dist/render-log-*.txt
             dist/fonts-*-pdffonts.txt
             dist/font-resolution.txt
+            dist/render-all-command.log
+            dist/render-tests-command.log
+            dist/command-status.json
+            dist/render-all-exit-diagnostic.json
       - name: Fail if render or render tests failed
-        if: steps.render_all.outcome != 'success' || steps.render_tests.outcome != 'success'
-        run: exit 1
+        if: >-
+          always() &&
+          (
+            steps.render_all.outputs.exit_code != '0' ||
+            steps.render_tests.outputs.exit_code != '0'
+          )
+        shell: bash
+        run: |
+          echo "render:all exit code:"
+          echo "${{ steps.render_all.outputs.exit_code }}"
+          echo "test:render exit code:"
+          echo "${{ steps.render_tests.outputs.exit_code }}"
+          echo "Last render-all output:"
+          tail -n 100 dist/render-all-command.log || true
+          echo "Last render-test output:"
+          tail -n 200 dist/render-tests-command.log || true
+          exit 1
