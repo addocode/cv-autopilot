@@ -194,14 +194,26 @@ function buildSkillsets(rawSections) {
     for (const item of [...baseItems, ...supplemental]) {
       if (!deduped.some((existing) => existing.id === item.id || normalizeAtsText(existing.text) === normalizeAtsText(item.text))) deduped.push(item);
     }
-    const mandatory = deduped.filter((item) => !item.optional).slice(0, 6);
-    const optional = deduped.filter((item) => item.optional).slice(0, 2);
-    const items = [...mandatory, ...optional].slice(0, 8);
-    while (items.length < 6 && supplemental[items.length - baseItems.length]) items.push(supplemental[items.length - baseItems.length]);
+    const coreItems = [];
+    for (const item of deduped) {
+      if (coreItems.length >= 6) break;
+      if (!item.optional) coreItems.push({ ...item, skillOptional: false });
+    }
+    for (const item of deduped) {
+      if (coreItems.length >= 6) break;
+      if (!coreItems.some((core) => core.id === item.id)) coreItems.push({ ...item, skillOptional: false, optionalPromotedToCore: true });
+    }
+    const optionalItems = deduped
+      .filter((item) => !coreItems.some((core) => core.id === item.id))
+      .slice(0, 2)
+      .map((item) => ({ ...item, skillOptional: true }));
+    const items = [...coreItems, ...optionalItems];
     return {
       ...section,
       title: variant.skillSectionTitles[section.id] || section.title,
-      items: items.slice(0, 8),
+      coreItems,
+      optionalItems,
+      items,
       minimumBullets: 6,
       maximumBullets: 8,
     };
@@ -379,7 +391,7 @@ function toolColumns() {
 
 function html() {
   const [toolLeft, toolRight] = toolColumns();
-  const skillHtml = cv.skillSections.map((section) => `<section class="module skill-section" id="skill-${section.id}" data-skillset-id="${section.id}" data-skill-icon-id="${section.iconId}" data-check data-collision-group="skills"><div class="skill-icon-wrap">${skillIcon(section.iconId)}</div><div class="skill-copy"><h2 data-ats-required>${esc(section.title)}</h2><ul>${section.items.map((item) => `<li id="${item.id}" data-check data-ats-required data-source-ids="${esc((item.sourceIds || item.sources || []).join(','))}" data-evidence-status="${esc(item.evidenceStatus || evidenceStatus(item))}" data-job-ad-match-score="${item.jobAdMatchScore ?? 0}">${esc(item.text)}</li>`).join('')}</ul></div></section>`).join('');
+  const skillHtml = cv.skillSections.map((section) => `<section class="module skill-section" id="skill-${section.id}" data-skillset-id="${section.id}" data-skill-icon-id="${section.iconId}" data-check data-collision-group="skills"><div class="skill-icon-wrap">${skillIcon(section.iconId)}</div><div class="skill-copy"><h2 data-ats-required>${esc(section.title)}</h2><ul>${section.items.map((item) => `<li id="${item.id}"${item.skillOptional ? ' class="optional-skill-bullet" hidden' : ''} data-check data-ats-required data-skill-optional="${item.skillOptional ? 'true' : 'false'}" data-skillset-id="${section.id}" data-source-ids="${esc((item.sourceIds || item.sources || []).join(','))}" data-evidence-status="${esc(item.evidenceStatus || evidenceStatus(item))}" data-job-ad-match-score="${item.jobAdMatchScore ?? 0}">${esc(item.text)}</li>`).join('')}</ul></div></section>`).join('');
   const expHtml = cv.experiences.map((experience) => {
     const bullets = experience.bullets;
     const optionalHtml = experience.optionalCandidates.map((bullet) => `<li id="${bullet.id}" class="optional-fill" data-check data-fill-state="candidate" data-fill-kind="optional-bullet" data-experience-id="${experience.id}" data-fill-priority="${bullet.fillPriority ?? 99}" data-long-text="${esc(bullet.text)}" data-short-text="${esc(bullet.shortText || bullet.text)}" data-fill-id="${bullet.id}" hidden>${esc(bullet.text)}</li>`).join('');
@@ -528,6 +540,71 @@ async function withPlaywright() {
     };
   });
 
+  renderStage = 'skillset-layout-selection';
+  const skillsetLayoutSelection = await page.evaluate(async () => {
+    const root = document.documentElement;
+    const iconSizes = [21, 20, 19, 18, 17, 16];
+    const minimumLanguageGapPx = 1.5 * 96 / 25.4;
+    const waitForLayout = async () => {
+      if (document.fonts?.ready) await document.fonts.ready;
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    };
+    const visibleSkillSections = () => [...document.querySelectorAll('.skill-section:not([hidden])')];
+    const visibleBullets = (section) => [...section.querySelectorAll('li:not([hidden])')];
+    const measure = () => {
+      const sections = visibleSkillSections();
+      const panel = document.querySelector('.competence-panel');
+      const panelRect = panel?.getBoundingClientRect();
+      const languageRect = document.querySelector('#languages')?.getBoundingClientRect();
+      const lastSkillRect = sections.at(-1)?.getBoundingClientRect();
+      const languageGapPx = languageRect && lastSkillRect ? languageRect.top - lastSkillRect.bottom : -1;
+      const reasons = [];
+      if (sections.length !== 4) reasons.push('skillset-count');
+      for (const section of sections) {
+        const bullets = visibleBullets(section);
+        const coreBullets = bullets.filter((li) => li.dataset.skillOptional === 'false');
+        const sectionRect = section.getBoundingClientRect();
+        const lastBulletRect = bullets.at(-1)?.getBoundingClientRect();
+        const borderY = sectionRect.bottom;
+        if (coreBullets.length !== 6) reasons.push('core-bullet-count');
+        if (bullets.length < 6 || bullets.length > 8) reasons.push('bullet-count-range');
+        if (section.scrollHeight > section.clientHeight + 1) reasons.push('skill-scroll-overflow');
+        if (panelRect && sectionRect.bottom > panelRect.bottom + 1) reasons.push('panel-overflow');
+        if (lastBulletRect && lastBulletRect.bottom >= borderY - 1) reasons.push('text-border-overlap');
+      }
+      if (languageGapPx < minimumLanguageGapPx) reasons.push('language-gap');
+      return { accepted: reasons.length === 0, reason: reasons[0] || null, reasons: [...new Set(reasons)], languageGapPx: Number(Math.max(0, languageGapPx).toFixed(2)), minimumLanguageGapPx: Number(minimumLanguageGapPx.toFixed(2)), finalBulletCounts: Object.fromEntries(sections.map((section) => [section.dataset.skillsetId || section.id.replace('skill-', ''), visibleBullets(section).length])) };
+    };
+    const optionalBullets = [...document.querySelectorAll('.optional-skill-bullet')];
+    optionalBullets.forEach((bullet) => { bullet.hidden = true; });
+    const testedIconSizes = [];
+    let selectedIconSizeMm = iconSizes.at(-1);
+    for (const sizeMm of iconSizes) {
+      root.style.setProperty('--skill-icon-size', `${sizeMm}mm`);
+      await waitForLayout();
+      const measured = measure();
+      testedIconSizes.push({ sizeMm, accepted: measured.accepted, reason: measured.reason, reasons: measured.reasons, languageGapPx: measured.languageGapPx });
+      if (measured.accepted) { selectedIconSizeMm = sizeMm; break; }
+    }
+    root.style.setProperty('--skill-icon-size', `${selectedIconSizeMm}mm`);
+    await waitForLayout();
+    const candidates = optionalBullets
+      .map((bullet, index) => ({ bullet, index, id: bullet.id, skillsetId: bullet.dataset.skillsetId || '', jobAdMatchScore: Number(bullet.dataset.jobAdMatchScore || 0), evidenceStatus: bullet.dataset.evidenceStatus || '' }))
+      .sort((a, b) => b.jobAdMatchScore - a.jobAdMatchScore || (a.evidenceStatus === 'verified' ? -1 : 1) || a.index - b.index);
+    const optionalBulletCandidates = candidates.map(({ id, skillsetId, jobAdMatchScore, evidenceStatus }) => ({ id, skillsetId, jobAdMatchScore, evidenceStatus }));
+    const acceptedOptionalBulletIds = [];
+    const rejectedOptionalBulletIds = [];
+    for (const candidate of candidates) {
+      candidate.bullet.hidden = false;
+      await waitForLayout();
+      const measured = measure();
+      if (measured.accepted) acceptedOptionalBulletIds.push(candidate.id);
+      else { candidate.bullet.hidden = true; rejectedOptionalBulletIds.push(candidate.id); await waitForLayout(); }
+    }
+    const finalMeasurement = measure();
+    return { coreBulletCountPerSkillset: 6, selectedIconSizeMm, testedIconSizes, optionalBulletCandidates, acceptedOptionalBulletIds, rejectedOptionalBulletIds, finalBulletCounts: finalMeasurement.finalBulletCounts, minimumLanguageGapPx: finalMeasurement.minimumLanguageGapPx, languageGapPx: finalMeasurement.languageGapPx, noClippedSkillText: finalMeasurement.accepted, largestSafeIconSizeSelected: testedIconSizes.find((item) => item.accepted)?.sizeMm === selectedIconSizeMm };
+  });
+
   renderStage = 'initial-layout-metrics';
   const metrics = await page.evaluate(({ bgExists, variantMeta }) => {
     const cssString = (value) => typeof value === 'string' ? value : '';
@@ -643,7 +720,7 @@ async function withPlaywright() {
       finalInteractiveState: {},
       layout: { pageTwoWhitePanelTopPx: 0, pageTwoFooterHeightPx: 0, counterRailAlignment: [], languageVerticalDividerCount: 1, languageHorizontalDividerCount: 2, darkRuleWidthPx: 0, profileBorderWidthPx: 0, frameOffsetLeftPx: 0, frameOffsetRightPx: 0, frameOffsetTopPx: 0, frameOffsetBottomPx: 0, blueTouchesPageTop: false, blueTouchesPageBottom: false, blueTouchesPageLeft: false, blueTouchesPageRight: false, experienceBulletGapPx: 0, experienceBulletGaps: [], frameOffsets: { page1: {}, page2: {} }, pageOneHasTopBackgroundStrip: false, pageOneHasBottomBackgroundStrip: true, pageTwoHasTopBackgroundStrip: true, pageTwoHasBottomBackgroundStrip: false, stackedPageGapPx: 0 },
       experienceQuality: { minimumBulletsPerStation: 2, stations: [], crossDomainBullet: {} },
-      skillsetsQuality: { requiredSkillsetCount: 4, renderedSkillsetCount: 0, allSkillsetsPresent: false, minimumBulletsPerSkillset: 6, maximumBulletsPerSkillset: 8, totalVisibleBullets: 0, allBulletCountsWithinRange: false, allBulletsEvidenceBacked: false, duplicateBulletIds: [], semanticDuplicatePairs: [], uniqueIconCount: 0, allIconsUsedExactlyOnce: false, allIconsLoaded: false, selectedIconSizeMm: 0, testedIconSizesMm: [21, 20, 19, 18, 17, 16], largestSafeIconSizeSelected: false, textWidthMaximized: false, linkedinEvidenceAvailable: false, skillsets: [] },
+      skillsetsQuality: { requiredSkillsetCount: 4, renderedSkillsetCount: 0, allSkillsetsPresent: false, minimumBulletsPerSkillset: 6, maximumBulletsPerSkillset: 8, coreBulletCountPerSkillset: 6, totalVisibleBullets: 0, allBulletCountsWithinRange: false, allBulletsEvidenceBacked: false, duplicateBulletIds: [], semanticDuplicatePairs: [], uniqueIconCount: 0, allIconsUsedExactlyOnce: false, allIconsLoaded: false, selectedIconSizeMm: 0, testedIconSizesMm: [21, 20, 19, 18, 17, 16], testedIconSizes: [], optionalBulletCandidates: [], acceptedOptionalBulletIds: [], rejectedOptionalBulletIds: [], finalBulletCounts: {}, minimumLanguageGapPx: 0, languageGapPx: 0, noClippedSkillText: false, largestSafeIconSizeSelected: false, textWidthMaximized: false, linkedinEvidenceAvailable: false, skillsets: [] },
       experienceLocationStyles: [],
       toolsQuality: { minimumVisibleTools: 12, maximumVisibleTools: 20, visibleToolCount: 0, selectionMode: 'variant-fallback', jobAdMatchedToolIds: [], semanticMatchToolIds: [], variantFallbackToolIds: [], omittedToolIds: [], duplicateToolIds: [], unverifiedVisibleToolIds: [], withinAllowedRange: false, typography: variantMeta.typographySelection?.toolTypography || {} },
       footerQuality: { titleFontSizes: {}, titleFontFamilies: {}, titleStyles: {}, iconBoxes: {}, iconTitleGapsPx: {}, icons: {}, entryAndWorkloadAligned: false, allTitleFamiliesEqual: false, allTitleSizesEqual: false, allTitleWeightsEqual: false, allTitleBaselinesAligned: false, allTitleTypographyEqual: false, topRowBaselinesAligned: false, availabilityTitlesLeftAligned: false, availabilityRowsStacked: false, availabilityTitleGapPx: 0, footerLayoutValid: false, contentTypography: {}, toolsMoreGapPx: 0, toolsMoreGapIncreaseRatio: 0, allFooterIconsLoaded: false, allFooterIconBoxesEqual: false },
@@ -752,12 +829,20 @@ async function withPlaywright() {
     out.skillsetsQuality.allIconsUsedExactlyOnce = skillIconIdsRendered.length === 4 && new Set(skillIconIdsRendered).size === 4;
     out.skillsetsQuality.allIconsLoaded = iconBoxes.length === 4 && iconBoxes.every((box) => box.width > 0 && box.height > 0);
     out.skillsetsQuality.iconBoxes = iconBoxes;
-    out.skillsetsQuality.selectedIconSizeMm = Number.parseFloat(rootStyle.getPropertyValue('--skill-icon-size')) || 0;
-    out.skillsetsQuality.largestSafeIconSizeSelected = out.skillsetsQuality.selectedIconSizeMm >= 16 && out.skillsetsQuality.testedIconSizesMm.includes(out.skillsetsQuality.selectedIconSizeMm);
+    out.skillsetsQuality.coreBulletCountPerSkillset = variantMeta.skillsetLayoutSelection?.coreBulletCountPerSkillset ?? 6;
+    out.skillsetsQuality.selectedIconSizeMm = Number.parseFloat(rootStyle.getPropertyValue('--skill-icon-size')) || variantMeta.skillsetLayoutSelection?.selectedIconSizeMm || 0;
+    out.skillsetsQuality.testedIconSizes = variantMeta.skillsetLayoutSelection?.testedIconSizes || [];
+    out.skillsetsQuality.optionalBulletCandidates = variantMeta.skillsetLayoutSelection?.optionalBulletCandidates || [];
+    out.skillsetsQuality.acceptedOptionalBulletIds = variantMeta.skillsetLayoutSelection?.acceptedOptionalBulletIds || [];
+    out.skillsetsQuality.rejectedOptionalBulletIds = variantMeta.skillsetLayoutSelection?.rejectedOptionalBulletIds || [];
+    out.skillsetsQuality.finalBulletCounts = variantMeta.skillsetLayoutSelection?.finalBulletCounts || Object.fromEntries(out.skillsetsQuality.skillsets.map((section) => [section.id, section.bulletCount]));
+    out.skillsetsQuality.minimumLanguageGapPx = variantMeta.skillsetLayoutSelection?.minimumLanguageGapPx || Number((1.5 * 96 / 25.4).toFixed(2));
+    out.skillsetsQuality.languageGapPx = languageRect && lastSkillRect ? Math.round(languageRect.top - lastSkillRect.bottom) : 0;
+    out.skillsetsQuality.noClippedSkillText = variantMeta.skillsetLayoutSelection?.noClippedSkillText === true;
+    out.skillsetsQuality.largestSafeIconSizeSelected = variantMeta.skillsetLayoutSelection?.largestSafeIconSizeSelected === true && out.skillsetsQuality.selectedIconSizeMm >= 16 && out.skillsetsQuality.testedIconSizesMm.includes(out.skillsetsQuality.selectedIconSizeMm);
     out.skillsetsQuality.textWidthMaximized = skillTextRects.length === 4 && dividerRects.every((rect, index) => Math.abs(rect.right - skillTextRects[index].right) <= 4);
     out.skillsetsQuality.textColumnLeftPx = skillTextRects.map((rect) => Math.round(rect.left));
     out.skillsetsQuality.textColumnWidthPx = skillTextRects.map((rect) => Math.round(rect.width));
-    out.skillsetsQuality.languageGapPx = languageRect && lastSkillRect ? Math.round(languageRect.top - lastSkillRect.bottom) : 0;
     out.layout.experienceBulletGaps = [...document.querySelectorAll('.experience')].map((experience) => { const heading = experience.querySelector('.experience-heading'); const firstBullet = experience.querySelector('li:not([hidden])'); return { experienceId: experience.id.replace('experience-', ''), gapPx: heading && firstBullet ? Math.round(firstBullet.getBoundingClientRect().top - heading.getBoundingClientRect().bottom) : 0 }; });
     out.layout.experienceBulletGapPx = out.layout.experienceBulletGaps[0]?.gapPx || 0;
     out.experienceQuality.stations = [...document.querySelectorAll('.experience')].map((experience) => {
@@ -928,14 +1013,14 @@ async function withPlaywright() {
     if ([...document.querySelectorAll('.experience-location-line')].some((element) => getComputedStyle(element).fontWeight !== '700')) out.warnings.push('An experience location line is not bold.');
     if (out.summary.actualLines !== out.summary.targetLines || out.summary.selectionSucceeded !== true) out.warnings.push('Summary is not exactly four visible lines.');
     if (out.experienceQuality.stations.some((station) => station.visibleBulletCount < out.experienceQuality.minimumBulletsPerStation)) out.warnings.push('An experience has fewer than two visible bullets.');
-    if (!out.skillsetsQuality.allSkillsetsPresent || !out.skillsetsQuality.allBulletCountsWithinRange || !out.skillsetsQuality.allBulletsEvidenceBacked || !out.skillsetsQuality.allIconsUsedExactlyOnce || !out.skillsetsQuality.allIconsLoaded || !out.skillsetsQuality.largestSafeIconSizeSelected || !out.skillsetsQuality.textWidthMaximized) out.warnings.push('Skillset quality requirements failed.');
+    if (!out.skillsetsQuality.allSkillsetsPresent || !out.skillsetsQuality.allBulletCountsWithinRange || !out.skillsetsQuality.allBulletsEvidenceBacked || !out.skillsetsQuality.allIconsUsedExactlyOnce || !out.skillsetsQuality.allIconsLoaded || !out.skillsetsQuality.largestSafeIconSizeSelected || !out.skillsetsQuality.textWidthMaximized || !out.skillsetsQuality.noClippedSkillText || out.skillsetsQuality.languageGapPx < out.skillsetsQuality.minimumLanguageGapPx) out.warnings.push('Skillset quality requirements failed.');
     if (out.experienceQuality.crossDomainBullet.enabled && (out.experienceQuality.crossDomainBullet.renderedStationCount !== out.experienceQuality.crossDomainBullet.expectedStationCount || out.experienceQuality.crossDomainBullet.allRenderedLast !== true || out.experienceQuality.crossDomainBullet.allStationsHaveMinimumSubstantiveBullets !== true || out.experienceQuality.crossDomainBullet.insufficientSubstantiveExperienceIds.length > 0)) out.warnings.push('Cross-domain experience bullet policy failed.');
     if (!out.toolsQuality.withinAllowedRange || out.toolsQuality.duplicateToolIds.length || out.toolsQuality.unverifiedVisibleToolIds.length) out.warnings.push('Tool quality requirements failed.');
     if (!out.assets.background.exists || !out.assets.background.computed || !out.assets.background.rendered || !out.assets.background.coversFullPage || !out.assets.background.bottomZoneNotGray) out.warnings.push('Background image did not cover the full page.');
     return out;
   }, {
     bgExists: backgroundFileExists,
-    variantMeta: { supplementary: cv.supplementary, fill: cv.fill, summary: cv.summaryMeta, summaryCandidates: cv.summaryCandidates, typographySelection, footerIconFiles, skillIconFiles, targetRoleFamily: cv.targetRoleFamily, crossDomainBulletText },
+    variantMeta: { supplementary: cv.supplementary, fill: cv.fill, summary: cv.summaryMeta, summaryCandidates: cv.summaryCandidates, typographySelection, skillsetLayoutSelection, footerIconFiles, skillIconFiles, targetRoleFamily: cv.targetRoleFamily, crossDomainBulletText },
   });
 
   async function measureLayout() {
@@ -1348,7 +1433,7 @@ if (!metrics.fonts.pdfEmbeddedFamilies.some((family) => /Arial-Italic|Liberation
 metrics.reviewQueue = buildReviewQueue();
 
 const report = {
-  success: renderer === 'playwright' && pageCount === 2 && metrics.summary.selectionSucceeded === true && metrics.summary.actualLines === metrics.summary.targetLines && metrics.overflows.length === 0 && metrics.collisions.length === 0 && metrics.warnings.length === 0 && metrics.ats.textExtractable && metrics.ats.primaryContentSuccess === true && metrics.ats.readingOrderValid === true && metrics.ats.primarySuccess === true && metrics.ats.missingTerms.length === 0 && metrics.ats.brokenTokensDetected.length === 0 && !metrics.ats.keywordStuffingRisk && !metrics.ats.hiddenTextDetected && metrics.skillsetsQuality?.renderedSkillsetCount === 4 && metrics.skillsetsQuality?.allBulletCountsWithinRange === true && metrics.skillsetsQuality?.allBulletsEvidenceBacked === true && metrics.skillsetsQuality?.uniqueIconCount === 4 && metrics.skillsetsQuality?.allIconsUsedExactlyOnce === true && metrics.skillsetsQuality?.allIconsLoaded === true && metrics.skillsetsQuality?.largestSafeIconSizeSelected === true && metrics.skillsetsQuality?.textWidthMaximized === true && (metrics.experienceQuality?.crossDomainBullet?.enabled !== true || (metrics.experienceQuality.crossDomainBullet.renderedStationCount === metrics.experienceQuality.crossDomainBullet.expectedStationCount && metrics.experienceQuality.crossDomainBullet.allRenderedLast === true && metrics.experienceQuality.crossDomainBullet.allStationsHaveMinimumSubstantiveBullets === true && metrics.experienceQuality.crossDomainBullet.insufficientSubstantiveExperienceIds.length === 0)),
+  success: renderer === 'playwright' && pageCount === 2 && metrics.summary.selectionSucceeded === true && metrics.summary.actualLines === metrics.summary.targetLines && metrics.overflows.length === 0 && metrics.collisions.length === 0 && metrics.warnings.length === 0 && metrics.ats.textExtractable && metrics.ats.primaryContentSuccess === true && metrics.ats.readingOrderValid === true && metrics.ats.primarySuccess === true && metrics.ats.missingTerms.length === 0 && metrics.ats.brokenTokensDetected.length === 0 && !metrics.ats.keywordStuffingRisk && !metrics.ats.hiddenTextDetected && metrics.skillsetsQuality?.renderedSkillsetCount === 4 && metrics.skillsetsQuality?.allBulletCountsWithinRange === true && metrics.skillsetsQuality?.allBulletsEvidenceBacked === true && metrics.skillsetsQuality?.uniqueIconCount === 4 && metrics.skillsetsQuality?.allIconsUsedExactlyOnce === true && metrics.skillsetsQuality?.allIconsLoaded === true && metrics.skillsetsQuality?.largestSafeIconSizeSelected === true && metrics.skillsetsQuality?.textWidthMaximized === true && metrics.skillsetsQuality?.noClippedSkillText === true && metrics.skillsetsQuality?.languageGapPx >= metrics.skillsetsQuality?.minimumLanguageGapPx && (metrics.experienceQuality?.crossDomainBullet?.enabled !== true || (metrics.experienceQuality.crossDomainBullet.renderedStationCount === metrics.experienceQuality.crossDomainBullet.expectedStationCount && metrics.experienceQuality.crossDomainBullet.allRenderedLast === true && metrics.experienceQuality.crossDomainBullet.allStationsHaveMinimumSubstantiveBullets === true && metrics.experienceQuality.crossDomainBullet.insufficientSubstantiveExperienceIds.length === 0)),
   variant: variantId,
   renderer,
   renderedAt: new Date().toISOString(),
