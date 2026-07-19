@@ -197,6 +197,18 @@ const toolChecks = {
   supplementaryIndicatorRendered: allReportsPresent && allReports.every((report) => report.toolsQuality?.toolsIndicator?.rendered === true),
   supplementaryGapIncreased: allReportsPresent && allReports.every((report) => report.footerQuality?.toolsMoreGapIncreaseRatio >= 1.45 && report.footerQuality?.toolsMoreGapIncreaseRatio <= 1.55),
 };
+const skillsetChecks = {
+  exactlyFourSkillsets: allReportsPresent && allReports.every((report) => report.skillsetsQuality?.renderedSkillsetCount === 4),
+  sixToEightBulletsEach: allReportsPresent && allReports.every((report) => report.skillsetsQuality?.allBulletCountsWithinRange === true),
+  allEvidenceBacked: allReportsPresent && allReports.every((report) => report.skillsetsQuality?.allBulletsEvidenceBacked === true),
+  titlesJobRelevant: allReportsPresent && allReports.every((report) => (report.skillsetsQuality?.skillsets || []).length === 4 && new Set((report.skillsetsQuality?.skillsets || []).map((section) => section.title)).size === 4),
+  allIconsLoaded: allReportsPresent && allReports.every((report) => report.skillsetsQuality?.allIconsLoaded === true),
+  allIconsUnique: allReportsPresent && allReports.every((report) => report.skillsetsQuality?.uniqueIconCount === 4 && report.skillsetsQuality?.allIconsUsedExactlyOnce === true),
+  largestSafeIconSizeSelected: allReportsPresent && allReports.every((report) => report.skillsetsQuality?.largestSafeIconSizeSelected === true),
+  textWidthMaximized: allReportsPresent && allReports.every((report) => report.skillsetsQuality?.textWidthMaximized === true),
+  languagesNotColliding: allReportsPresent && allReports.every((report) => (report.skillsetsQuality?.languageGapPx ?? 1) >= 0 && (report.collisions || []).every((collision) => !String(collision.elementA + collision.elementB).includes('languages'))),
+};
+experienceChecks.crossDomainBulletPolicyPassed = allReportsPresent && allReports.every((report) => report.experienceQuality?.crossDomainBullet?.enabled !== true || (report.experienceQuality.crossDomainBullet.renderedStationCount === report.experienceQuality.crossDomainBullet.expectedStationCount && report.experienceQuality.crossDomainBullet.allRenderedLast === true));
 const remainingDifferences = [];
 if (!allReportsPresent) remainingDifferences.push('Production render failed before PDF/report generation');
 for (const variant of variants) {
@@ -217,6 +229,7 @@ if (atsChecks.pdfJsSeparatorHandlingPassed !== true) remainingDifferences.push('
 for (const [key, value] of Object.entries(footerChecks)) if (!value) remainingDifferences.push(`footer check failed: ${key}`);
 for (const [key, value] of Object.entries(experienceChecks)) if (!value) remainingDifferences.push(`experience check failed: ${key}`);
 for (const [key, value] of Object.entries(toolChecks)) if (!value) remainingDifferences.push(`tool check failed: ${key}`);
+for (const [key, value] of Object.entries(skillsetChecks)) if (!value) remainingDifferences.push(`skillset check failed: ${key}`);
 const overallSuccess = allReportsPresent
   && artifactCompleteness.complete
   && allReports.every((report) => report.success === true)
@@ -225,6 +238,7 @@ const overallSuccess = allReportsPresent
   && Object.values(footerChecks).every(Boolean)
   && Object.values(experienceChecks).every(Boolean)
   && Object.values(toolChecks).every(Boolean)
+  && Object.values(skillsetChecks).every(Boolean)
   && remainingDifferences.length === 0;
 const visualReview = {
   reportsPresent,
@@ -241,6 +255,7 @@ const visualReview = {
   footerChecks,
   experienceChecks,
   toolChecks,
+  skillsetChecks,
   pageTransition: {
     pageOneTopInset: allReportsPresent ? Boolean(firstLayout.pageOneHasTopBackgroundStrip) : false,
     pageOneBottomContinuous: allReportsPresent ? firstLayout.pageOneHasBottomBackgroundStrip === false : false,

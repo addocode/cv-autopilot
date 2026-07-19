@@ -9,7 +9,9 @@
   ],
   "skillSectionTitles": {
     "technik-systeme": "ADMINISTRATION, GEVER & SYSTEME",
-    "arbeitsweise": "QUALITÄT, KOORDINATION & PROZESSE"
+    "arbeitsweise": "ARBEITSWEISE & ZUSAMMENARBEIT",
+    "digital-marketing-web": "DIGITALE ARBEITSMITTEL & SUPPORT",
+    "content-media": "KOMMUNIKATION & DOKUMENTATION"
   },
   "hiddenSkillSections": [
     "content-media"

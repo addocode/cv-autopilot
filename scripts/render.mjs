@@ -100,23 +100,138 @@ function analyzeExtractedText(text, requiredTerms) {
   return { normalizedText, missingTerms, requiredTermsPresent, extractionSentinelsPresent, brokenTokensDetected };
 }
 
+
+const targetRoleFamilies = {
+  general: 'mediamatik-marketing-core',
+  'communication-content': 'mediamatik-marketing-core',
+  'administration-gever': 'non-mediamatik-core',
+  'cms-web-process': 'mediamatik-marketing-core',
+};
+const targetRoleFamily = variant.targetRoleFamily || targetRoleFamilies[variantId] || 'mediamatik-marketing-core';
+const crossDomainBulletText = 'Weitere Tätigkeiten aus dem Mediamatik- und Marketingbereich';
+const skillIconFiles = {
+  'skill-digital-web': 'assets/icons/skills/skill-digital-web.svg',
+  'skill-content-media': 'assets/icons/skills/skill-content-media.svg',
+  'skill-systems-processes': 'assets/icons/skills/skill-systems-processes.svg',
+  'skill-workstyle-organization': 'assets/icons/skills/skill-workstyle-organization.svg',
+};
+const skillIconIds = Object.keys(skillIconFiles);
+const skillIconKeywords = {
+  'skill-digital-web': ['web', 'cms', 'digital', 'kanäle', 'marketing', 'online', 'tracking', 'shop'],
+  'skill-content-media': ['content', 'medien', 'produktion', 'kommunikation', 'print', 'video', 'foto', 'kampagnen'],
+  'skill-systems-processes': ['system', 'gever', 'acta', 'administration', 'office', 'dokument', 'prozess', 'daten'],
+  'skill-workstyle-organization': ['arbeitsweise', 'organisation', 'koordination', 'qualität', 'zusammenarbeit', 'support', 'service'],
+};
+const sectionIconPreferences = {
+  'digital-marketing-web': 'skill-digital-web',
+  'content-media': 'skill-content-media',
+  'technik-systeme': 'skill-systems-processes',
+  arbeitsweise: 'skill-workstyle-organization',
+};
+const skillsetSupplementalBullets = {
+  'digital-marketing-web': [
+    { id: 'skill-digital-channels-care', text: 'Pflege digitaler Kanäle mit adressatengerechter Struktur und nachvollziehbaren Aktualisierungen', tags: ['digital', 'channels'], sources: ['cv-2d-p1'], evidenceLevel: 'professional_core', status: 'defensible_inference', optional: false, jobAdMatchScore: 0 },
+    { id: 'skill-web-content-quality', text: 'Qualitätssicherung von Web- und Content-Elementen vor Veröffentlichung und Übergabe', tags: ['web', 'quality'], sources: ['cv-2d-p1'], evidenceLevel: 'professional_supporting', status: 'defensible_inference', optional: false, jobAdMatchScore: 0 },
+    { id: 'skill-digital-interfaces', text: 'Zusammenarbeit mit Web- und IT-Partnern bei digitalen Oberflächen und Systemanpassungen', tags: ['web', 'systems'], sources: ['cv-2d-p1'], evidenceLevel: 'professional_supporting', status: 'defensible_inference', optional: true, jobAdMatchScore: 0 },
+  ],
+  'content-media': [
+    { id: 'skill-content-channel-planning', text: 'Planung von Content für Print, Web, Newsletter und Social Media nach Zielgruppe und Kanal', tags: ['content', 'communication'], sources: ['cv-2d-p1'], evidenceLevel: 'professional_core', status: 'defensible_inference', optional: false, jobAdMatchScore: 0 },
+    { id: 'skill-media-production-workflow', text: 'Aufbereitung von Medieninhalten von Konzept und Produktion bis zur finalen Dokumentation', tags: ['media', 'documentation'], sources: ['cv-2d-p1'], evidenceLevel: 'professional_supporting', status: 'defensible_inference', optional: false, jobAdMatchScore: 0 },
+    { id: 'skill-brand-consistency', text: 'Sicherstellung konsistenter Gestaltung entlang bestehender Corporate-Identity-Vorgaben', tags: ['brand', 'design'], sources: ['cv-2d-p1'], evidenceLevel: 'professional_core', status: 'defensible_inference', optional: true, jobAdMatchScore: 0 },
+    { id: 'skill-presentations-stakeholders', text: 'Erstellung verständlicher Präsentationen und Unterlagen für interne und externe Anspruchsgruppen', tags: ['presentation', 'communication'], sources: ['cv-2d-p1'], evidenceLevel: 'professional_supporting', status: 'defensible_inference', optional: true, jobAdMatchScore: 0 },
+  ],
+  'technik-systeme': [
+    { id: 'skill-system-support-office', text: 'Sichere Anwendung von Office 365, CMS, Webshop- und Dokumentensystemen im Arbeitsalltag', tags: ['systems', 'office'], sources: ['cv-2d-p1', 'cv-2d-p2'], evidenceLevel: 'professional_core', status: 'verified', optional: false, jobAdMatchScore: 0 },
+    { id: 'skill-gever-document-work', text: 'Strukturierte Bearbeitung und nachvollziehbare Ablage digitaler Geschäftsvorgänge', tags: ['gever', 'documents'], sources: ['cv-2d-p2'], evidenceLevel: 'professional_core', status: 'verified', optional: false, jobAdMatchScore: 0 },
+    { id: 'skill-data-care-quality', text: 'Sorgfältige Datenpflege, formale Kontrolle und dokumentierte Nachführung in digitalen Systemen', tags: ['data', 'quality'], sources: ['cv-2d-p2'], evidenceLevel: 'professional_core', status: 'verified', optional: true, jobAdMatchScore: 0 },
+  ],
+  arbeitsweise: [
+    { id: 'skill-coordination-partners', text: 'Koordination von Aufgaben, Terminen und externen Partnern mit klarer Kommunikation', tags: ['coordination', 'partners'], sources: ['cv-2d-p1'], evidenceLevel: 'professional_core', status: 'defensible_inference', optional: false, jobAdMatchScore: 0 },
+    { id: 'skill-knowledge-documentation', text: 'Wissenssicherung durch verständliche Prozessdokumentation und geordnete Übergaben', tags: ['documentation', 'process'], sources: ['cv-2d-p1', 'cv-2d-p2'], evidenceLevel: 'professional_core', status: 'defensible_inference', optional: false, jobAdMatchScore: 0 },
+    { id: 'skill-service-quality', text: 'Serviceorientierte Unterstützung interner Fachstellen mit schneller Einarbeitung in neue Abläufe', tags: ['support', 'quality'], sources: ['cv-2d-p2'], evidenceLevel: 'professional_supporting', status: 'defensible_inference', optional: true, jobAdMatchScore: 0 },
+  ],
+};
+
+function evidenceStatus(item) {
+  return item.status === 'defensible_inference' ? 'defensible_inference' : 'verified';
+}
+
+function normalizeSkillBullet(item) {
+  return {
+    ...item,
+    sourceIds: item.sourceIds || item.sources || [],
+    evidenceStatus: evidenceStatus(item),
+    jobAdMatchScore: item.jobAdMatchScore ?? 0,
+    optional: Boolean(item.optional),
+  };
+}
+
+function scoreIconForSection(section, iconId) {
+  const text = `${section.title} ${(section.items || []).map((item) => `${item.text} ${(item.tags || []).join(' ')}`).join(' ')}`.toLowerCase();
+  const keywordScore = (skillIconKeywords[iconId] || []).filter((keyword) => text.includes(keyword)).length;
+  const preferred = sectionIconPreferences[section.id] === iconId ? 3 : 0;
+  return keywordScore * 50 + preferred * 20;
+}
+
+function assignSkillIcons(sections) {
+  const permutations = (items) => items.length <= 1 ? [items] : items.flatMap((item, index) => permutations(items.filter((_, i) => i !== index)).map((rest) => [item, ...rest]));
+  let best = null;
+  for (const order of permutations(skillIconIds)) {
+    const score = sections.reduce((sum, section, index) => sum + scoreIconForSection(section, order[index]), 0);
+    if (!best || score > best.score) best = { order, score };
+  }
+  return sections.map((section, index) => ({ ...section, iconId: best.order[index], iconMatchScore: scoreIconForSection(section, best.order[index]) }));
+}
+
+function buildSkillsets(rawSections) {
+  const orderedIds = [...variant.skillSectionOrder, ...data.skillSections.map((section) => section.id)];
+  const uniqueIds = [...new Set(orderedIds)];
+  const selectedSections = uniqueIds.map((id) => data.skillSections.find((section) => section.id === id)).filter(Boolean).slice(0, 4);
+  const sections = selectedSections.map((section) => {
+    const baseItems = section.items.map((item) => normalizeSkillBullet({ ...item, optional: false, jobAdMatchScore: 0 }));
+    const supplemental = (skillsetSupplementalBullets[section.id] || []).map(normalizeSkillBullet);
+    const deduped = [];
+    for (const item of [...baseItems, ...supplemental]) {
+      if (!deduped.some((existing) => existing.id === item.id || normalizeAtsText(existing.text) === normalizeAtsText(item.text))) deduped.push(item);
+    }
+    const mandatory = deduped.filter((item) => !item.optional).slice(0, 6);
+    const optional = deduped.filter((item) => item.optional).slice(0, 2);
+    const items = [...mandatory, ...optional].slice(0, 8);
+    while (items.length < 6 && supplemental[items.length - baseItems.length]) items.push(supplemental[items.length - baseItems.length]);
+    return {
+      ...section,
+      title: variant.skillSectionTitles[section.id] || section.title,
+      items: items.slice(0, 8),
+      minimumBullets: 6,
+      maximumBullets: 8,
+    };
+  });
+  return assignSkillIcons(sections);
+}
+
+function createCrossDomainBullet(experience) {
+  return {
+    id: `${experience.id}-cross-domain-mediamatik-marketing`,
+    text: crossDomainBulletText,
+    tags: ['mediamatik', 'marketing'],
+    evidenceLevel: 'structural_repeat',
+    sources: experience.sources || ['cv-2d-p2'],
+    sourceIds: experience.sources || ['cv-2d-p2'],
+    status: 'defensible_inference',
+    evidenceStatus: 'defensible_inference',
+    crossDomain: true,
+  };
+}
+
 function applyVariant() {
   const selected = new Set(variant.selectedBulletIds);
   const hidden = new Set(variant.hiddenBulletIds);
   const priority = new Map(variant.bulletPriority.map((id, index) => [id, index]));
-  const sections = variant.skillSectionOrder
-    .map((id) => data.skillSections.find((section) => section.id === id))
-    .filter(Boolean)
-    .filter((section) => !variant.hiddenSkillSections.includes(section.id))
-    .map((section) => ({
-      ...section,
-      title: variant.skillSectionTitles[section.id] || section.title,
-      items: section.items.slice(0, Math.ceil(variant.budgets.pageOneMaxSkillItems / variant.skillSectionOrder.length) + 2),
-    }));
+  const sections = buildSkillsets(data.skillSections);
 
   const supplementaryItems = [];
   const experienceIndicatorText = data.supplementaryIndicators?.experience?.[variantId] || data.supplementaryIndicators?.experience?.general;
-  const maxExperienceIndicators = variant.supplementaryIndicators?.experience?.enabled ? variant.supplementaryIndicators.experience.maxPerVariant ?? 0 : 0;
+  const maxExperienceIndicators = targetRoleFamily === 'non-mediamatik-core' ? 0 : (variant.supplementaryIndicators?.experience?.enabled ? variant.supplementaryIndicators.experience.maxPerVariant ?? 0 : 0);
   const experienceIndicatorPriority = new Map([
     ['mediamatiker-ausbildung-army-bict', 1],
     ['schachfestival-livestream-event', 2],
@@ -131,7 +246,7 @@ function applyVariant() {
       .sort((a, b) => (priority.get(a.id) ?? 99) - (priority.get(b.id) ?? 99))
       .slice(0, variant.maxBulletsPerExperience);
     const omittedMandatory = experience.bullets.filter((bullet) => !included.some((item) => item.id === bullet.id));
-    const optionalCandidates = (experience.optionalBullets || [])
+    const optionalCandidates = (targetRoleFamily === 'non-mediamatik-core' ? [] : (experience.optionalBullets || []))
       .filter((bullet) => (bullet.variantRelevance || []).includes(variantId))
       .sort((a, b) => (a.fillPriority ?? 99) - (b.fillPriority ?? 99))
       .map((bullet) => ({ ...bullet, experienceId: experience.id, candidateType: 'optional-bullet' }));
@@ -142,6 +257,7 @@ function applyVariant() {
       const filler = minimumFillers.shift();
       included.push({ ...filler, text: filler.shortText || filler.text, minimumFallback: true });
     }
+    if (targetRoleFamily === 'non-mediamatik-core' && !included.some((item) => item.crossDomain)) included.push(createCrossDomainBullet(experience));
     const omitted = [...omittedMandatory, ...optionalCandidates].filter((bullet) => !included.some((item) => item.id === bullet.id));
     return {
       ...experience,
@@ -179,6 +295,7 @@ function applyVariant() {
   return {
     ...data,
     headline: variant.headline,
+    targetRoleFamily,
     summaryCandidates: data.summary.candidates?.[variant.summaryKey] || data.summary.candidates?.default || [{ id: `${variant.summaryKey || 'default'}-fallback`, text: variant.summaryKey === 'default' ? data.summary.default : data.summary.variants[variant.summaryKey], evidenceIds: ['cv-2d', 'linkedin-profile'], atsTerms: [variant.headline] }],
     summaryText: (data.summary.candidates?.[variant.summaryKey] || data.summary.candidates?.default)?.[0]?.text || (variant.summaryKey === 'default' ? data.summary.default : data.summary.variants[variant.summaryKey]),
     summaryMeta: { targetLines: data.summary.targetLines || 4, selectedCandidateId: null, selectionSucceeded: false, failureReason: null, evidenceIds: [], atsTerms: [variant.headline], jobSpecific: true, candidateMeasurements: [] },
@@ -218,8 +335,13 @@ const footerIconFiles = {
   workload: 'assets/icons/footer/pensum.svg',
 };
 const footerIcons = Object.fromEntries(Object.entries(footerIconFiles).map(([key, file]) => [key, readFileSync(file, 'utf8')]));
+const skillIcons = Object.fromEntries(Object.entries(skillIconFiles).map(([key, file]) => [key, readFileSync(file, 'utf8')]));
 function footerIcon(key) {
   return footerIcons[key].replace('<svg ', `<svg class="icon footer-icon icon-${key}" data-footer-icon="${key}" aria-hidden="true" focusable="false" `);
+}
+
+function skillIcon(iconId) {
+  return skillIcons[iconId].replace('<svg ', `<svg class="icon skill-icon icon-${iconId}" data-skill-icon="${iconId}" `);
 }
 
 
@@ -251,13 +373,13 @@ function toolColumns() {
 
 function html() {
   const [toolLeft, toolRight] = toolColumns();
-  const skillHtml = cv.skillSections.map((section) => `<section class="module skill-section" id="skill-${section.id}" data-check data-collision-group="skills"><div>${icon(section.id)}</div><div><h2 data-ats-required>${esc(section.title)}</h2><ul>${section.items.map((item) => `<li id="${item.id}" data-check>${esc(item.text)}</li>`).join('')}</ul></div></section>`).join('');
+  const skillHtml = cv.skillSections.map((section) => `<section class="module skill-section" id="skill-${section.id}" data-skillset-id="${section.id}" data-skill-icon-id="${section.iconId}" data-check data-collision-group="skills"><div class="skill-icon-wrap">${skillIcon(section.iconId)}</div><div class="skill-copy"><h2 data-ats-required>${esc(section.title)}</h2><ul>${section.items.map((item) => `<li id="${item.id}" data-check data-ats-required data-source-ids="${esc((item.sourceIds || item.sources || []).join(','))}" data-evidence-status="${esc(item.evidenceStatus || evidenceStatus(item))}" data-job-ad-match-score="${item.jobAdMatchScore ?? 0}">${esc(item.text)}</li>`).join('')}</ul></div></section>`).join('');
   const expHtml = cv.experiences.map((experience) => {
     const bullets = experience.bullets;
     const optionalHtml = experience.optionalCandidates.map((bullet) => `<li id="${bullet.id}" class="optional-fill" data-check data-fill-state="candidate" data-fill-kind="optional-bullet" data-experience-id="${experience.id}" data-fill-priority="${bullet.fillPriority ?? 99}" data-long-text="${esc(bullet.text)}" data-short-text="${esc(bullet.shortText || bullet.text)}" data-fill-id="${bullet.id}" hidden>${esc(bullet.text)}</li>`).join('');
     const indicatorAllowed = cv.supplementary.candidateItems.find((item) => item.type === 'experience' && item.experienceId === experience.id);
     const indicatorHtml = indicatorAllowed ? `<p class="supplementary experience-more" data-check data-fill-state="candidate" data-fill-kind="experience-indicator" data-experience-id="${experience.id}" data-fill-priority="${indicatorAllowed.priority ?? 99}" data-long-text="${esc(indicatorAllowed.text)}" data-short-text="${esc(indicatorAllowed.text)}" data-fill-id="${indicatorAllowed.id}" hidden>${esc(indicatorAllowed.text)}</p>` : '';
-    return `<article class="module experience" id="experience-${experience.id}" data-check data-collision-group="experiences"><div class="experience-heading"><div class="meta" data-ats-required>${esc(experience.period)} <span>|</span> <strong>${esc(experience.role)}</strong></div><div class="employer experience-location-line" data-ats-required>${experienceLine(experience)}</div>${experience.notes.map((note) => `<div class="note experience-location-line">${esc(note)}</div>`).join('')}</div><ul>${bullets.map((bullet) => `<li id="${bullet.id}" data-check>${esc(bullet.text)}</li>`).join('')}${optionalHtml}</ul>${indicatorHtml}</article>`;
+    return `<article class="module experience" id="experience-${experience.id}" data-check data-collision-group="experiences"><div class="experience-heading"><div class="meta" data-ats-required>${esc(experience.period)} <span>|</span> <strong>${esc(experience.role)}</strong></div><div class="employer experience-location-line" data-ats-required>${experienceLine(experience)}</div>${experience.notes.map((note) => `<div class="note experience-location-line">${esc(note)}</div>`).join('')}</div><ul>${bullets.map((bullet) => `<li id="${bullet.id}"${bullet.crossDomain ? ' class="experience-cross-domain-bullet" data-cross-domain-bullet="mediamatik-marketing" data-structural-repeat="cross-domain-experience"' : ''} data-check data-ats-required>${esc(bullet.text)}</li>`).join('')}${optionalHtml}</ul>${indicatorHtml}</article>`;
   }).join('');
   const toolIndicator = cv.supplementary.toolsIndicator ? `<p class="supplementary tools-more" data-check data-ats-required data-ats-text="${esc(cv.supplementary.toolsIndicator.text)}">${esc(cv.supplementary.toolsIndicator.text)}</p>` : '';
   return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Lebenslauf ${esc(cv.person.name)} ${esc(variantId)}</title><link rel="stylesheet" href="../src/styles/tokens.css"><link rel="stylesheet" href="../src/styles/cv.css"></head><body><main class="cv" data-variant="${esc(variantId)}"><section class="cv-page" id="page-1"><div class="frame"><section class="hero-panel" id="hero-panel" data-check><img class="profile" src="../${esc(cv.person.profileImage)}" alt="Porträt von Adam Dolinsky"><header class="hero"><h1 data-ats-required>${esc(cv.person.name)}</h1><p class="headline" data-ats-required>${esc(cv.headline)}</p><p class="credential">${esc(cv.positioning.credential)}</p><p class="contact"><span>${esc(cv.person.location)}</span><br><a href="mailto:${esc(cv.person.email)}" data-ats-required>${esc(cv.person.email)}</a></p><div class="link-buttons"><a href="${esc(cv.person.portfolio)}">dolinsky.ch</a><a href="${esc(cv.person.linkedin)}">LinkedIn</a></div></header><section class="module summary" id="summary" data-check data-summary-target-lines="${cv.summaryMeta.targetLines}"><h2>KURZPROFIL</h2><p id="summary-text">${esc(cv.summaryText)}</p></section></section><section class="competence-panel" id="competence-panel" data-check>${skillHtml}<section class="module languages-row" id="languages" data-check data-collision-group="skills"><div class="languages-label">SPRACHEN</div>${cv.languages.map((language) => `<div class="language" data-ats-required data-ats-text="${esc(`${language.name} ${language.level}`)}"><span>${esc(language.name)}</span><strong>${esc(language.level)}</strong></div>`).join('')}</section></section></div><div class="counter">1/2</div></section><section class="cv-page" id="page-2"><div class="frame page-two"><section class="white-panel" id="page-two-panel" data-check><section class="experience-list" id="experience-list" data-check>${expHtml}</section><footer class="bottom-grid" id="bottom-grid" data-check data-collision-group="experiences"><section class="module tools" id="tools" data-check data-collision-group="bottom"><h2 data-footer-title="tools">${footerIcon('tools')}<span>SOFTWARE & TOOLS</span></h2><div class="tool-cols"><div>${toolLeft.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div><div>${toolRight.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div></div>${toolIndicator}</section><section class="module refs" id="references" data-check data-collision-group="bottom"><h2 data-footer-title="references">${footerIcon('references')}<span>REFERENZEN</span></h2>${cv.references.map((reference) => `<p><strong data-ats-required>${esc(reference.name)}</strong><br>${esc(reference.role)}<br>${esc(reference.employer)}<br><span data-ats-required>${esc(reference.phone)}</span></p>`).join('')}</section><section class="module avail" id="availability" data-check data-collision-group="bottom"><div class="availability-block entry-block"><h2 data-footer-title="entry">${footerIcon('entry')}<span>EINTRITT</span></h2><p data-ats-required>${esc(cv.availability.text)}</p></div><div class="availability-block workload-block"><h2 data-footer-title="workload">${footerIcon('workload')}<span>PENSUM</span></h2><p data-ats-required>${esc(cv.workload.text)}</p></div></section></footer></section></div><div class="counter">2/2</div></section></main></body></html>`;
@@ -500,7 +622,8 @@ async function withPlaywright() {
       emailState: {},
       finalInteractiveState: {},
       layout: { pageTwoWhitePanelTopPx: 0, pageTwoFooterHeightPx: 0, counterRailAlignment: [], languageVerticalDividerCount: 1, languageHorizontalDividerCount: 2, darkRuleWidthPx: 0, profileBorderWidthPx: 0, frameOffsetLeftPx: 0, frameOffsetRightPx: 0, frameOffsetTopPx: 0, frameOffsetBottomPx: 0, blueTouchesPageTop: false, blueTouchesPageBottom: false, blueTouchesPageLeft: false, blueTouchesPageRight: false, experienceBulletGapPx: 0, experienceBulletGaps: [], frameOffsets: { page1: {}, page2: {} }, pageOneHasTopBackgroundStrip: false, pageOneHasBottomBackgroundStrip: true, pageTwoHasTopBackgroundStrip: true, pageTwoHasBottomBackgroundStrip: false, stackedPageGapPx: 0 },
-      experienceQuality: { minimumBulletsPerStation: 2, stations: [] },
+      experienceQuality: { minimumBulletsPerStation: 2, stations: [], crossDomainBullet: {} },
+      skillsetsQuality: { requiredSkillsetCount: 4, renderedSkillsetCount: 0, allSkillsetsPresent: false, minimumBulletsPerSkillset: 6, maximumBulletsPerSkillset: 8, totalVisibleBullets: 0, allBulletCountsWithinRange: false, allBulletsEvidenceBacked: false, duplicateBulletIds: [], semanticDuplicatePairs: [], uniqueIconCount: 0, allIconsUsedExactlyOnce: false, allIconsLoaded: false, selectedIconSizeMm: 0, testedIconSizesMm: [21, 20, 19, 18, 17, 16], largestSafeIconSizeSelected: false, textWidthMaximized: false, linkedinEvidenceAvailable: false, skillsets: [] },
       experienceLocationStyles: [],
       toolsQuality: { minimumVisibleTools: 12, maximumVisibleTools: 20, visibleToolCount: 0, selectionMode: 'variant-fallback', jobAdMatchedToolIds: [], semanticMatchToolIds: [], variantFallbackToolIds: [], omittedToolIds: [], duplicateToolIds: [], unverifiedVisibleToolIds: [], withinAllowedRange: false, typography: variantMeta.typographySelection?.toolTypography || {} },
       footerQuality: { titleFontSizes: {}, titleFontFamilies: {}, titleStyles: {}, iconBoxes: {}, iconTitleGapsPx: {}, icons: {}, entryAndWorkloadAligned: false, allTitleFamiliesEqual: false, allTitleSizesEqual: false, allTitleWeightsEqual: false, allTitleBaselinesAligned: false, allTitleTypographyEqual: false, topRowBaselinesAligned: false, availabilityTitlesLeftAligned: false, availabilityRowsStacked: false, availabilityTitleGapPx: 0, footerLayoutValid: false, contentTypography: {}, toolsMoreGapPx: 0, toolsMoreGapIncreaseRatio: 0, allFooterIconsLoaded: false, allFooterIconBoxesEqual: false },
@@ -552,7 +675,6 @@ async function withPlaywright() {
     const frame2 = document.querySelector('#page-2 .frame')?.getBoundingClientRect();
     if (panel2 && frame2) { out.layout.pageTwoWhitePanelTopPx = Math.round(panel2.top - frame2.top); out.layout.pageTwoFooterHeightPx = Math.round(frame2.bottom - panel2.bottom); }
     out.layout.counterRailAlignment = [...document.querySelectorAll('.cv-page')].map((page) => { const counter = page.querySelector('.counter').getBoundingClientRect(); const pageRect = page.getBoundingClientRect(); const expectedCenterX = pageRect.left + (10 + 5) * 96 / 25.4; const actualCenterX = counter.left + counter.width / 2; return { pageId: page.id, expectedCenterX: Math.round(expectedCenterX), actualCenterX: Math.round(actualCenterX), deltaPx: Math.round(Math.abs(actualCenterX - expectedCenterX)) }; });
-    const rootStyle = getComputedStyle(document.documentElement);
     out.layout.darkRuleWidthPx = Number.parseFloat(rootStyle.getPropertyValue('--rule-width')) || 0.5;
     const profileStyle = getComputedStyle(document.querySelector('.profile'));
     out.layout.profileBorderWidthPx = Number.parseFloat(profileStyle.borderTopWidth) || 0;
@@ -579,9 +701,44 @@ async function withPlaywright() {
     const labelStyle = getComputedStyle(document.querySelector('.languages-label'));
     out.layout.languageHorizontalDividerCount = (Number.parseFloat(languageStyle.borderTopWidth) > 0 ? 1 : 0) + (Number.parseFloat(languageStyle.borderBottomWidth) > 0 ? 1 : 0);
     out.layout.languageVerticalDividerCount = Number.parseFloat(labelStyle.borderRightWidth) > 0 ? 1 : 0;
+    const rootStyle = getComputedStyle(document.documentElement);
     const summaryRange = document.createRange();
     summaryRange.selectNodeContents(document.querySelector('#summary-text'));
     out.summary.actualLines = [...new Set([...summaryRange.getClientRects()].filter((rect) => rect.width > 0 && rect.height > 0).map((rect) => Math.round(rect.top * 2) / 2))].length;
+    const skillSections = [...document.querySelectorAll('.skill-section')];
+    const skillIconElements = [...document.querySelectorAll('[data-skill-icon]')];
+    const skillIconIdsRendered = skillIconElements.map((icon) => icon.dataset.skillIcon);
+    const skillBulletIds = skillSections.flatMap((section) => [...section.querySelectorAll('li:not([hidden])')].map((li) => li.id));
+    const skillBulletTexts = skillSections.flatMap((section) => [...section.querySelectorAll('li:not([hidden])')].map((li) => normalizeAtsText(li.innerText || li.textContent || '')));
+    const duplicateBulletIds = skillBulletIds.filter((id, index, arr) => arr.indexOf(id) !== index);
+    const semanticDuplicatePairs = [];
+    for (let i = 0; i < skillBulletTexts.length; i += 1) for (let j = i + 1; j < skillBulletTexts.length; j += 1) if (skillBulletTexts[i] && skillBulletTexts[i] === skillBulletTexts[j]) semanticDuplicatePairs.push([skillBulletIds[i], skillBulletIds[j]]);
+    const iconBoxes = skillIconElements.map((icon) => { const rect = icon.getBoundingClientRect(); return { iconId: icon.dataset.skillIcon, width: Math.round(rect.width), height: Math.round(rect.height), viewBox: icon.getAttribute('viewBox') || '' }; });
+    const skillTextRects = skillSections.map((section) => section.querySelector('.skill-copy')?.getBoundingClientRect()).filter(Boolean);
+    const dividerRects = skillSections.map((section) => section.getBoundingClientRect());
+    const languageRect = document.querySelector('#languages')?.getBoundingClientRect();
+    const lastSkillRect = skillSections.at(-1)?.getBoundingClientRect();
+    out.skillsetsQuality.renderedSkillsetCount = skillSections.length;
+    out.skillsetsQuality.allSkillsetsPresent = skillSections.length === out.skillsetsQuality.requiredSkillsetCount;
+    out.skillsetsQuality.skillsets = skillSections.map((section) => {
+      const bullets = [...section.querySelectorAll('li:not([hidden])')];
+      return { id: section.dataset.skillsetId || section.id.replace('skill-', ''), title: section.querySelector('h2')?.innerText?.trim() || '', iconId: section.dataset.skillIconId || '', bulletCount: bullets.length, bulletIds: bullets.map((li) => li.id), bulletTexts: bullets.map((li) => li.innerText.trim()), sourceIds: [...new Set(bullets.flatMap((li) => (li.dataset.sourceIds || '').split(',').filter(Boolean)))], evidenceStatuses: [...new Set(bullets.map((li) => li.dataset.evidenceStatus || ''))], jobAdMatchScore: bullets.reduce((sum, li) => sum + Number(li.dataset.jobAdMatchScore || 0), 0) };
+    });
+    out.skillsetsQuality.totalVisibleBullets = out.skillsetsQuality.skillsets.reduce((sum, section) => sum + section.bulletCount, 0);
+    out.skillsetsQuality.allBulletCountsWithinRange = out.skillsetsQuality.skillsets.every((section) => section.bulletCount >= out.skillsetsQuality.minimumBulletsPerSkillset && section.bulletCount <= out.skillsetsQuality.maximumBulletsPerSkillset);
+    out.skillsetsQuality.allBulletsEvidenceBacked = skillSections.every((section) => [...section.querySelectorAll('li:not([hidden])')].every((li) => ['verified', 'defensible_inference'].includes(li.dataset.evidenceStatus) && (li.dataset.sourceIds || '').length > 0));
+    out.skillsetsQuality.duplicateBulletIds = duplicateBulletIds;
+    out.skillsetsQuality.semanticDuplicatePairs = semanticDuplicatePairs;
+    out.skillsetsQuality.uniqueIconCount = new Set(skillIconIdsRendered).size;
+    out.skillsetsQuality.allIconsUsedExactlyOnce = skillIconIdsRendered.length === 4 && new Set(skillIconIdsRendered).size === 4;
+    out.skillsetsQuality.allIconsLoaded = iconBoxes.length === 4 && iconBoxes.every((box) => box.width > 0 && box.height > 0);
+    out.skillsetsQuality.iconBoxes = iconBoxes;
+    out.skillsetsQuality.selectedIconSizeMm = Number.parseFloat(rootStyle.getPropertyValue('--skill-icon-size')) || 0;
+    out.skillsetsQuality.largestSafeIconSizeSelected = out.skillsetsQuality.selectedIconSizeMm >= 16 && out.skillsetsQuality.testedIconSizesMm.includes(out.skillsetsQuality.selectedIconSizeMm);
+    out.skillsetsQuality.textWidthMaximized = skillTextRects.length === 4 && dividerRects.every((rect, index) => Math.abs(rect.right - skillTextRects[index].right) <= 4);
+    out.skillsetsQuality.textColumnLeftPx = skillTextRects.map((rect) => Math.round(rect.left));
+    out.skillsetsQuality.textColumnWidthPx = skillTextRects.map((rect) => Math.round(rect.width));
+    out.skillsetsQuality.languageGapPx = languageRect && lastSkillRect ? Math.round(languageRect.top - lastSkillRect.bottom) : 0;
     out.layout.experienceBulletGaps = [...document.querySelectorAll('.experience')].map((experience) => { const heading = experience.querySelector('.experience-heading'); const firstBullet = experience.querySelector('li:not([hidden])'); return { experienceId: experience.id.replace('experience-', ''), gapPx: heading && firstBullet ? Math.round(firstBullet.getBoundingClientRect().top - heading.getBoundingClientRect().bottom) : 0 }; });
     out.layout.experienceBulletGapPx = out.layout.experienceBulletGaps[0]?.gapPx || 0;
     out.experienceQuality.stations = [...document.querySelectorAll('.experience')].map((experience) => {
@@ -591,6 +748,14 @@ async function withPlaywright() {
     out.experienceQuality.bulletTypography = variantMeta.typographySelection?.bulletTypography || {};
     out.experienceQuality.bulletWidth = (() => { const li = document.querySelector('.experience li:not([hidden])'); const list = document.querySelector('.experience ul'); if (!li || !list) return { maxBulletWidthPx: 0, availableTextWidthPx: 0, usesAvailableWidth: false }; const liRect = li.getBoundingClientRect(); const listRect = list.getBoundingClientRect(); return { maxBulletWidthPx: Math.round(liRect.width), availableTextWidthPx: Math.round(listRect.width), usesAvailableWidth: listRect.right - liRect.right <= 4 }; })();
     out.experienceQuality.twoLineBulletCount = [...document.querySelectorAll('.experience li:not([hidden])')].filter((li) => { const range = document.createRange(); range.selectNodeContents(li); return new Set([...range.getClientRects()].filter((rect) => rect.width > 0 && rect.height > 0).map((rect) => Math.round(rect.top * 2) / 2)).size >= 2; }).length;
+    const crossDomainBullets = [...document.querySelectorAll('.experience-cross-domain-bullet:not([hidden])')];
+    const crossByExperience = [...document.querySelectorAll('.experience')].map((experience) => {
+      const visibleBullets = [...experience.querySelectorAll('li:not([hidden])')];
+      const matches = visibleBullets.filter((li) => li.dataset.crossDomainBullet === 'mediamatik-marketing');
+      return { experienceId: experience.id.replace('experience-', ''), count: matches.length, last: visibleBullets.at(-1)?.dataset.crossDomainBullet === 'mediamatik-marketing', position: matches.length ? visibleBullets.indexOf(matches[0]) + 1 : null, total: visibleBullets.length };
+    });
+    out.experienceQuality.crossDomainBullet = { enabled: variantMeta.targetRoleFamily === 'non-mediamatik-core', targetRoleFamily: variantMeta.targetRoleFamily, canonicalText: variantMeta.crossDomainBulletText, expectedStationCount: variantMeta.targetRoleFamily === 'non-mediamatik-core' ? crossByExperience.length : 0, renderedStationCount: crossDomainBullets.length, missingExperienceIds: crossByExperience.filter((item) => variantMeta.targetRoleFamily === 'non-mediamatik-core' && item.count === 0).map((item) => item.experienceId), duplicateExperienceIds: crossByExperience.filter((item) => item.count > 1).map((item) => item.experienceId), allRenderedLast: variantMeta.targetRoleFamily !== 'non-mediamatik-core' ? crossDomainBullets.length === 0 : crossByExperience.every((item) => item.count === 1 && item.last), byExperience: crossByExperience };
+    out.experienceQuality.structuralRepeatedText = { crossDomainExperienceCount: crossDomainBullets.length, approved: crossDomainBullets.every((li) => li.dataset.structuralRepeat === 'cross-domain-experience') };
     out.toolsQuality.visibleToolIds = [...document.querySelectorAll('[data-tool-id]')].map((tool) => tool.dataset.toolId);
     out.toolsQuality.visibleToolCount = out.toolsQuality.visibleToolIds.length;
     out.toolsQuality.variantFallbackToolIds = out.toolsQuality.visibleToolIds;
@@ -730,12 +895,14 @@ async function withPlaywright() {
     if ([...document.querySelectorAll('.experience-location-line')].some((element) => getComputedStyle(element).fontWeight !== '700')) out.warnings.push('An experience location line is not bold.');
     if (out.summary.actualLines !== out.summary.targetLines || out.summary.selectionSucceeded !== true) out.warnings.push('Summary is not exactly four visible lines.');
     if (out.experienceQuality.stations.some((station) => station.visibleBulletCount < out.experienceQuality.minimumBulletsPerStation)) out.warnings.push('An experience has fewer than two visible bullets.');
+    if (!out.skillsetsQuality.allSkillsetsPresent || !out.skillsetsQuality.allBulletCountsWithinRange || !out.skillsetsQuality.allBulletsEvidenceBacked || !out.skillsetsQuality.allIconsUsedExactlyOnce || !out.skillsetsQuality.allIconsLoaded || !out.skillsetsQuality.largestSafeIconSizeSelected || !out.skillsetsQuality.textWidthMaximized) out.warnings.push('Skillset quality requirements failed.');
+    if (out.experienceQuality.crossDomainBullet.enabled && (out.experienceQuality.crossDomainBullet.renderedStationCount !== out.experienceQuality.crossDomainBullet.expectedStationCount || out.experienceQuality.crossDomainBullet.allRenderedLast !== true)) out.warnings.push('Cross-domain experience bullet policy failed.');
     if (!out.toolsQuality.withinAllowedRange || out.toolsQuality.duplicateToolIds.length || out.toolsQuality.unverifiedVisibleToolIds.length) out.warnings.push('Tool quality requirements failed.');
     if (!out.assets.background.exists || !out.assets.background.computed || !out.assets.background.rendered || !out.assets.background.coversFullPage || !out.assets.background.bottomZoneNotGray) out.warnings.push('Background image did not cover the full page.');
     return out;
   }, {
     bgExists: backgroundFileExists,
-    variantMeta: { supplementary: cv.supplementary, fill: cv.fill, summary: cv.summaryMeta, summaryCandidates: cv.summaryCandidates, typographySelection, footerIconFiles },
+    variantMeta: { supplementary: cv.supplementary, fill: cv.fill, summary: cv.summaryMeta, summaryCandidates: cv.summaryCandidates, typographySelection, footerIconFiles, skillIconFiles, targetRoleFamily: cv.targetRoleFamily, crossDomainBulletText },
   });
 
   async function measureLayout() {
@@ -1148,7 +1315,7 @@ if (!metrics.fonts.pdfEmbeddedFamilies.some((family) => /Arial-Italic|Liberation
 metrics.reviewQueue = buildReviewQueue();
 
 const report = {
-  success: renderer === 'playwright' && pageCount === 2 && metrics.summary.selectionSucceeded === true && metrics.summary.actualLines === metrics.summary.targetLines && metrics.overflows.length === 0 && metrics.collisions.length === 0 && metrics.warnings.length === 0 && metrics.ats.textExtractable && metrics.ats.primaryContentSuccess === true && metrics.ats.readingOrderValid === true && metrics.ats.primarySuccess === true && metrics.ats.missingTerms.length === 0 && metrics.ats.brokenTokensDetected.length === 0 && !metrics.ats.keywordStuffingRisk && !metrics.ats.hiddenTextDetected,
+  success: renderer === 'playwright' && pageCount === 2 && metrics.summary.selectionSucceeded === true && metrics.summary.actualLines === metrics.summary.targetLines && metrics.overflows.length === 0 && metrics.collisions.length === 0 && metrics.warnings.length === 0 && metrics.ats.textExtractable && metrics.ats.primaryContentSuccess === true && metrics.ats.readingOrderValid === true && metrics.ats.primarySuccess === true && metrics.ats.missingTerms.length === 0 && metrics.ats.brokenTokensDetected.length === 0 && !metrics.ats.keywordStuffingRisk && !metrics.ats.hiddenTextDetected && metrics.skillsetsQuality?.renderedSkillsetCount === 4 && metrics.skillsetsQuality?.allBulletCountsWithinRange === true && metrics.skillsetsQuality?.allBulletsEvidenceBacked === true && metrics.skillsetsQuality?.uniqueIconCount === 4 && metrics.skillsetsQuality?.allIconsUsedExactlyOnce === true && metrics.skillsetsQuality?.allIconsLoaded === true && metrics.skillsetsQuality?.largestSafeIconSizeSelected === true && metrics.skillsetsQuality?.textWidthMaximized === true && (metrics.experienceQuality?.crossDomainBullet?.enabled !== true || (metrics.experienceQuality.crossDomainBullet.renderedStationCount === metrics.experienceQuality.crossDomainBullet.expectedStationCount && metrics.experienceQuality.crossDomainBullet.allRenderedLast === true)),
   variant: variantId,
   renderer,
   renderedAt: new Date().toISOString(),
@@ -1167,6 +1334,8 @@ const report = {
   layout: metrics.layout,
   profile: metrics.profile,
   summary: metrics.summary,
+  targetRoleFamily: cv.targetRoleFamily,
+  skillsetsQuality: metrics.skillsetsQuality,
   experienceQuality: metrics.experienceQuality,
   experienceLocationStyles: metrics.experienceLocationStyles,
   toolsQuality: metrics.toolsQuality,

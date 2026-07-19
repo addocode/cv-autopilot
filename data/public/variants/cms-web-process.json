@@ -9,7 +9,9 @@
   ],
   "skillSectionTitles": {
     "technik-systeme": "CMS, SHOP & SYSTEME",
-    "digital-marketing-web": "WEB, TRACKING & ONLINE-KANÄLE"
+    "digital-marketing-web": "WEB, TRACKING & ONLINE-KANÄLE",
+    "content-media": "CONTENT & DOKUMENTATION",
+    "arbeitsweise": "ARBEITSWEISE & SUPPORT"
   },
   "hiddenSkillSections": [
     "content-media"

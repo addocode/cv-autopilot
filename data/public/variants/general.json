@@ -8,7 +8,9 @@
     "technik-systeme",
     "arbeitsweise"
   ],
-  "skillSectionTitles": {},
+  "skillSectionTitles": {
+    "arbeitsweise": "ARBEITSWEISE & ORGANISATION"
+  },
   "hiddenSkillSections": [],
   "selectedBulletIds": [
     "bullet-freelance-project-marketing-media",
