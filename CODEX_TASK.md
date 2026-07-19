@@ -15,7 +15,7 @@ Das System soll später durch ChatGPT/Codex anhand eines Stelleninserats automat
 3. Variantenlogik,
 4. PDF-Export,
 5. Überlauf-/Qualitätskontrollen,
-6. Datenschutz im öffentlichen Repository.
+6. Datenschutz im privaten Repository.
 
 Kein generisches CV-Template bauen. Die bestehende Gestaltung ist die visuelle Source of Truth.
 
@@ -525,32 +525,18 @@ Automatischer Test:
 
 # 10. Datenschutz
 
-Das Repository ist öffentlich.
+Das Repository ist privat und enthält bewusst reale Bewerbungs- und Kontaktdaten. Diese Private-Repository-Regel ersetzt die frühere Public-Repository-Annahme.
 
-Darum:
+Erlaubt sind im privaten Produktionsmodus:
 
-- keine privaten Telefonnummern committen
-- keine nicht öffentlichen Referenzdaten committen
-- keine API-Schlüssel
-- keine vollständigen privaten Bewerbungsunterlagen öffentlich ablegen, falls dies nicht bewusst gewünscht ist
-- `data/private/` in `.gitignore`
-- `.env` in `.gitignore`
-- öffentlich nur `cv.master.example.json`
-- echte Daten lokal in `data/private/cv.master.json`
+- vollständiger Name, Adresse/Ort, E-Mail, Telefonnummern und persönliche Links,
+- reale Referenzpersonen inklusive Funktion, Arbeitgeber und Kontaktdaten,
+- Beschäftigungszeiträume und sämtliche belegten Angaben aus CV, LinkedIn-Extrakt und Motivationsschreiben,
+- Speicherung in der zentralen CV-Datenbank, Git-Commit, HTML-Vorschau, PDF-Ausgabe, Tests und lokalen Render-Artefakten.
 
-Bei Referenzen in öffentlichen Beispieldaten:
+Nicht erlaubt sind weiterhin technische Geheimnisse: Passwörter, API-Schlüssel, Access Tokens, private SSH-Schlüssel, Session-Cookies oder sonstige Zugangsdaten.
 
-```json
-{
-  "name": "Peter Stadelmann",
-  "role": "ehem. CEO & Marketingleiter",
-  "contact": "auf Anfrage"
-}
-```
-
-Die realen Telefonnummern dürfen nur lokal liegen.
-
-Wichtig: Die vorhandenen PDFs enthalten private Kontaktdaten. Vor einem Commit prüfen, ob das öffentliche Repository diese enthalten soll. Standardannahme: **nicht committen**.
+Das Repository muss privat bleiben. Falls später ein Public-/Demo-Modus vorgesehen wird, muss dieser ausdrücklich anonymisierte Beispieldaten verwenden; der normale Produktionsmodus darf vollständige reale Daten nutzen.
 
 ---
 
