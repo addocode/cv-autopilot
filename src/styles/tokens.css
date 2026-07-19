@@ -27,5 +27,5 @@
   --frame-offset-bottom-page-2:10mm;
   --side-rail-width:10mm;
   --page-two-footer-height:28mm;
-  --body-line-height:1.25;
+  --body-line-height:1.25;--experience-body-font-size:8.2pt;--tool-font-size:7.1pt;--tools-more-gap:1.5mm;
 }

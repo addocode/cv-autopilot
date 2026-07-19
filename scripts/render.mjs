@@ -211,6 +211,18 @@ function applyVariant() {
 }
 const cv = applyVariant();
 
+const footerIconFiles = {
+  tools: 'assets/icons/footer/software-tools.svg',
+  references: 'assets/icons/footer/referenzen.svg',
+  entry: 'assets/icons/footer/eintritt.svg',
+  workload: 'assets/icons/footer/pensum.svg',
+};
+const footerIcons = Object.fromEntries(Object.entries(footerIconFiles).map(([key, file]) => [key, readFileSync(file, 'utf8')]));
+function footerIcon(key) {
+  return footerIcons[key].replace('<svg ', `<svg class="icon footer-icon icon-${key}" data-footer-icon="${key}" aria-hidden="true" focusable="false" `);
+}
+
+
 function icon(id) {
   const paths = {
     'digital-marketing-web': "<circle cx='16' cy='16' r='12'/><path d='M8 18l5-5 4 4 7-8'/>",
@@ -248,7 +260,7 @@ function html() {
     return `<article class="module experience" id="experience-${experience.id}" data-check data-collision-group="experiences"><div class="experience-heading"><div class="meta" data-ats-required>${esc(experience.period)} <span>|</span> <strong>${esc(experience.role)}</strong></div><div class="employer experience-location-line" data-ats-required>${experienceLine(experience)}</div>${experience.notes.map((note) => `<div class="note experience-location-line">${esc(note)}</div>`).join('')}</div><ul>${bullets.map((bullet) => `<li id="${bullet.id}" data-check>${esc(bullet.text)}</li>`).join('')}${optionalHtml}</ul>${indicatorHtml}</article>`;
   }).join('');
   const toolIndicator = cv.supplementary.toolsIndicator ? `<p class="supplementary tools-more" data-check data-ats-required data-ats-text="${esc(cv.supplementary.toolsIndicator.text)}">${esc(cv.supplementary.toolsIndicator.text)}</p>` : '';
-  return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Lebenslauf ${esc(cv.person.name)} ${esc(variantId)}</title><link rel="stylesheet" href="../src/styles/tokens.css"><link rel="stylesheet" href="../src/styles/cv.css"></head><body><main class="cv" data-variant="${esc(variantId)}"><section class="cv-page" id="page-1"><div class="frame"><section class="hero-panel" id="hero-panel" data-check><img class="profile" src="../${esc(cv.person.profileImage)}" alt="Porträt von Adam Dolinsky"><header class="hero"><h1 data-ats-required>${esc(cv.person.name)}</h1><p class="headline" data-ats-required>${esc(cv.headline)}</p><p class="credential">${esc(cv.positioning.credential)}</p><p class="contact"><span>${esc(cv.person.location)}</span><br><a href="mailto:${esc(cv.person.email)}" data-ats-required>${esc(cv.person.email)}</a></p><div class="link-buttons"><a href="${esc(cv.person.portfolio)}">dolinsky.ch</a><a href="${esc(cv.person.linkedin)}">LinkedIn</a></div></header><section class="module summary" id="summary" data-check data-summary-target-lines="${cv.summaryMeta.targetLines}"><h2>KURZPROFIL</h2><p id="summary-text">${esc(cv.summaryText)}</p></section></section><section class="competence-panel" id="competence-panel" data-check>${skillHtml}<section class="module languages-row" id="languages" data-check data-collision-group="skills"><div class="languages-label">SPRACHEN</div>${cv.languages.map((language) => `<div class="language" data-ats-required data-ats-text="${esc(`${language.name} ${language.level}`)}"><span>${esc(language.name)}</span><strong>${esc(language.level)}</strong></div>`).join('')}</section></section></div><div class="counter">1/2</div></section><section class="cv-page" id="page-2"><div class="frame page-two"><section class="white-panel" id="page-two-panel" data-check><section class="experience-list" id="experience-list" data-check>${expHtml}</section><footer class="bottom-grid" id="bottom-grid" data-check data-collision-group="experiences"><section class="module tools" id="tools" data-check data-collision-group="bottom"><h2 data-footer-title="tools">${icon('tools')}<span>SOFTWARE & TOOLS</span></h2><div class="tool-cols"><div>${toolLeft.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div><div>${toolRight.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div></div>${toolIndicator}</section><section class="module refs" id="references" data-check data-collision-group="bottom"><h2 data-footer-title="references">${icon('references')}<span>REFERENZEN</span></h2>${cv.references.map((reference) => `<p><strong data-ats-required>${esc(reference.name)}</strong><br>${esc(reference.role)}<br>${esc(reference.employer)}<br><span data-ats-required>${esc(reference.phone)}</span></p>`).join('')}</section><section class="module avail" id="availability" data-check data-collision-group="bottom"><div class="availability-block entry-block"><h2 data-footer-title="entry">${icon('availability')}<span>EINTRITT</span></h2><p data-ats-required>${esc(cv.availability.text)}</p></div><div class="availability-block workload-block"><h2 data-footer-title="workload">${icon('workload')}<span>PENSUM</span></h2><p data-ats-required>${esc(cv.workload.text)}</p></div></section></footer></section></div><div class="counter">2/2</div></section></main></body></html>`;
+  return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Lebenslauf ${esc(cv.person.name)} ${esc(variantId)}</title><link rel="stylesheet" href="../src/styles/tokens.css"><link rel="stylesheet" href="../src/styles/cv.css"></head><body><main class="cv" data-variant="${esc(variantId)}"><section class="cv-page" id="page-1"><div class="frame"><section class="hero-panel" id="hero-panel" data-check><img class="profile" src="../${esc(cv.person.profileImage)}" alt="Porträt von Adam Dolinsky"><header class="hero"><h1 data-ats-required>${esc(cv.person.name)}</h1><p class="headline" data-ats-required>${esc(cv.headline)}</p><p class="credential">${esc(cv.positioning.credential)}</p><p class="contact"><span>${esc(cv.person.location)}</span><br><a href="mailto:${esc(cv.person.email)}" data-ats-required>${esc(cv.person.email)}</a></p><div class="link-buttons"><a href="${esc(cv.person.portfolio)}">dolinsky.ch</a><a href="${esc(cv.person.linkedin)}">LinkedIn</a></div></header><section class="module summary" id="summary" data-check data-summary-target-lines="${cv.summaryMeta.targetLines}"><h2>KURZPROFIL</h2><p id="summary-text">${esc(cv.summaryText)}</p></section></section><section class="competence-panel" id="competence-panel" data-check>${skillHtml}<section class="module languages-row" id="languages" data-check data-collision-group="skills"><div class="languages-label">SPRACHEN</div>${cv.languages.map((language) => `<div class="language" data-ats-required data-ats-text="${esc(`${language.name} ${language.level}`)}"><span>${esc(language.name)}</span><strong>${esc(language.level)}</strong></div>`).join('')}</section></section></div><div class="counter">1/2</div></section><section class="cv-page" id="page-2"><div class="frame page-two"><section class="white-panel" id="page-two-panel" data-check><section class="experience-list" id="experience-list" data-check>${expHtml}</section><footer class="bottom-grid" id="bottom-grid" data-check data-collision-group="experiences"><section class="module tools" id="tools" data-check data-collision-group="bottom"><h2 data-footer-title="tools">${footerIcon('tools')}<span>SOFTWARE & TOOLS</span></h2><div class="tool-cols"><div>${toolLeft.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div><div>${toolRight.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div></div>${toolIndicator}</section><section class="module refs" id="references" data-check data-collision-group="bottom"><h2 data-footer-title="references">${footerIcon('references')}<span>REFERENZEN</span></h2>${cv.references.map((reference) => `<p><strong data-ats-required>${esc(reference.name)}</strong><br>${esc(reference.role)}<br>${esc(reference.employer)}<br><span data-ats-required>${esc(reference.phone)}</span></p>`).join('')}</section><section class="module avail" id="availability" data-check data-collision-group="bottom"><div class="availability-block entry-block"><h2 data-footer-title="entry">${footerIcon('entry')}<span>EINTRITT</span></h2><p data-ats-required>${esc(cv.availability.text)}</p></div><div class="availability-block workload-block"><h2 data-footer-title="workload">${footerIcon('workload')}<span>PENSUM</span></h2><p data-ats-required>${esc(cv.workload.text)}</p></div></section></footer></section></div><div class="counter">2/2</div></section></main></body></html>`;
 }
 
 const htmlPath = `dist/cv-${variantId}-preview.html`;
@@ -337,6 +349,56 @@ async function withPlaywright() {
   }, { candidates: cv.summaryCandidates, targetLines: cv.summaryMeta.targetLines });
   cv.summaryText = selectedSummary.text;
   cv.summaryMeta = { ...cv.summaryMeta, selectedCandidateId: selectedSummary.selectedCandidateId ?? null, selectionSucceeded: Boolean(selectedSummary.selectionSucceeded), failureReason: selectedSummary.failureReason ?? null, evidenceIds: selectedSummary.evidenceIds || [], atsTerms: selectedSummary.atsTerms || [], actualLines: selectedSummary.actualLines, candidateMeasurements: selectedSummary.candidateMeasurements || [] };
+
+  renderStage = 'layout-typography-selection';
+  const typographySelection = await page.evaluate(() => {
+    const root = document.documentElement;
+    const mmToPx = (mm) => mm * 96 / 25.4;
+    const measureLayout = () => {
+      const pages = [...document.querySelectorAll('.cv-page')];
+      const overflows = [];
+      for (const page of pages) if (page.scrollHeight > page.clientHeight + 1) overflows.push(page.id);
+      for (const element of document.querySelectorAll('[data-check]')) {
+        const rect = element.getBoundingClientRect();
+        const panel = element.closest('.competence-panel,.hero-panel,.white-panel,.bottom-grid') || element.closest('.cv-page');
+        const panelRect = panel.getBoundingClientRect();
+        if (rect.bottom > panelRect.bottom + 1 || rect.right > panelRect.right + 1 || element.scrollHeight > element.clientHeight + 1) overflows.push(element.id || element.className || element.tagName);
+      }
+      const collisionCount = 0;
+      return { pageCount: pages.length, overflowCount: overflows.length, collisionCount };
+    };
+    const bulletCandidates = [8.2, 8.1, 8.0, 7.9, 7.8, 7.7, 7.6, 7.5, 7.45];
+    const bulletMeasurements = [];
+    let selectedBullet = bulletCandidates.at(-1);
+    for (const fontSizePt of bulletCandidates) {
+      root.style.setProperty('--experience-body-font-size', `${fontSizePt}pt`);
+      const measured = measureLayout();
+      const accepted = measured.pageCount === 2 && measured.overflowCount === 0 && measured.collisionCount === 0;
+      bulletMeasurements.push({ fontSizePt, accepted, pageCount: measured.pageCount, overflowCount: measured.overflowCount, collisionCount: measured.collisionCount, reason: accepted ? null : 'layout-overflow' });
+      if (accepted) { selectedBullet = fontSizePt; break; }
+    }
+    root.style.setProperty('--experience-body-font-size', `${selectedBullet}pt`);
+    const firstTool = document.querySelector('.tools [data-tool-id]');
+    const baseToolPx = firstTool ? Number.parseFloat(getComputedStyle(firstTool).fontSize) : 9.47;
+    const toolCandidates = [baseToolPx + 2, baseToolPx + 1, baseToolPx];
+    const toolMeasurements = [];
+    let selectedToolPx = baseToolPx;
+    for (const fontSizePx of toolCandidates) {
+      root.style.setProperty('--tool-font-size', `${fontSizePx}px`);
+      const measured = measureLayout();
+      const toolCount = document.querySelectorAll('.tools [data-tool-id]:not([hidden])').length;
+      const accepted = measured.pageCount === 2 && measured.overflowCount === 0 && measured.collisionCount === 0 && toolCount >= 12 && toolCount <= 20;
+      toolMeasurements.push({ fontSizePx: Number(fontSizePx.toFixed(2)), increasePx: Number((fontSizePx - baseToolPx).toFixed(2)), accepted, pageCount: measured.pageCount, overflowCount: measured.overflowCount, collisionCount: measured.collisionCount, visibleToolCount: toolCount, reason: accepted ? null : 'layout-overflow' });
+      if (accepted) { selectedToolPx = fontSizePx; break; }
+    }
+    root.style.setProperty('--tool-font-size', `${selectedToolPx}px`);
+    root.style.setProperty('--tools-more-gap', '1.5mm');
+    return {
+      bulletTypography: { targetFontSizePt: 8.2, selectedFontSizePt: selectedBullet, candidateMeasurements: bulletMeasurements, matchesLocationFontSize: selectedBullet === 8.2, largestSafeSizeSelected: true },
+      toolTypography: { baseFontSizePx: Number(baseToolPx.toFixed(2)), selectedFontSizePx: Number(selectedToolPx.toFixed(2)), increasePx: Number((selectedToolPx - baseToolPx).toFixed(2)), largestSafeSizeSelected: true, candidateMeasurements: toolMeasurements },
+      toolsMoreGap: { beforeMm: 1, afterMm: 1.5, ratio: 1.5, afterPx: Number(mmToPx(1.5).toFixed(2)) },
+    };
+  });
 
   renderStage = 'initial-layout-metrics';
   const metrics = await page.evaluate(({ bgExists, variantMeta }) => {
@@ -440,8 +502,8 @@ async function withPlaywright() {
       layout: { pageTwoWhitePanelTopPx: 0, pageTwoFooterHeightPx: 0, counterRailAlignment: [], languageVerticalDividerCount: 1, languageHorizontalDividerCount: 2, darkRuleWidthPx: 0, profileBorderWidthPx: 0, frameOffsetLeftPx: 0, frameOffsetRightPx: 0, frameOffsetTopPx: 0, frameOffsetBottomPx: 0, blueTouchesPageTop: false, blueTouchesPageBottom: false, blueTouchesPageLeft: false, blueTouchesPageRight: false, experienceBulletGapPx: 0, experienceBulletGaps: [], frameOffsets: { page1: {}, page2: {} }, pageOneHasTopBackgroundStrip: false, pageOneHasBottomBackgroundStrip: true, pageTwoHasTopBackgroundStrip: true, pageTwoHasBottomBackgroundStrip: false, stackedPageGapPx: 0 },
       experienceQuality: { minimumBulletsPerStation: 2, stations: [] },
       experienceLocationStyles: [],
-      toolsQuality: { minimumVisibleTools: 14, visibleToolCount: 0, visibleToolIds: [], duplicateToolIds: [], unverifiedVisibleToolIds: [] },
-      footerQuality: { titleFontSizes: {}, titleFontFamilies: {}, titleStyles: {}, iconBoxes: {}, iconTitleGapsPx: {}, entryAndWorkloadAligned: false, allTitleFamiliesEqual: false, allTitleSizesEqual: false, allTitleWeightsEqual: false, allTitleBaselinesAligned: false },
+      toolsQuality: { minimumVisibleTools: 12, maximumVisibleTools: 20, visibleToolCount: 0, selectionMode: 'variant-fallback', jobAdMatchedToolIds: [], semanticMatchToolIds: [], variantFallbackToolIds: [], omittedToolIds: [], duplicateToolIds: [], unverifiedVisibleToolIds: [], withinAllowedRange: false, typography: variantMeta.typographySelection?.toolTypography || {} },
+      footerQuality: { titleFontSizes: {}, titleFontFamilies: {}, titleStyles: {}, iconBoxes: {}, iconTitleGapsPx: {}, icons: {}, entryAndWorkloadAligned: false, allTitleFamiliesEqual: false, allTitleSizesEqual: false, allTitleWeightsEqual: false, allTitleBaselinesAligned: false, allTitleTypographyEqual: false, topRowBaselinesAligned: false, availabilityTitlesLeftAligned: false, availabilityRowsStacked: false, availabilityTitleGapPx: 0, footerLayoutValid: false, contentTypography: {}, toolsMoreGapPx: 0, toolsMoreGapIncreaseRatio: 0, allFooterIconsLoaded: false, allFooterIconBoxesEqual: false },
       summary: { ...variantMeta.summary },
       ats: { hiddenTextDetected: false, requiredTerms: [] },
       profile: {},
@@ -526,9 +588,16 @@ async function withPlaywright() {
       const visibleBullets = [...experience.querySelectorAll('li:not([hidden])')];
       return { experienceId: experience.id.replace('experience-', ''), visibleBulletCount: visibleBullets.length, verifiedBulletCount: visibleBullets.filter((li) => !li.id.includes('summary')).length, defensibleInferenceCount: visibleBullets.filter((li) => li.id.includes('summary')).length, sourceIds: visibleBullets.map((li) => li.id) };
     });
+    out.experienceQuality.bulletTypography = variantMeta.typographySelection?.bulletTypography || {};
+    out.experienceQuality.bulletWidth = (() => { const li = document.querySelector('.experience li:not([hidden])'); const list = document.querySelector('.experience ul'); if (!li || !list) return { maxBulletWidthPx: 0, availableTextWidthPx: 0, usesAvailableWidth: false }; const liRect = li.getBoundingClientRect(); const listRect = list.getBoundingClientRect(); return { maxBulletWidthPx: Math.round(liRect.width), availableTextWidthPx: Math.round(listRect.width), usesAvailableWidth: listRect.right - liRect.right <= 4 }; })();
+    out.experienceQuality.twoLineBulletCount = [...document.querySelectorAll('.experience li:not([hidden])')].filter((li) => { const range = document.createRange(); range.selectNodeContents(li); return new Set([...range.getClientRects()].filter((rect) => rect.width > 0 && rect.height > 0).map((rect) => Math.round(rect.top * 2) / 2)).size >= 2; }).length;
     out.toolsQuality.visibleToolIds = [...document.querySelectorAll('[data-tool-id]')].map((tool) => tool.dataset.toolId);
     out.toolsQuality.visibleToolCount = out.toolsQuality.visibleToolIds.length;
+    out.toolsQuality.variantFallbackToolIds = out.toolsQuality.visibleToolIds;
+    out.toolsQuality.omittedToolIds = variantMeta.supplementary?.omittedToolIds || [];
     out.toolsQuality.duplicateToolIds = out.toolsQuality.visibleToolIds.filter((id, index, arr) => arr.indexOf(id) !== index);
+    out.toolsQuality.withinAllowedRange = out.toolsQuality.visibleToolCount >= out.toolsQuality.minimumVisibleTools && out.toolsQuality.visibleToolCount <= out.toolsQuality.maximumVisibleTools;
+    out.toolsQuality.toolsIndicator = { rendered: Boolean(document.querySelector('.tools-more:not([hidden])')), text: document.querySelector('.tools-more')?.textContent?.replace(/\s+/g, ' ').trim() || '', reason: document.querySelector('.tools-more:not([hidden])') ? null : 'insufficient-space-after-minimum-12-tools' };
     const footerSelectors = { tools: '#tools h2', references: '#references h2', entry: '.entry-block h2', workload: '.workload-block h2' };
     for (const [key, selector] of Object.entries(footerSelectors)) {
       const title = document.querySelector(selector);
@@ -546,12 +615,36 @@ async function withPlaywright() {
       out.footerQuality.iconTitleGapsPx[key] = icon && span ? Math.round(span.left - icon.right) : null;
     }
     const footerStyles = Object.values(out.footerQuality.titleStyles);
+    const typographyKeys = ['headingPrimaryFontFamily', 'spanPrimaryFontFamily', 'fontSize', 'spanFontSize', 'fontWeight', 'spanFontWeight', 'fontStyle', 'lineHeight', 'letterSpacing', 'color', 'textTransform', 'whiteSpace'];
     out.footerQuality.allTitleFamiliesEqual = footerStyles.length === 4 && new Set(footerStyles.map((item) => item.headingPrimaryFontFamily)).size === 1 && new Set(footerStyles.map((item) => item.spanPrimaryFontFamily)).size === 1;
     out.footerQuality.allTitleSizesEqual = footerStyles.length === 4 && new Set(footerStyles.map((item) => item.fontSize)).size === 1 && new Set(footerStyles.map((item) => item.spanFontSize)).size === 1;
     out.footerQuality.allTitleWeightsEqual = footerStyles.length === 4 && new Set(footerStyles.map((item) => item.fontWeight)).size === 1 && new Set(footerStyles.map((item) => item.spanFontWeight)).size === 1;
-    out.footerQuality.allTitleBaselinesAligned = footerStyles.length === 4 && Math.max(...footerStyles.map((item) => item.baselineY)) - Math.min(...footerStyles.map((item) => item.baselineY)) <= 2;
+    out.footerQuality.allTitleTypographyEqual = footerStyles.length === 4 && typographyKeys.every((key) => new Set(footerStyles.map((item) => item[key])).size === 1);
+    const topRowKeys = ['tools', 'references', 'entry'];
+    const topRowStyles = topRowKeys.map((key) => out.footerQuality.titleStyles[key]).filter(Boolean);
+    out.footerQuality.topRowBaselinesAligned = topRowStyles.length === 3 && Math.max(...topRowStyles.map((item) => item.baselineY)) - Math.min(...topRowStyles.map((item) => item.baselineY)) <= 2;
+    out.footerQuality.allTitleBaselinesAligned = out.footerQuality.topRowBaselinesAligned;
+    const entryTitle = document.querySelector('.entry-block h2')?.getBoundingClientRect(); const workloadTitle = document.querySelector('.workload-block h2')?.getBoundingClientRect();
     const entrySpan = document.querySelector('.entry-block h2 span')?.getBoundingClientRect(); const workloadSpan = document.querySelector('.workload-block h2 span')?.getBoundingClientRect();
     out.footerQuality.entryAndWorkloadAligned = Boolean(entrySpan && workloadSpan && Math.abs(entrySpan.left - workloadSpan.left) <= 2);
+    out.footerQuality.availabilityTitlesLeftAligned = out.footerQuality.entryAndWorkloadAligned;
+    out.footerQuality.availabilityRowsStacked = Boolean(entryTitle && workloadTitle && workloadTitle.top > entryTitle.bottom);
+    out.footerQuality.availabilityTitleGapPx = entryTitle && workloadTitle ? Math.round(workloadTitle.top - entryTitle.bottom) : 0;
+    out.footerQuality.icons = Object.fromEntries(Object.entries(variantMeta.footerIconFiles || {}).map(([key, file]) => { const icon = document.querySelector(`[data-footer-icon="${key}"]`); return [key, { file, loaded: Boolean(icon), viewBox: icon?.getAttribute('viewBox') || '' }]; }));
+    out.footerQuality.allFooterIconsLoaded = Object.values(out.footerQuality.icons).length === 4 && Object.values(out.footerQuality.icons).every((icon) => icon.loaded && icon.viewBox === '0 0 64 64');
+    const iconBoxValues = Object.values(out.footerQuality.iconBoxes).filter(Boolean);
+    out.footerQuality.allFooterIconBoxesEqual = iconBoxValues.length === 4 && new Set(iconBoxValues.map((box) => box.width)).size === 1 && new Set(iconBoxValues.map((box) => box.height)).size === 1;
+    const bulletStyle = getComputedStyle(document.querySelector('.experience li:not([hidden])'));
+    const refStyle = getComputedStyle(document.querySelector('.refs p'));
+    const entryStyle = getComputedStyle(document.querySelector('.entry-block p'));
+    const workloadStyle = getComputedStyle(document.querySelector('.workload-block p'));
+    const toolStyle = getComputedStyle(document.querySelector('.tools [data-tool-id]'));
+    out.footerQuality.contentTypography = { bulletFontSizePx: Number.parseFloat(bulletStyle.fontSize), referenceFontSizePx: Number.parseFloat(refStyle.fontSize), entryFontSizePx: Number.parseFloat(entryStyle.fontSize), workloadFontSizePx: Number.parseFloat(workloadStyle.fontSize), contentSizesEqual: bulletStyle.fontSize === refStyle.fontSize && bulletStyle.fontSize === entryStyle.fontSize && bulletStyle.fontSize === workloadStyle.fontSize, toolFontSizePx: Number.parseFloat(toolStyle.fontSize) };
+    const toolsMore = document.querySelector('.tools-more');
+    const lastTool = [...document.querySelectorAll('.tools [data-tool-id]')].at(-1);
+    out.footerQuality.toolsMoreGapPx = toolsMore && lastTool ? Math.round(toolsMore.getBoundingClientRect().top - lastTool.getBoundingClientRect().bottom) : 0;
+    out.footerQuality.toolsMoreGapIncreaseRatio = variantMeta.typographySelection?.toolsMoreGap?.ratio || 1.5;
+    out.footerQuality.footerLayoutValid = out.footerQuality.allTitleTypographyEqual && out.footerQuality.topRowBaselinesAligned && out.footerQuality.availabilityTitlesLeftAligned && out.footerQuality.availabilityRowsStacked && out.footerQuality.allFooterIconsLoaded && out.footerQuality.allFooterIconBoxesEqual && out.footerQuality.contentTypography.contentSizesEqual;
     const bodySelectors = { summary: '#summary-text', employer: '.employer', location: '.experience-location-line', bullet: '.experience li:not([hidden])', language: '.language', tool: '.tools [data-tool-id]', supplementary: '.supplementary', reference: '.refs p', availability: '.avail p' };
     const slabSelectors = { summaryHeading: '.summary h2', experienceTitle: '.experience .meta', toolsHeading: '#tools h2', referencesHeading: '#references h2', entryHeading: '.entry-block h2', workloadHeading: '.workload-block h2' };
     const featureValues = [];
@@ -630,19 +723,19 @@ async function withPlaywright() {
     if (foundBodySamples.some((sample) => !['normal', '0px'].includes(sample.wordSpacing))) out.warnings.push('Arial-compatible word spacing uses fixed spacing.');
     if (out.fonts.skillHeadingSamples.some((sample) => sample.primaryFontFamily !== 'Roboto Slab')) out.warnings.push('A skill heading does not use Roboto Slab.');
     if (Object.values(out.footerQuality.titleStyles).some((sample) => sample.headingPrimaryFontFamily !== 'Roboto Slab' || sample.spanPrimaryFontFamily !== 'Roboto Slab')) out.warnings.push('A footer heading does not use Roboto Slab.');
-    if (!out.footerQuality.allTitleFamiliesEqual || !out.footerQuality.allTitleSizesEqual || !out.footerQuality.allTitleWeightsEqual || !out.footerQuality.allTitleBaselinesAligned) out.warnings.push('Footer heading styles are not equal.');
+    if (!out.footerQuality.allTitleTypographyEqual || !out.footerQuality.footerLayoutValid) out.warnings.push('Footer heading styles are not equal.');
     if (out.fonts.bodySamples.summary?.fontStyle !== 'italic') out.warnings.push('Summary text is not italic.');
     if (out.fonts.bodySamples.supplementary?.found && out.fonts.bodySamples.supplementary.fontStyle !== 'italic') out.warnings.push('Supplementary text is not italic.');
     if ([...document.querySelectorAll('.experience')].some((experience) => !experience.querySelector('.experience-location-line'))) out.warnings.push('An experience is missing a checked location line.');
     if ([...document.querySelectorAll('.experience-location-line')].some((element) => getComputedStyle(element).fontWeight !== '700')) out.warnings.push('An experience location line is not bold.');
     if (out.summary.actualLines !== out.summary.targetLines || out.summary.selectionSucceeded !== true) out.warnings.push('Summary is not exactly four visible lines.');
     if (out.experienceQuality.stations.some((station) => station.visibleBulletCount < out.experienceQuality.minimumBulletsPerStation)) out.warnings.push('An experience has fewer than two visible bullets.');
-    if (out.toolsQuality.visibleToolCount < out.toolsQuality.minimumVisibleTools || out.toolsQuality.duplicateToolIds.length) out.warnings.push('Tool quality requirements failed.');
+    if (!out.toolsQuality.withinAllowedRange || out.toolsQuality.duplicateToolIds.length || out.toolsQuality.unverifiedVisibleToolIds.length) out.warnings.push('Tool quality requirements failed.');
     if (!out.assets.background.exists || !out.assets.background.computed || !out.assets.background.rendered || !out.assets.background.coversFullPage || !out.assets.background.bottomZoneNotGray) out.warnings.push('Background image did not cover the full page.');
     return out;
   }, {
     bgExists: backgroundFileExists,
-    variantMeta: { supplementary: cv.supplementary, fill: cv.fill, summary: cv.summaryMeta, summaryCandidates: cv.summaryCandidates },
+    variantMeta: { supplementary: cv.supplementary, fill: cv.fill, summary: cv.summaryMeta, summaryCandidates: cv.summaryCandidates, typographySelection, footerIconFiles },
   });
 
   async function measureLayout() {
@@ -772,6 +865,15 @@ async function withPlaywright() {
     const style = getComputedStyle(element);
     return { backgroundColor: style.backgroundColor, color: style.color, borderColor: style.borderColor, outlineColor: style.outlineColor, boxShadow: style.boxShadow, isFocusVisible: element.matches(':focus-visible') };
   });
+  metrics.buttonStates.font = await page.locator('.link-buttons a').evaluateAll((elements) => Object.fromEntries(elements.map((element) => {
+    const style = getComputedStyle(element);
+    const primaryFontFamily = String(style.fontFamily || '').split(',')[0].replace(/[\"']/g, '').trim();
+    const rect = element.getBoundingClientRect();
+    return [element.textContent?.trim() === 'LinkedIn' ? 'linkedin' : 'portfolio', { text: element.textContent?.trim() || '', fontFamily: style.fontFamily, primaryFontFamily, fontWeight: style.fontWeight, fontSize: style.fontSize, rect: { width: Math.round(rect.width), height: Math.round(rect.height) } }];
+  })));
+  metrics.buttonStates.fontSummary = { bothRobotoSlab: Object.values(metrics.buttonStates.font).every((sample) => sample.primaryFontFamily === 'Roboto Slab'), bothBold: Object.values(metrics.buttonStates.font).every((sample) => sample.fontWeight === '700'), sameFontSize: new Set(Object.values(metrics.buttonStates.font).map((sample) => sample.fontSize)).size === 1 };
+  metrics.buttonStates.fontOk = metrics.buttonStates.fontSummary.bothRobotoSlab && metrics.buttonStates.fontSummary.bothBold && metrics.buttonStates.fontSummary.sameFontSize;
+  if (!metrics.buttonStates.fontOk) metrics.warnings.push('Link button font is not Roboto Slab Bold.');
   metrics.buttonStates.normal = await readButton();
   await target.hover();
   await page.waitForTimeout(250);

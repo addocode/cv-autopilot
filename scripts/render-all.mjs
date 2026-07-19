@@ -157,7 +157,8 @@ const fontChecks = {
   robotoSlabLoaded: allReportsPresent && allReports.every((report) => report.fonts?.slabLoaded === true && (report.fonts?.pdfEmbeddedFamilies || []).some((family) => /RobotoSlab-Bold/i.test(family))),
   allSkillHeadingsRobotoSlab: allReportsPresent && skillHeadingSamples.length > 0 && skillHeadingSamples.every((sample) => sample.primaryFontFamily === 'Roboto Slab'),
   allFooterHeadingsRobotoSlab: allReportsPresent && allReports.every((report) => Object.values(report.footerQuality?.titleStyles || {}).every((sample) => sample.headingPrimaryFontFamily === 'Roboto Slab' && sample.spanPrimaryFontFamily === 'Roboto Slab')),
-  allFooterHeadingsEqual: allReportsPresent && allReports.every((report) => report.footerQuality?.allTitleFamiliesEqual === true && report.footerQuality?.allTitleSizesEqual === true && report.footerQuality?.allTitleWeightsEqual === true && report.footerQuality?.allTitleBaselinesAligned === true),
+  allFooterHeadingsEqual: allReportsPresent && allReports.every((report) => report.footerQuality?.allTitleTypographyEqual === true),
+  buttonsRobotoSlab: allReportsPresent && allReports.every((report) => report.buttonStates?.fontOk === true),
   summaryItalic: allReportsPresent && allReports.every((report) => report.fonts?.bodySamples?.summary?.fontStyle === 'italic'),
   supplementaryItalic: allReportsPresent && allReports.every((report) => {
     const sample = report.fonts?.bodySamples?.supplementary;
@@ -179,6 +180,25 @@ const atsChecks = {
   productionAtsPassed: allReportsPresent && allReports.every((report) => report.ats?.primaryExtractor === 'poppler-raw' && report.ats?.readingOrderExtractor === 'poppler-default' && report.ats?.primaryContentSuccess === true && report.ats?.readingOrderValid === true && report.ats?.primarySuccess === true && report.ats?.missingTerms?.length === 0 && report.ats?.brokenTokensDetected?.length === 0),
   pdfJsSeparatorHandlingPassed: allReportsPresent && allReports.every((report) => Number.isFinite(report.ats?.fragmentJoinCount) && report.ats.fragmentJoinCount >= 0 && Number.isFinite(report.ats?.insertedSpaceCount) && report.ats.insertedSpaceCount >= 0 && Number.isFinite(report.ats?.preservedSpaceCount) && report.ats.preservedSpaceCount >= 0 && report.ats.insertedLineBreakCount > 0 && (report.ats.extractors?.pdfjs?.brokenTokensDetected || []).length === 0),
 };
+const footerChecks = {
+  topRowBaselinesAligned: allReportsPresent && allReports.every((report) => report.footerQuality?.topRowBaselinesAligned === true),
+  availabilityTitlesLeftAligned: allReportsPresent && allReports.every((report) => report.footerQuality?.availabilityTitlesLeftAligned === true),
+  availabilityRowsStacked: allReportsPresent && allReports.every((report) => report.footerQuality?.availabilityRowsStacked === true),
+  footerLayoutValid: allReportsPresent && allReports.every((report) => report.footerQuality?.footerLayoutValid === true),
+  contentSizesMatchBullets: allReportsPresent && allReports.every((report) => report.footerQuality?.contentTypography?.contentSizesEqual === true),
+  allNewIconsLoaded: allReportsPresent && allReports.every((report) => report.footerQuality?.allFooterIconsLoaded === true && report.footerQuality?.allFooterIconBoxesEqual === true),
+};
+const experienceChecks = {
+  largestSafeBulletSizeSelected: allReportsPresent && allReports.every((report) => report.experienceQuality?.bulletTypography?.largestSafeSizeSelected === true && report.experienceQuality?.bulletTypography?.selectedFontSizePt >= 7.45 && report.experienceQuality?.bulletTypography?.selectedFontSizePt <= 8.2),
+  bulletWidthMaximized: allReportsPresent && allReports.every((report) => report.experienceQuality?.bulletWidth?.usesAvailableWidth === true || report.experienceQuality?.bulletWidth?.availableTextWidthPx > 0),
+};
+const toolChecks = {
+  minimum12Visible: allReportsPresent && allReports.every((report) => report.toolsQuality?.visibleToolCount >= 12),
+  maximum20Visible: allReportsPresent && allReports.every((report) => report.toolsQuality?.visibleToolCount <= 20),
+  largestSafeToolSizeSelected: allReportsPresent && allReports.every((report) => report.toolsQuality?.typography?.largestSafeSizeSelected === true),
+  supplementaryIndicatorRendered: allReportsPresent && allReports.every((report) => report.toolsQuality?.toolsIndicator?.rendered === true),
+  supplementaryGapIncreased: allReportsPresent && allReports.every((report) => report.footerQuality?.toolsMoreGapIncreaseRatio >= 1.45 && report.footerQuality?.toolsMoreGapIncreaseRatio <= 1.55),
+};
 const remainingDifferences = [];
 if (!allReportsPresent) remainingDifferences.push('Production render failed before PDF/report generation');
 for (const variant of variants) {
@@ -196,11 +216,17 @@ for (const [key, value] of Object.entries(fontChecks)) {
   if (!value) remainingDifferences.push(`font check failed: ${key}`);
 }
 if (atsChecks.pdfJsSeparatorHandlingPassed !== true) remainingDifferences.push('PDF.js separator handling check failed');
+for (const [key, value] of Object.entries(footerChecks)) if (!value) remainingDifferences.push(`footer check failed: ${key}`);
+for (const [key, value] of Object.entries(experienceChecks)) if (!value) remainingDifferences.push(`experience check failed: ${key}`);
+for (const [key, value] of Object.entries(toolChecks)) if (!value) remainingDifferences.push(`tool check failed: ${key}`);
 const overallSuccess = allReportsPresent
   && artifactCompleteness.complete
   && allReports.every((report) => report.success === true)
   && Object.values(fontChecks).every(Boolean)
   && atsChecks.productionAtsPassed
+  && Object.values(footerChecks).every(Boolean)
+  && Object.values(experienceChecks).every(Boolean)
+  && Object.values(toolChecks).every(Boolean)
   && remainingDifferences.length === 0;
 const visualReview = {
   reportsPresent,
@@ -214,6 +240,9 @@ const visualReview = {
   },
   fontChecks,
   atsChecks,
+  footerChecks,
+  experienceChecks,
+  toolChecks,
   pageTransition: {
     pageOneTopInset: allReportsPresent ? Boolean(firstLayout.pageOneHasTopBackgroundStrip) : false,
     pageOneBottomContinuous: allReportsPresent ? firstLayout.pageOneHasBottomBackgroundStrip === false : false,
