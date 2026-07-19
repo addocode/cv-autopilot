@@ -1,0 +1,76 @@
+{
+  "id": "administration-gever",
+  "headline": "Administration · GEVER · Dokumentenmanagement · Qualitätssicherung",
+  "summaryKey": "administration-gever",
+  "skillSectionOrder": [
+    "technik-systeme",
+    "arbeitsweise",
+    "digital-marketing-web"
+  ],
+  "skillSectionTitles": {
+    "technik-systeme": "ADMINISTRATION, GEVER & SYSTEME",
+    "arbeitsweise": "QUALITÄT, KOORDINATION & PROZESSE"
+  },
+  "hiddenSkillSections": [
+    "content-media"
+  ],
+  "selectedBulletIds": [
+    "bullet-rs-acta-nova",
+    "bullet-rs-quality",
+    "bullet-rs-doc-management",
+    "bullet-rs-coordination",
+    "bullet-kunz-process-handover",
+    "bullet-kunz-external-partners",
+    "bullet-kunz-websites-landing",
+    "bullet-freelance-remote-stakeholders"
+  ],
+  "bulletPriority": [
+    "bullet-rs-acta-nova",
+    "bullet-rs-quality",
+    "bullet-rs-doc-management",
+    "bullet-rs-coordination",
+    "bullet-kunz-process-handover"
+  ],
+  "hiddenBulletIds": [
+    "bullet-kunz-photo-video-social-ci"
+  ],
+  "toolOrder": [
+    "tool-ms-office",
+    "tool-ms-word",
+    "tool-ms-excel",
+    "tool-ms-powerpoint",
+    "tool-ms-outlook",
+    "tool-ms-onenote",
+    "tool-office-365",
+    "tool-acta-nova",
+    "tool-chatgpt",
+    "tool-adobe-indesign",
+    "tool-adobe-photoshop",
+    "tool-wordpress",
+    "tool-typo3",
+    "tool-canva"
+  ],
+  "maxBulletsPerExperience": 4,
+  "maxTools": 14,
+  "budgets": {
+    "summaryMaxChars": 430,
+    "pageOneMaxSkillItems": 14,
+    "pageTwoMaxExperienceBullets": 10
+  },
+  "supplementaryIndicators": {
+    "tools": {
+      "enabled": true,
+      "text": "+ weitere mediamatikbezogene Tools und Systeme"
+    },
+    "experience": {
+      "enabled": true,
+      "maxPerVariant": 3
+    }
+  },
+  "fill": {
+    "enabled": true,
+    "minRemainingSpaceMm": 5,
+    "preferredOptionalBulletCount": 2,
+    "maxOptionalBullets": 5
+  }
+}

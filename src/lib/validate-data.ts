@@ -1,0 +1,2 @@
+import type{CvData}from'../types/cv.js';
+export function validateData(data:CvData){const errors:string[]=[]; if(!data.person.name)errors.push('person.name missing'); if(!data.experiences.length)errors.push('experiences missing'); if(!data.languages.find(l=>l.name==='Polnisch'&&l.level==='C2'))errors.push('Polnisch C2 missing'); for(const e of data.experiences){for(const b of e.bullets){if(!b.id||!b.sources.length)errors.push(`invalid bullet ${b.id}`)}} return errors}
