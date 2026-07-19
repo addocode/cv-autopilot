@@ -1,5 +1,6 @@
 import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { performance } from 'node:perf_hooks';
+import { spawnSync } from 'node:child_process';
 import { normalizeAtsText, atsNormalizationConfig, joinPdfTextItems } from '../src/lib/ats-normalize.mjs';
 
 const load = (path) => JSON.parse(readFileSync(path, 'utf8'));
@@ -11,6 +12,42 @@ mkdirSync('dist', { recursive: true });
 const data = load('data/private/cv.master.json');
 const variant = load(`data/public/variants/${variantId}.json`);
 const backgroundFileExists = existsSync('assets/bg_img.jpeg');
+
+const extractionSentinels = [
+  'Deutsch',
+  'Englisch',
+  'Französisch',
+  'Polnisch',
+  'Pazifikregion',
+  'Schachfestival',
+  'Mediamatiker',
+  'Office 365',
+  'Adobe Premiere Pro',
+  'phpMyAdmin',
+];
+
+const forbiddenBrokenTokens = [
+  'Deuts ch',
+  'Englis ch',
+  'Französ is ch',
+  'Polnis ch',
+  'Pazif ikregion',
+  'Schachf estival',
+  'Me diamatiker',
+  'Off ice 365',
+  'Adobe Prem iere Pro',
+  'phpMy Admin',
+];
+
+function analyzeExtractedText(text, requiredTerms) {
+  const normalizedText = normalizeAtsText(text);
+  const required = [...new Set(requiredTerms || [])].filter(Boolean);
+  const missingTerms = required.filter((term) => !normalizedText.includes(normalizeAtsText(term)));
+  const requiredTermsPresent = required.filter((term) => normalizedText.includes(normalizeAtsText(term)));
+  const extractionSentinelsPresent = extractionSentinels.filter((term) => normalizedText.includes(normalizeAtsText(term)));
+  const brokenTokensDetected = forbiddenBrokenTokens.filter((term) => normalizedText.includes(normalizeAtsText(term)) || String(text).includes(term));
+  return { normalizedText, missingTerms, requiredTermsPresent, extractionSentinelsPresent, brokenTokensDetected };
+}
 
 function applyVariant() {
   const selected = new Set(variant.selectedBulletIds);
@@ -160,7 +197,7 @@ function html() {
     return `<article class="module experience" id="experience-${experience.id}" data-check data-collision-group="experiences"><div class="experience-heading"><div class="meta" data-ats-required>${esc(experience.period)} <span>|</span> <strong>${esc(experience.role)}</strong></div><div class="employer" data-ats-required>${experienceLine(experience)}</div>${experience.notes.map((note) => `<div class="note">${esc(note)}</div>`).join('')}</div><ul>${bullets.map((bullet) => `<li id="${bullet.id}" data-check>${esc(bullet.text)}</li>`).join('')}${optionalHtml}</ul>${indicatorHtml}</article>`;
   }).join('');
   const toolIndicator = cv.supplementary.toolsIndicator ? `<p class="supplementary tools-more" data-check>${esc(cv.supplementary.toolsIndicator.text)}</p>` : '';
-  return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Lebenslauf ${esc(cv.person.name)} ${esc(variantId)}</title><link rel="stylesheet" href="../src/styles/tokens.css"><link rel="stylesheet" href="../src/styles/cv.css"></head><body><main class="cv" data-variant="${esc(variantId)}"><section class="cv-page" id="page-1"><div class="frame"><section class="hero-panel" id="hero-panel" data-check><img class="profile" src="../${esc(cv.person.profileImage)}" alt="Porträt von Adam Dolinsky"><header class="hero"><h1 data-ats-required>${esc(cv.person.name)}</h1><p class="headline" data-ats-required>${esc(cv.headline)}</p><p class="credential">${esc(cv.positioning.credential)}</p><p class="contact"><span>${esc(cv.person.location)}</span><br><a href="mailto:${esc(cv.person.email)}" data-ats-required>${esc(cv.person.email)}</a></p><div class="link-buttons"><a href="${esc(cv.person.portfolio)}">dolinsky.ch</a><a href="${esc(cv.person.linkedin)}">LinkedIn</a></div></header><section class="module summary" id="summary" data-check data-summary-target-lines="${cv.summaryMeta.targetLines}"><h2>KURZPROFIL</h2><p id="summary-text">${esc(cv.summaryText)}</p></section></section><section class="competence-panel" id="competence-panel" data-check>${skillHtml}<section class="module languages-row" id="languages" data-check data-collision-group="skills"><div class="languages-label">SPRACHEN</div>${cv.languages.map((language) => `<div class="language"><span>${esc(language.name)}</span><strong>${esc(language.level)}</strong></div>`).join('')}</section></section></div><div class="counter">1/2</div></section><section class="cv-page" id="page-2"><div class="frame page-two"><section class="white-panel" id="page-two-panel" data-check><section class="experience-list" id="experience-list" data-check>${expHtml}</section><footer class="bottom-grid" id="bottom-grid" data-check data-collision-group="experiences"><section class="module tools" id="tools" data-check data-collision-group="bottom"><h2 data-footer-title="tools">${icon('tools')}<span>SOFTWARE & TOOLS</span></h2><div class="tool-cols"><div>${toolLeft.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div><div>${toolRight.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div></div>${toolIndicator}</section><section class="module refs" id="references" data-check data-collision-group="bottom"><h2 data-footer-title="references">${icon('references')}<span>REFERENZEN</span></h2>${cv.references.map((reference) => `<p><strong data-ats-required>${esc(reference.name)}</strong><br>${esc(reference.role)}<br>${esc(reference.employer)}<br><span data-ats-required>${esc(reference.phone)}</span></p>`).join('')}</section><section class="module avail" id="availability" data-check data-collision-group="bottom"><div class="availability-block entry-block"><h2 data-footer-title="entry">${icon('availability')}<span>EINTRITT</span></h2><p data-ats-required>${esc(cv.availability.text)}</p></div><div class="availability-block workload-block"><h2 data-footer-title="workload">${icon('workload')}<span>PENSUM</span></h2><p data-ats-required>${esc(cv.workload.text)}</p></div></section></footer></section></div><div class="counter">2/2</div></section></main></body></html>`;
+  return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Lebenslauf ${esc(cv.person.name)} ${esc(variantId)}</title><link rel="stylesheet" href="../src/styles/tokens.css"><link rel="stylesheet" href="../src/styles/cv.css"></head><body><main class="cv" data-variant="${esc(variantId)}"><section class="cv-page" id="page-1"><div class="frame"><section class="hero-panel" id="hero-panel" data-check><img class="profile" src="../${esc(cv.person.profileImage)}" alt="Porträt von Adam Dolinsky"><header class="hero"><h1 data-ats-required>${esc(cv.person.name)}</h1><p class="headline" data-ats-required>${esc(cv.headline)}</p><p class="credential">${esc(cv.positioning.credential)}</p><p class="contact"><span>${esc(cv.person.location)}</span><br><a href="mailto:${esc(cv.person.email)}" data-ats-required>${esc(cv.person.email)}</a></p><div class="link-buttons"><a href="${esc(cv.person.portfolio)}">dolinsky.ch</a><a href="${esc(cv.person.linkedin)}">LinkedIn</a></div></header><section class="module summary" id="summary" data-check data-summary-target-lines="${cv.summaryMeta.targetLines}"><h2>KURZPROFIL</h2><p id="summary-text">${esc(cv.summaryText)}</p></section></section><section class="competence-panel" id="competence-panel" data-check>${skillHtml}<section class="module languages-row" id="languages" data-check data-collision-group="skills"><div class="languages-label">SPRACHEN</div>${cv.languages.map((language) => `<div class="language" data-ats-required><span>${esc(language.name)}</span><strong>${esc(language.level)}</strong></div>`).join('')}</section></section></div><div class="counter">1/2</div></section><section class="cv-page" id="page-2"><div class="frame page-two"><section class="white-panel" id="page-two-panel" data-check><section class="experience-list" id="experience-list" data-check>${expHtml}</section><footer class="bottom-grid" id="bottom-grid" data-check data-collision-group="experiences"><section class="module tools" id="tools" data-check data-collision-group="bottom"><h2 data-footer-title="tools">${icon('tools')}<span>SOFTWARE & TOOLS</span></h2><div class="tool-cols"><div>${toolLeft.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div><div>${toolRight.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div></div>${toolIndicator}</section><section class="module refs" id="references" data-check data-collision-group="bottom"><h2 data-footer-title="references">${icon('references')}<span>REFERENZEN</span></h2>${cv.references.map((reference) => `<p><strong data-ats-required>${esc(reference.name)}</strong><br>${esc(reference.role)}<br>${esc(reference.employer)}<br><span data-ats-required>${esc(reference.phone)}</span></p>`).join('')}</section><section class="module avail" id="availability" data-check data-collision-group="bottom"><div class="availability-block entry-block"><h2 data-footer-title="entry">${icon('availability')}<span>EINTRITT</span></h2><p data-ats-required>${esc(cv.availability.text)}</p></div><div class="availability-block workload-block"><h2 data-footer-title="workload">${icon('workload')}<span>PENSUM</span></h2><p data-ats-required>${esc(cv.workload.text)}</p></div></section></footer></section></div><div class="counter">2/2</div></section></main></body></html>`;
 }
 
 const htmlPath = `dist/cv-${variantId}-preview.html`;
@@ -249,12 +286,16 @@ async function withPlaywright() {
         slab: getComputedStyle(document.querySelector('.summary h2')).fontFamily,
         slabLoaded: document.fonts.check('700 16px "Roboto Slab"'),
         poppinsLoaded: document.fonts.check('400 16px "Poppins"') && document.fonts.check('600 16px "Poppins"'),
+        poppinsLigatures: '',
+        poppinsKerning: '',
+        poppinsFeatureSettings: '',
+        poppinsSynthesis: '',
+        poppinsComputedSamples: {},
       },
       buttonStates: { normal: {}, hover: {}, focus: {} },
       emailState: {},
       finalInteractiveState: {},
       layout: { pageTwoWhitePanelTopPx: 0, pageTwoFooterHeightPx: 0, counterRailAlignment: [], languageVerticalDividerCount: 1, languageHorizontalDividerCount: 2, darkRuleWidthPx: 0, profileBorderWidthPx: 0, frameOffsetLeftPx: 0, frameOffsetRightPx: 0, frameOffsetTopPx: 0, frameOffsetBottomPx: 0, blueTouchesPageTop: false, blueTouchesPageBottom: false, blueTouchesPageLeft: false, blueTouchesPageRight: false, experienceBulletGapPx: 0, experienceBulletGaps: [], frameOffsets: { page1: {}, page2: {} }, pageOneHasTopBackgroundStrip: false, pageOneHasBottomBackgroundStrip: true, pageTwoHasTopBackgroundStrip: true, pageTwoHasBottomBackgroundStrip: false, stackedPageGapPx: 0 },
-      ats: { textExtractable: false, readingOrderValid: false, requiredTermsPresent: [], missingTerms: [], keywordCoverage: 0, keywordStuffingRisk: false, hiddenTextDetected: false },
       experienceQuality: { minimumBulletsPerStation: 2, stations: [] },
       toolsQuality: { minimumVisibleTools: 14, visibleToolCount: 0, visibleToolIds: [], duplicateToolIds: [], unverifiedVisibleToolIds: [] },
       footerQuality: { titleFontSizes: {}, titleFontFamilies: {}, iconBoxes: {}, iconTitleGapsPx: {}, entryAndWorkloadAligned: false },
@@ -348,10 +389,42 @@ async function withPlaywright() {
     for (const [key, selector] of Object.entries(footerSelectors)) { const title = document.querySelector(selector); if (!title) continue; const style = getComputedStyle(title); const icon = title.querySelector('.icon')?.getBoundingClientRect(); const span = title.querySelector('span')?.getBoundingClientRect(); out.footerQuality.titleFontSizes[key] = style.fontSize; out.footerQuality.titleFontFamilies[key] = style.fontFamily; out.footerQuality.iconBoxes[key] = icon ? { width: Math.round(icon.width), height: Math.round(icon.height), top: Math.round(icon.top), left: Math.round(icon.left) } : null; out.footerQuality.iconTitleGapsPx[key] = icon && span ? Math.round(span.left - icon.right) : null; }
     const entrySpan = document.querySelector('.entry-block h2 span')?.getBoundingClientRect(); const workloadSpan = document.querySelector('.workload-block h2 span')?.getBoundingClientRect();
     out.footerQuality.entryAndWorkloadAligned = Boolean(entrySpan && workloadSpan && Math.abs(entrySpan.left - workloadSpan.left) <= 2);
+    const poppinsSelectors = { summary: '#summary-text', employer: '.employer', bullet: '.experience li:not([hidden])', language: '.language', tool: '.tools [data-tool-id]', availability: '.avail p' };
+    const featureValues = [];
+    const kerningValues = [];
+    const ligatureValues = [];
+    const synthesisValues = [];
+    for (const [key, selector] of Object.entries(poppinsSelectors)) {
+      const element = document.querySelector(selector);
+      if (!element) continue;
+      const style = getComputedStyle(element);
+      const sample = {
+        fontFamily: style.fontFamily,
+        fontVariantLigatures: style.fontVariantLigatures,
+        fontKerning: style.fontKerning,
+        fontFeatureSettings: style.fontFeatureSettings,
+        fontSynthesis: style.fontSynthesis || style.getPropertyValue('font-synthesis'),
+        letterSpacing: style.letterSpacing,
+      };
+      out.fonts.poppinsComputedSamples[key] = sample;
+      ligatureValues.push(sample.fontVariantLigatures);
+      kerningValues.push(sample.fontKerning);
+      featureValues.push(sample.fontFeatureSettings);
+      synthesisValues.push(sample.fontSynthesis);
+    }
+    out.fonts.poppinsLigatures = [...new Set(ligatureValues)].join(' | ');
+    out.fonts.poppinsKerning = [...new Set(kerningValues)].join(' | ');
+    out.fonts.poppinsFeatureSettings = [...new Set(featureValues)].join(' | ');
+    out.fonts.poppinsSynthesis = [...new Set(synthesisValues)].join(' | ');
     if (!out.assets.profile.loaded) out.warnings.push('Profile image did not load.');
     if ([out.fonts.heading, out.fonts.body, out.fonts.slab, out.fonts.tools, out.fonts.employer].some((font) => /Times New Roman|Arial/i.test(font))) out.warnings.push('Chromium fell back to Arial or Times New Roman.');
     if (!out.fonts.slabLoaded || !/Roboto Slab/i.test(out.fonts.slab)) out.warnings.push('Roboto Slab did not load for the summary heading.');
     if (!out.fonts.poppinsLoaded || !/Poppins/i.test(out.fonts.body)) out.warnings.push('Poppins did not load for body text.');
+    const poppinsSamples = Object.values(out.fonts.poppinsComputedSamples);
+    if (poppinsSamples.some((sample) => sample.fontVariantLigatures !== 'none')) out.warnings.push('Poppins ligatures are not disabled.');
+    if (poppinsSamples.some((sample) => sample.fontKerning !== 'none')) out.warnings.push('Poppins kerning is not disabled.');
+    if (poppinsSamples.some((sample) => !sample.fontFeatureSettings.includes('liga') || !sample.fontFeatureSettings.includes('kern'))) out.warnings.push('Poppins feature settings are incomplete.');
+    if (poppinsSamples.some((sample) => sample.fontSynthesis !== 'none')) out.warnings.push('Poppins font synthesis is not disabled.');
     if (out.summary.actualLines !== out.summary.targetLines || out.summary.selectionSucceeded !== true) out.warnings.push('Summary is not exactly four visible lines.');
     if (out.experienceQuality.stations.some((station) => station.visibleBulletCount < out.experienceQuality.minimumBulletsPerStation)) out.warnings.push('An experience has fewer than two visible bullets.');
     if (out.toolsQuality.visibleToolCount < out.toolsQuality.minimumVisibleTools || out.toolsQuality.duplicateToolIds.length) out.warnings.push('Tool quality requirements failed.');
@@ -542,39 +615,77 @@ try {
   pageCount = (pdf.match(/\/Type\s*\/Page\b/g) || []).length;
 } catch {}
 
+async function extractPdfJsText(pdf, options, joinStats) {
+  const pages = [];
+  for (let pageNo = 1; pageNo <= pdf.numPages; pageNo += 1) {
+    const page = await pdf.getPage(pageNo);
+    const content = await page.getTextContent(options);
+    pages.push(joinPdfTextItems(content.items, joinStats));
+  }
+  return pages.join('\n').trim();
+}
+
+function runPopplerExtraction(pdfPath, variant) {
+  const outputPath = `dist/text-${variant}-poppler.txt`;
+  const result = spawnSync('pdftotext', ['-enc', 'UTF-8', '-layout', pdfPath, outputPath], { encoding: 'utf8' });
+  if (result.status !== 0) {
+    return { outputPath, text: '', error: result.stderr || result.error?.message || 'pdftotext failed' };
+  }
+  return { outputPath, text: readFileSync(outputPath, 'utf8'), error: null };
+}
+
 async function buildAtsReport(pdfPath, metrics, requiredTerms) {
   const visibleText = metrics.visibleText || '';
   const required = [...new Set(requiredTerms || [])];
-  const joinStats = { fragmentJoinCount: 0, insertedSpaceCount: 0, insertedLineBreakCount: 0, fragmentJoinExamples: [] };
+  const normalizedStats = { fragmentJoinCount: 0, insertedSpaceCount: 0, insertedLineBreakCount: 0, fragmentJoinExamples: [] };
+  const rawStats = { fragmentJoinCount: 0, insertedSpaceCount: 0, insertedLineBreakCount: 0, fragmentJoinExamples: [] };
   let extractedText = visibleText;
   let textExtractable = false;
+  let selectedPdfJsMode = 'fallback-visible-text';
+  const pdfJsModes = {
+    normalized: { missingTerms: required.slice(), brokenTokenExamples: [], extractionSentinelsPresent: [] },
+    normalizationDisabled: { missingTerms: required.slice(), brokenTokenExamples: [], extractionSentinelsPresent: [] },
+  };
   try {
     const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
-    const pdf = await pdfjs.getDocument({ data: new Uint8Array(readFileSync(pdfPath)) }).promise;
-    const pages = [];
-    for (let pageNo = 1; pageNo <= pdf.numPages; pageNo += 1) {
-      const page = await pdf.getPage(pageNo);
-      const content = await page.getTextContent();
-      pages.push(joinPdfTextItems(content.items, joinStats));
+    const dataBuffer = new Uint8Array(readFileSync(pdfPath));
+    const normalizedPdf = await pdfjs.getDocument({ data: dataBuffer }).promise;
+    const normalizedText = await extractPdfJsText(normalizedPdf, undefined, normalizedStats);
+    const rawPdf = await pdfjs.getDocument({ data: new Uint8Array(readFileSync(pdfPath)) }).promise;
+    const normalizationDisabledText = await extractPdfJsText(rawPdf, { disableNormalization: true }, rawStats);
+    const normalizedAnalysis = analyzeExtractedText(normalizedText, required);
+    const rawAnalysis = analyzeExtractedText(normalizationDisabledText, required);
+    pdfJsModes.normalized = { missingTerms: normalizedAnalysis.missingTerms, brokenTokenExamples: normalizedAnalysis.brokenTokensDetected, extractionSentinelsPresent: normalizedAnalysis.extractionSentinelsPresent };
+    pdfJsModes.normalizationDisabled = { missingTerms: rawAnalysis.missingTerms, brokenTokenExamples: rawAnalysis.brokenTokensDetected, extractionSentinelsPresent: rawAnalysis.extractionSentinelsPresent };
+    const normalizedScore = normalizedAnalysis.missingTerms.length + normalizedAnalysis.brokenTokensDetected.length;
+    const rawScore = rawAnalysis.missingTerms.length + rawAnalysis.brokenTokensDetected.length;
+    if (rawScore < normalizedScore && rawAnalysis.normalizedText.includes(normalizeAtsText('Französisch')) && rawAnalysis.normalizedText.includes(normalizeAtsText('03/2026 – heute'))) {
+      extractedText = normalizationDisabledText;
+      selectedPdfJsMode = 'normalizationDisabled';
+      Object.assign(normalizedStats, rawStats);
+    } else {
+      extractedText = normalizedText;
+      selectedPdfJsMode = 'normalized';
     }
-    extractedText = pages.join('\n').trim();
     textExtractable = extractedText.length > 100;
   } catch {
     textExtractable = visibleText.length > 100;
   }
-  const normalizedPdfText = normalizeAtsText(extractedText);
-  const missingTerms = required.filter((term) => term && !normalizedPdfText.includes(normalizeAtsText(term)));
-  const requiredTermsPresent = required.filter((term) => term && normalizedPdfText.includes(normalizeAtsText(term)));
-  const lower = normalizedPdfText;
+  const pdfJsAnalysis = analyzeExtractedText(extractedText, required);
+  const poppler = runPopplerExtraction(pdfPath, variantId);
+  const popplerAnalysis = analyzeExtractedText(poppler.text, required);
+  const lower = pdfJsAnalysis.normalizedText;
   const keywordTerms = [...new Set(cv.skillSections.flatMap((section) => section.items.flatMap((item) => item.atsSynonyms || item.tags || [])))];
   const keywordHits = keywordTerms.filter((term) => lower.includes(normalizeAtsText(term)));
   const orderChecks = [cv.person.name, cv.person.email, cv.experiences[0]?.period, cv.experiences[1]?.employer].filter(Boolean).map((term) => normalizeAtsText(term));
-  const readingOrderValid = orderChecks.every((term, index) => index === 0 || normalizedPdfText.indexOf(orderChecks[index - 1]) <= normalizedPdfText.indexOf(term));
+  const readingOrderValid = orderChecks.every((term, index) => index === 0 || pdfJsAnalysis.normalizedText.indexOf(orderChecks[index - 1]) <= pdfJsAnalysis.normalizedText.indexOf(term));
   return {
     textExtractable,
     readingOrderValid,
-    requiredTermsPresent,
-    missingTerms,
+    requiredTermsPresent: pdfJsAnalysis.requiredTermsPresent,
+    missingTerms: pdfJsAnalysis.missingTerms,
+    brokenTokensDetected: [...new Set([...pdfJsAnalysis.brokenTokensDetected, ...popplerAnalysis.brokenTokensDetected])],
+    extractionSentinelsPresent: pdfJsAnalysis.extractionSentinelsPresent,
     keywordCoverage: keywordTerms.length ? Number((keywordHits.length / keywordTerms.length).toFixed(2)) : 0,
     keywordStuffingRisk: /(\b\w+\b)(?:\s+\1){3,}/i.test(extractedText),
     hiddenTextDetected: Boolean(metrics.ats.hiddenTextDetected),
@@ -582,10 +693,18 @@ async function buildAtsReport(pdfPath, metrics, requiredTerms) {
     normalization: atsNormalizationConfig,
     requiredTermsSource: 'final-visible-dom',
     pdfItemJoinMode: 'geometry-aware-v2',
-    fragmentJoinCount: joinStats.fragmentJoinCount,
-    insertedSpaceCount: joinStats.insertedSpaceCount,
-    insertedLineBreakCount: joinStats.insertedLineBreakCount,
-    fragmentJoinExamples: joinStats.fragmentJoinExamples,
+    selectedPdfJsMode,
+    pdfJsModes,
+    extractors: {
+      pdfjs: { success: pdfJsAnalysis.missingTerms.length === 0 && pdfJsAnalysis.brokenTokensDetected.length === 0, missingTerms: pdfJsAnalysis.missingTerms, brokenTokensDetected: pdfJsAnalysis.brokenTokensDetected, selectedMode: selectedPdfJsMode },
+      poppler: { success: !poppler.error && popplerAnalysis.missingTerms.length === 0 && popplerAnalysis.brokenTokensDetected.length === 0, missingTerms: popplerAnalysis.missingTerms, brokenTokensDetected: popplerAnalysis.brokenTokensDetected, outputPath: poppler.outputPath, error: poppler.error },
+    },
+    requiredTermRepairApplied: false,
+    requiredTermRepairs: [],
+    fragmentJoinCount: normalizedStats.fragmentJoinCount,
+    insertedSpaceCount: normalizedStats.insertedSpaceCount,
+    insertedLineBreakCount: normalizedStats.insertedLineBreakCount,
+    fragmentJoinExamples: normalizedStats.fragmentJoinExamples,
   };
 }
 
@@ -604,7 +723,7 @@ metrics.ats = await buildAtsReport(`dist/Lebenslauf_Adam-Dolinsky_${variantId}.p
 metrics.reviewQueue = buildReviewQueue();
 
 const report = {
-  success: renderer === 'playwright' && pageCount === 2 && metrics.summary.selectionSucceeded === true && metrics.summary.actualLines === metrics.summary.targetLines && metrics.overflows.length === 0 && metrics.collisions.length === 0 && metrics.warnings.length === 0 && metrics.ats.textExtractable && metrics.ats.readingOrderValid && metrics.ats.missingTerms.length === 0 && !metrics.ats.keywordStuffingRisk && !metrics.ats.hiddenTextDetected,
+  success: renderer === 'playwright' && pageCount === 2 && metrics.summary.selectionSucceeded === true && metrics.summary.actualLines === metrics.summary.targetLines && metrics.overflows.length === 0 && metrics.collisions.length === 0 && metrics.warnings.length === 0 && metrics.ats.textExtractable && metrics.ats.readingOrderValid && metrics.ats.missingTerms.length === 0 && metrics.ats.brokenTokensDetected.length === 0 && metrics.ats.extractors?.pdfjs?.success === true && metrics.ats.extractors?.poppler?.success === true && !metrics.ats.keywordStuffingRisk && !metrics.ats.hiddenTextDetected,
   variant: variantId,
   renderer,
   renderedAt: new Date().toISOString(),
@@ -632,9 +751,5 @@ const report = {
   fill: metrics.fill,
 };
 writeFileSync(`dist/render-report-${variantId}.json`, JSON.stringify(report, null, 2));
-if (variantId === 'general') {
-  writeFileSync('dist/visual-review-round-14.json', JSON.stringify({ referenceChecks: { insetBlueTop: true, insetBlueBottom: true, languageRowMatchesReference: true, rulesThinner: true, profileBorderThinner: true }, remainingDifferences: [] }, null, 2));
-  writeFileSync('dist/visual-review-round-17.json', JSON.stringify({ summaryChecks: { allVariantsFourLines: true }, atsChecks: { geometryAwareV2: true, missingTermsEmpty: true }, pageTransition: { pageOneTopInset: true, pageOneBottomContinuous: true, pageTwoTopContinuous: true, pageTwoBottomInset: true, stackedGapPx: 0 }, experienceSpacing: { consistent: true, minimumGapPx: metrics.layout.experienceBulletGaps?.reduce((min, item) => Math.min(min, item.gapPx), Infinity) || 0, maximumGapPx: metrics.layout.experienceBulletGaps?.reduce((max, item) => Math.max(max, item.gapPx), 0) || 0 }, footer: { titlesEqualSize: true, iconsEqualSize: true, entryIconAligned: true, workloadHasIcon: true, entryAndWorkloadAligned: metrics.footerQuality.entryAndWorkloadAligned }, removedContent: { rsEmploymentOverlapNoteRemoved: !metrics.visibleText.includes('Während Anstellung im Zeitraum bei Kunz Kunath AG') }, remainingDifferences: [] }, null, 2));
-}
 console.log(`Rendered ${variantId} with ${renderer}: success=${report.success}, pages=${pageCount}, overflows=${report.overflows.length}, collisions=${report.collisions.length}`);
 if (!report.success) process.exit(1);

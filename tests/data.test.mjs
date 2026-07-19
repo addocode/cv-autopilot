@@ -51,3 +51,9 @@ test('summary candidates exist for every base variant',()=>{assert.equal(data.su
 
 
 test('rekrutenschule overlap note is removed from production data',()=>{const forbidden='Während Anstellung im Zeitraum bei Kunz Kunath AG';assert.equal(JSON.stringify(data).includes(forbidden),false);const example=JSON.parse(readFileSync('data/public/cv.master.example.json','utf8'));assert.equal(JSON.stringify(example).includes(forbidden),false)});
+
+test('workflow installs Poppler and uploads Poppler text artifacts',()=>{const wf=readFileSync('.github/workflows/render-cv.yml','utf8');assert.ok(wf.includes('Install PDF text tools'));assert.ok(wf.includes('poppler-utils'));assert.ok(wf.includes('dist/text-*-poppler.txt'))});
+
+test('round 17 visual review is aggregated after all renders',()=>{const render=readFileSync('scripts/render.mjs','utf8');const renderAll=readFileSync('scripts/render-all.mjs','utf8');assert.equal(render.includes('visual-review-round-17.json'),false);assert.ok(renderAll.includes('visual-review-round-17.json'));assert.ok(renderAll.includes('overallSuccess'));assert.ok(renderAll.includes('render-report-${variant}.json'))});
+
+test('Poppins text disables ligatures, kerning and font synthesis centrally',()=>{const css=readFileSync('src/styles/cv.css','utf8');assert.ok(css.includes('font-variant-ligatures:none'));assert.ok(css.includes('font-kerning:none'));for(const feature of ['"liga" 0','"clig" 0','"dlig" 0','"calt" 0','"kern" 0'])assert.ok(css.includes(feature));assert.ok(css.includes('font-synthesis:none'));assert.ok(css.includes('letter-spacing:normal'))});
