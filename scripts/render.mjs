@@ -203,14 +203,21 @@ function html() {
 const htmlPath = `dist/cv-${variantId}-preview.html`;
 writeFileSync(htmlPath, html());
 
+let renderStage = 'startup';
+
 async function withPlaywright() {
+  renderStage = 'playwright-import';
   const { chromium } = await import('playwright');
+  renderStage = 'browser-launch';
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 794, height: 1123 }, deviceScaleFactor: 1 });
   const fileUrl = new URL(htmlPath, `file://${process.cwd()}/`).href;
+  renderStage = 'preview-navigation';
   await page.goto(fileUrl, { waitUntil: 'networkidle' });
+  renderStage = 'font-loading';
   await page.evaluate(() => document.fonts.ready);
 
+  renderStage = 'summary-selection';
   const selectedSummary = await page.evaluate(async ({ candidates, targetLines }) => {
     const element = document.querySelector('#summary-text');
     const countVisibleTextLines = (target) => {
@@ -236,6 +243,7 @@ async function withPlaywright() {
   cv.summaryText = selectedSummary.text;
   cv.summaryMeta = { ...cv.summaryMeta, selectedCandidateId: selectedSummary.selectedCandidateId ?? null, selectionSucceeded: Boolean(selectedSummary.selectionSucceeded), failureReason: selectedSummary.failureReason ?? null, evidenceIds: selectedSummary.evidenceIds || [], atsTerms: selectedSummary.atsTerms || [], actualLines: selectedSummary.actualLines, candidateMeasurements: selectedSummary.candidateMeasurements || [] };
 
+  renderStage = 'initial-layout-metrics';
   const metrics = await page.evaluate(({ bgExists, variantMeta }) => {
     const rectOf = (element) => {
       const rect = element.getBoundingClientRect();
@@ -390,23 +398,30 @@ async function withPlaywright() {
     const entrySpan = document.querySelector('.entry-block h2 span')?.getBoundingClientRect(); const workloadSpan = document.querySelector('.workload-block h2 span')?.getBoundingClientRect();
     out.footerQuality.entryAndWorkloadAligned = Boolean(entrySpan && workloadSpan && Math.abs(entrySpan.left - workloadSpan.left) <= 2);
     const poppinsSelectors = { summary: '#summary-text', employer: '.employer', bullet: '.experience li:not([hidden])', language: '.language', tool: '.tools [data-tool-id]', availability: '.avail p' };
+    const cssString = (value) => typeof value === 'string' ? value : '';
+    function readComputedSample(selector) {
+      const element = document.querySelector(selector);
+      if (!element) return { selector, found: false, fontFamily: '', fontVariantLigatures: '', fontKerning: '', fontFeatureSettings: '', fontSynthesis: '', letterSpacing: '' };
+      const style = getComputedStyle(element);
+      return {
+        selector,
+        found: true,
+        fontFamily: cssString(style.fontFamily),
+        fontVariantLigatures: cssString(style.fontVariantLigatures || style.getPropertyValue('font-variant-ligatures')),
+        fontKerning: cssString(style.fontKerning || style.getPropertyValue('font-kerning')),
+        fontFeatureSettings: cssString(style.fontFeatureSettings || style.getPropertyValue('font-feature-settings')),
+        fontSynthesis: cssString(style.fontSynthesis || style.getPropertyValue('font-synthesis')),
+        letterSpacing: cssString(style.letterSpacing),
+      };
+    }
     const featureValues = [];
     const kerningValues = [];
     const ligatureValues = [];
     const synthesisValues = [];
     for (const [key, selector] of Object.entries(poppinsSelectors)) {
-      const element = document.querySelector(selector);
-      if (!element) continue;
-      const style = getComputedStyle(element);
-      const sample = {
-        fontFamily: style.fontFamily,
-        fontVariantLigatures: style.fontVariantLigatures,
-        fontKerning: style.fontKerning,
-        fontFeatureSettings: style.fontFeatureSettings,
-        fontSynthesis: style.fontSynthesis || style.getPropertyValue('font-synthesis'),
-        letterSpacing: style.letterSpacing,
-      };
+      const sample = readComputedSample(selector);
       out.fonts.poppinsComputedSamples[key] = sample;
+      if (!sample.found) continue;
       ligatureValues.push(sample.fontVariantLigatures);
       kerningValues.push(sample.fontKerning);
       featureValues.push(sample.fontFeatureSettings);
@@ -421,10 +436,13 @@ async function withPlaywright() {
     if (!out.fonts.slabLoaded || !/Roboto Slab/i.test(out.fonts.slab)) out.warnings.push('Roboto Slab did not load for the summary heading.');
     if (!out.fonts.poppinsLoaded || !/Poppins/i.test(out.fonts.body)) out.warnings.push('Poppins did not load for body text.');
     const poppinsSamples = Object.values(out.fonts.poppinsComputedSamples);
-    if (poppinsSamples.some((sample) => sample.fontVariantLigatures !== 'none')) out.warnings.push('Poppins ligatures are not disabled.');
-    if (poppinsSamples.some((sample) => sample.fontKerning !== 'none')) out.warnings.push('Poppins kerning is not disabled.');
-    if (poppinsSamples.some((sample) => !sample.fontFeatureSettings.includes('liga') || !sample.fontFeatureSettings.includes('kern'))) out.warnings.push('Poppins feature settings are incomplete.');
-    if (poppinsSamples.some((sample) => sample.fontSynthesis !== 'none')) out.warnings.push('Poppins font synthesis is not disabled.');
+    const foundPoppinsSamples = poppinsSamples.filter((sample) => sample.found);
+    const missingPoppinsSamples = Object.entries(out.fonts.poppinsComputedSamples).filter(([, sample]) => !sample.found).map(([key, sample]) => `${key}:${sample.selector}`);
+    if (missingPoppinsSamples.length) out.warnings.push(`Poppins diagnostic selector missing: ${missingPoppinsSamples.join(', ')}`);
+    if (foundPoppinsSamples.some((sample) => sample.fontVariantLigatures !== 'none')) out.warnings.push('Poppins ligatures are not disabled.');
+    if (foundPoppinsSamples.some((sample) => sample.fontKerning !== 'none')) out.warnings.push('Poppins kerning is not disabled.');
+    if (foundPoppinsSamples.some((sample) => { const settings = cssString(sample.fontFeatureSettings); return !settings.includes('liga') || !settings.includes('kern'); })) out.warnings.push('Poppins feature settings are incomplete.');
+    if (foundPoppinsSamples.some((sample) => sample.fontSynthesis !== 'none')) out.warnings.push('Poppins font synthesis is not disabled.');
     if (out.summary.actualLines !== out.summary.targetLines || out.summary.selectionSucceeded !== true) out.warnings.push('Summary is not exactly four visible lines.');
     if (out.experienceQuality.stations.some((station) => station.visibleBulletCount < out.experienceQuality.minimumBulletsPerStation)) out.warnings.push('An experience has fewer than two visible bullets.');
     if (out.toolsQuality.visibleToolCount < out.toolsQuality.minimumVisibleTools || out.toolsQuality.duplicateToolIds.length) out.warnings.push('Tool quality requirements failed.');
@@ -479,6 +497,7 @@ async function withPlaywright() {
     });
   }
 
+  renderStage = 'adaptive-fill';
   if (metrics.fill.enabled) {
     const minGapPx = Math.ceil(metrics.fill.minRemainingSpaceMm * 96 / 25.4);
     const baseline = await measureLayout();
@@ -555,6 +574,7 @@ async function withPlaywright() {
 
   writeFileSync(htmlPath, await page.content());
 
+  renderStage = 'interaction-checks';
   const target = page.locator('.link-buttons a').first();
   const readButton = async () => target.evaluate((element) => {
     const style = getComputedStyle(element);
@@ -587,14 +607,19 @@ async function withPlaywright() {
     emailFocused: Boolean(document.querySelector('.contact a[href^="mailto:"]:focus')),
   }));
 
+  renderStage = 'required-term-collection';
   metrics.visibleText = await page.evaluate(() => document.body.innerText.replace(/\s+/g, ' ').trim());
   metrics.ats.hiddenTextDetected = await page.evaluate(() => [...document.querySelectorAll('body *')].some((element) => { const style = getComputedStyle(element); const text = element.textContent?.trim(); return Boolean(text && style.visibility === 'hidden' && !element.closest('[hidden]')); }));
   metrics.ats.requiredTerms = await page.locator('[data-ats-required]:not([hidden])').evaluateAll((elements) => elements.map((element) => element.textContent.replace(/\s+/g, ' ').trim()).filter(Boolean));
 
   await page.evaluate(() => document.fonts.ready);
+  renderStage = 'pdf-export';
   await page.pdf({ path: `dist/Lebenslauf_Adam-Dolinsky_${variantId}.pdf`, format: 'A4', printBackground: true, preferCSSPageSize: true });
+  renderStage = 'page-one-screenshot';
   await page.locator('#page-1').screenshot({ path: `dist/cv-${variantId}-page-1.png` });
+  renderStage = 'page-two-screenshot';
   await page.locator('#page-2').screenshot({ path: `dist/cv-${variantId}-page-2.png` });
+  renderStage = 'browser-close';
   await browser.close();
   return metrics;
 }
@@ -605,7 +630,8 @@ const renderer = 'playwright';
 try {
   metrics = await withPlaywright();
 } catch (error) {
-  console.error('Production render requires Playwright/Chromium:', error.message);
+  console.error(`Render failed at stage: ${renderStage}`);
+  console.error(error?.stack || error);
   process.exit(1);
 }
 
