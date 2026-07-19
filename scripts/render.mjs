@@ -340,6 +340,33 @@ async function withPlaywright() {
 
   renderStage = 'initial-layout-metrics';
   const metrics = await page.evaluate(({ bgExists, variantMeta }) => {
+    const cssString = (value) => typeof value === 'string' ? value : '';
+    function getPrimaryFontFamily(value) {
+      return String(value || '').split(',')[0].replace(/[\"']/g, '').trim();
+    }
+    function readComputedSample(selector) {
+      const element = document.querySelector(selector);
+      if (!element) {
+        return { selector, found: false, text: '', fontFamily: '', primaryFontFamily: '', fontStyle: '', fontWeight: '', fontVariantLigatures: '', fontKerning: '', fontFeatureSettings: '', fontSynthesis: '', letterSpacing: '', wordSpacing: '' };
+      }
+      const style = getComputedStyle(element);
+      const semanticText = element.getAttribute('data-ats-text') || element.innerText || element.textContent || '';
+      return {
+        selector,
+        found: true,
+        text: String(semanticText).replace(/\s+/g, ' ').trim(),
+        fontFamily: cssString(style.fontFamily),
+        primaryFontFamily: getPrimaryFontFamily(style.fontFamily),
+        fontStyle: cssString(style.fontStyle),
+        fontWeight: cssString(style.fontWeight),
+        fontVariantLigatures: cssString(style.fontVariantLigatures || style.getPropertyValue('font-variant-ligatures')),
+        fontKerning: cssString(style.fontKerning || style.getPropertyValue('font-kerning')),
+        fontFeatureSettings: cssString(style.fontFeatureSettings || style.getPropertyValue('font-feature-settings')),
+        fontSynthesis: cssString(style.fontSynthesis || style.getPropertyValue('font-synthesis')),
+        letterSpacing: cssString(style.letterSpacing),
+        wordSpacing: cssString(style.wordSpacing),
+      };
+    }
     const rectOf = (element) => {
       const rect = element.getBoundingClientRect();
       return { id: element.id || element.className, left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width, height: rect.height, scrollHeight: element.scrollHeight, clientHeight: element.clientHeight, pageId: element.closest('.cv-page')?.id };
@@ -527,28 +554,6 @@ async function withPlaywright() {
     out.footerQuality.entryAndWorkloadAligned = Boolean(entrySpan && workloadSpan && Math.abs(entrySpan.left - workloadSpan.left) <= 2);
     const bodySelectors = { summary: '#summary-text', employer: '.employer', location: '.experience-location-line', bullet: '.experience li:not([hidden])', language: '.language', tool: '.tools [data-tool-id]', supplementary: '.supplementary', reference: '.refs p', availability: '.avail p' };
     const slabSelectors = { summaryHeading: '.summary h2', experienceTitle: '.experience .meta', toolsHeading: '#tools h2', referencesHeading: '#references h2', entryHeading: '.entry-block h2', workloadHeading: '.workload-block h2' };
-    const cssString = (value) => typeof value === 'string' ? value : '';
-    const getPrimaryFontFamily = (value) => String(value || '').split(',')[0].replace(/[\"']/g, '').trim();
-    function readComputedSample(selector) {
-      const element = document.querySelector(selector);
-      if (!element) return { selector, found: false, fontFamily: '', fontStyle: '', fontWeight: '', fontVariantLigatures: '', fontKerning: '', fontFeatureSettings: '', fontSynthesis: '', letterSpacing: '', wordSpacing: '' };
-      const style = getComputedStyle(element);
-      return {
-        selector,
-        found: true,
-        text: cssString(element.getAttribute('data-ats-text') || element.innerText || element.textContent || '').replace(/\s+/g, ' ').trim(),
-        fontFamily: cssString(style.fontFamily),
-        primaryFontFamily: getPrimaryFontFamily(style.fontFamily),
-        fontStyle: cssString(style.fontStyle),
-        fontWeight: cssString(style.fontWeight),
-        fontVariantLigatures: cssString(style.fontVariantLigatures || style.getPropertyValue('font-variant-ligatures')),
-        fontKerning: cssString(style.fontKerning || style.getPropertyValue('font-kerning')),
-        fontFeatureSettings: cssString(style.fontFeatureSettings || style.getPropertyValue('font-feature-settings')),
-        fontSynthesis: cssString(style.fontSynthesis || style.getPropertyValue('font-synthesis')),
-        letterSpacing: cssString(style.letterSpacing),
-        wordSpacing: cssString(style.wordSpacing),
-      };
-    }
     const featureValues = [];
     const kerningValues = [];
     const ligatureValues = [];
