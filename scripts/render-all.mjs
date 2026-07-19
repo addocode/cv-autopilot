@@ -86,6 +86,7 @@ const expectedFiles = [
   ...variants.map((variant) => `dist/cv-${variant}-preview.html`),
   ...variants.map((variant) => `dist/render-report-${variant}.json`),
   ...variants.map((variant) => `dist/text-${variant}-poppler-raw.txt`),
+  ...variants.map((variant) => `dist/text-${variant}-poppler-default.txt`),
   ...variants.map((variant) => `dist/text-${variant}-poppler-layout.txt`),
 ];
 const distFiles = existsSync('dist') ? readdirSync('dist') : [];
@@ -95,9 +96,10 @@ const artifactCompleteness = {
   htmlCount: distFiles.filter((file) => /^cv-.*-preview\.html$/.test(file)).length,
   reportCount: distFiles.filter((file) => /^render-report-.*\.json$/.test(file)).length,
   popplerRawTextCount: distFiles.filter((file) => /^text-.*-poppler-raw\.txt$/.test(file)).length,
+  popplerDefaultTextCount: distFiles.filter((file) => /^text-.*-poppler-default\.txt$/.test(file)).length,
   popplerLayoutTextCount: distFiles.filter((file) => /^text-.*-poppler-layout\.txt$/.test(file)).length,
-  popplerTextCount: distFiles.filter((file) => /^text-.*-poppler-(raw|layout)\.txt$/.test(file)).length,
-  expected: { pdfCount: 4, pngCount: 8, htmlCount: 4, reportCount: 4, popplerRawTextCount: 4, popplerLayoutTextCount: 4, popplerTextCount: 8 },
+  popplerTextCount: distFiles.filter((file) => /^text-.*-poppler-(raw|default|layout)\.txt$/.test(file)).length,
+  expected: { pdfCount: 4, pngCount: 8, htmlCount: 4, reportCount: 4, popplerRawTextCount: 4, popplerDefaultTextCount: 4, popplerLayoutTextCount: 4, popplerTextCount: 12 },
   missingFiles: expectedFiles.filter((file) => !existsSync(file)),
   complete: false,
 };
@@ -107,6 +109,7 @@ artifactCompleteness.complete = artifactCompleteness.missingFiles.length === 0
   && artifactCompleteness.htmlCount === artifactCompleteness.expected.htmlCount
   && artifactCompleteness.reportCount === artifactCompleteness.expected.reportCount
   && artifactCompleteness.popplerRawTextCount === artifactCompleteness.expected.popplerRawTextCount
+  && artifactCompleteness.popplerDefaultTextCount === artifactCompleteness.expected.popplerDefaultTextCount
   && artifactCompleteness.popplerLayoutTextCount === artifactCompleteness.expected.popplerLayoutTextCount
   && artifactCompleteness.popplerTextCount === artifactCompleteness.expected.popplerTextCount;
 if (artifactCompleteness.missingFiles.length) {
@@ -143,7 +146,7 @@ const fontChecks = {
   figtreeLoaded: allReportsPresent && allReports.every((report) => report.fonts?.figtreeLoaded === true),
   figtreeItalicLoaded: allReportsPresent && allReports.every((report) => report.fonts?.figtreeItalicLoaded === true),
   poppinsAbsent: allReportsPresent && allReports.every((report) => report.fonts?.deprecatedFontChecks?.poppinsPresent === false),
-  allSkillHeadingsRobotoSlab: allReportsPresent && skillHeadingSamples.length > 0 && skillHeadingSamples.every((sample) => /Roboto Slab/i.test(sample.fontFamily || '')),
+  allSkillHeadingsRobotoSlab: allReportsPresent && skillHeadingSamples.length > 0 && skillHeadingSamples.every((sample) => sample.primaryFontFamily === 'Roboto Slab'),
   summaryItalic: allReportsPresent && allReports.every((report) => report.fonts?.figtreeComputedSamples?.summary?.fontStyle === 'italic'),
   supplementaryItalic: allReportsPresent && allReports.every((report) => {
     const sample = report.fonts?.figtreeComputedSamples?.supplementary;
@@ -160,13 +163,28 @@ const atsChecks = {
   popplerRawPassed: allReportsPresent && allReports.every((report) => report.ats?.extractors?.popplerRaw?.success === true),
   popplerLayoutDiagnosticPassed: allReportsPresent && allReports.every((report) => report.ats?.extractors?.popplerLayout?.success === true),
   pdfJsDiagnosticPassed: allReportsPresent && allReports.every((report) => report.ats?.extractors?.pdfjs?.success === true),
-  productionAtsPassed: allReportsPresent && allReports.every((report) => report.ats?.primaryExtractor === 'poppler-raw' && report.ats?.primarySuccess === true && report.ats?.missingTerms?.length === 0 && report.ats?.brokenTokensDetected?.length === 0),
+  popplerDefaultReadingOrderPassed: allReportsPresent && allReports.every((report) => report.ats?.extractors?.popplerDefault?.success === true && report.ats?.readingOrderValid === true),
+  productionAtsPassed: allReportsPresent && allReports.every((report) => report.ats?.primaryExtractor === 'poppler-raw' && report.ats?.readingOrderExtractor === 'poppler-default' && report.ats?.primaryContentSuccess === true && report.ats?.readingOrderValid === true && report.ats?.primarySuccess === true && report.ats?.missingTerms?.length === 0 && report.ats?.brokenTokensDetected?.length === 0),
 };
+const remainingDifferences = [];
+if (!allReportsPresent) remainingDifferences.push('Production render failed before PDF/report generation');
+for (const variant of variants) {
+  const report = reports[variant];
+  if (!report) continue;
+  if (report.summary?.actualLines !== report.summary?.targetLines) remainingDifferences.push(`${variant}: summary has ${report.summary?.actualLines ?? 'unknown'} lines instead of ${report.summary?.targetLines ?? 'unknown'}`);
+  if (report.summary?.selectionSucceeded !== true) remainingDifferences.push(`${variant}: no four-line summary candidate selected`);
+  for (const warning of report.warnings || []) remainingDifferences.push(`${variant}: ${warning}`);
+  if (report.ats?.primaryContentSuccess !== true) remainingDifferences.push(`${variant}: Poppler Raw content gate failed`);
+  if (report.ats?.readingOrderValid !== true) remainingDifferences.push(`${variant}: Poppler Default reading order failed`);
+  if (report.ats?.primarySuccess !== true) remainingDifferences.push(`${variant}: ATS primary success failed`);
+}
+if (artifactCompleteness.missingFiles.length) remainingDifferences.push(...artifactCompleteness.missingFiles.map((file) => `missing artifact: ${file}`));
 const overallSuccess = allReportsPresent
   && artifactCompleteness.complete
   && allReports.every((report) => report.success === true)
   && Object.values(fontChecks).every(Boolean)
-  && atsChecks.productionAtsPassed;
+  && atsChecks.productionAtsPassed
+  && remainingDifferences.length === 0;
 const visualReview = {
   reportsPresent,
   renderFailures,
@@ -192,7 +210,7 @@ const visualReview = {
     workloadHasIcon: allReportsPresent && allReports.every((report) => Boolean(report.footerQuality?.iconBoxes?.workload)),
   },
   overallSuccess,
-  remainingDifferences: overallSuccess ? [] : (allReportsPresent ? [] : ['Production render failed before PDF/report generation']),
+  remainingDifferences: overallSuccess ? [] : remainingDifferences,
 };
 
 writeFileSync('dist/visual-review-round-17.json', JSON.stringify(visualReview, null, 2));

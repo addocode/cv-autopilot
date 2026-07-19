@@ -38,6 +38,7 @@ jobs:
             dist/render-report-*.json
             dist/visual-review-round-*.json
             dist/text-*-poppler-raw.txt
+            dist/text-*-poppler-default.txt
             dist/text-*-poppler-layout.txt
             dist/render-failure-*.json
             dist/render-log-*.txt

@@ -16,6 +16,7 @@ const staleFiles = [
   `dist/cv-${variantId}-page-2.png`,
   `dist/text-${variantId}-poppler.txt`,
   `dist/text-${variantId}-poppler-raw.txt`,
+  `dist/text-${variantId}-poppler-default.txt`,
   `dist/text-${variantId}-poppler-layout.txt`,
 ];
 for (const file of staleFiles) {
@@ -250,6 +251,15 @@ function writeRenderFailure(error) {
   }, null, 2));
 }
 
+function getPrimaryFontFamily(value) {
+  return String(value || '').split(',')[0].replace(/[\"']/g, '').trim();
+}
+
+function isUnexpectedPrimaryFont(value, expected) {
+  const primary = getPrimaryFontFamily(value);
+  return primary !== expected;
+}
+
 async function withPlaywright() {
   renderStage = 'playwright-import';
   const { chromium } = await import('playwright');
@@ -260,7 +270,18 @@ async function withPlaywright() {
   renderStage = 'preview-navigation';
   await page.goto(fileUrl, { waitUntil: 'networkidle' });
   renderStage = 'font-loading';
-  await page.evaluate(() => document.fonts.ready);
+  await page.evaluate(async () => {
+    await Promise.all([
+      document.fonts.load('400 16px "Figtree"', 'Adam Dolinsky'),
+      document.fonts.load('500 16px "Figtree"', 'Mediamatiker'),
+      document.fonts.load('600 16px "Figtree"', 'Digital Marketing'),
+      document.fonts.load('700 16px "Figtree"', 'Referenzen'),
+      document.fonts.load('italic 400 16px "Figtree"', 'Kurzprofil'),
+      document.fonts.load('italic 500 16px "Figtree"', 'mediamatikbezogene Tools'),
+      document.fonts.load('700 16px "Roboto Slab"', 'Arbeitsweise'),
+    ]);
+    await document.fonts.ready;
+  });
 
   renderStage = 'summary-selection';
   const selectedSummary = await page.evaluate(async ({ candidates, targetLines }) => {
@@ -455,6 +476,7 @@ async function withPlaywright() {
     const figtreeSelectors = { summary: '#summary-text', employer: '.employer', bullet: '.experience li:not([hidden])', language: '.language', tool: '.tools [data-tool-id]', supplementary: '.supplementary', reference: '.refs p', availability: '.avail p' };
     const slabSelectors = { summaryHeading: '.summary h2', experienceTitle: '.experience .meta', toolsHeading: '#tools h2', referencesHeading: '#references h2', entryHeading: '.entry-block h2', workloadHeading: '.workload-block h2' };
     const cssString = (value) => typeof value === 'string' ? value : '';
+    const getPrimaryFontFamily = (value) => String(value || '').split(',')[0].replace(/[\"']/g, '').trim();
     function readComputedSample(selector) {
       const element = document.querySelector(selector);
       if (!element) return { selector, found: false, fontFamily: '', fontStyle: '', fontWeight: '', fontVariantLigatures: '', fontKerning: '', fontFeatureSettings: '', fontSynthesis: '', letterSpacing: '', wordSpacing: '' };
@@ -462,8 +484,9 @@ async function withPlaywright() {
       return {
         selector,
         found: true,
-        text: cssString(element.textContent).replace(/\s+/g, ' ').trim(),
+        text: cssString(element.getAttribute('data-ats-text') || element.innerText || element.textContent || '').replace(/\s+/g, ' ').trim(),
         fontFamily: cssString(style.fontFamily),
+        primaryFontFamily: getPrimaryFontFamily(style.fontFamily),
         fontStyle: cssString(style.fontStyle),
         fontWeight: cssString(style.fontWeight),
         fontVariantLigatures: cssString(style.fontVariantLigatures || style.getPropertyValue('font-variant-ligatures')),
@@ -494,24 +517,25 @@ async function withPlaywright() {
     for (const [key, selector] of Object.entries(slabSelectors)) out.fonts.slabSamples[key] = readComputedSample(selector);
     out.fonts.skillHeadingSamples = [...document.querySelectorAll('.skill-section h2')].map((element) => {
       const style = getComputedStyle(element);
-      return { text: cssString(element.textContent).replace(/\s+/g, ' ').trim(), fontFamily: cssString(style.fontFamily), fontWeight: cssString(style.fontWeight), fontStyle: cssString(style.fontStyle) };
+      return { text: cssString(element.getAttribute('data-ats-text') || element.innerText || element.textContent || '').replace(/\s+/g, ' ').trim(), fontFamily: cssString(style.fontFamily), primaryFontFamily: getPrimaryFontFamily(style.fontFamily), fontWeight: cssString(style.fontWeight), fontStyle: cssString(style.fontStyle) };
     });
     if (!out.assets.profile.loaded) out.warnings.push('Profile image did not load.');
-    if ([out.fonts.heading, out.fonts.body, out.fonts.slab, out.fonts.tools, out.fonts.employer].some((font) => /Times New Roman|Arial/i.test(font))) out.warnings.push('Chromium fell back to Arial or Times New Roman.');
-    if (!out.fonts.slabLoaded || !/Roboto Slab/i.test(out.fonts.slab)) out.warnings.push('Roboto Slab did not load for the summary heading.');
-    if (!out.fonts.figtreeLoaded || !/Figtree/i.test(out.fonts.body)) out.warnings.push('Figtree did not load for body text.');
+    if ([out.fonts.body, out.fonts.tools, out.fonts.employer].some((font) => getPrimaryFontFamily(font) !== 'Figtree')) out.warnings.push('A body text sample used an unexpected primary font.');
+    if ([out.fonts.heading, out.fonts.slab, out.fonts.sectionHeading, out.fonts.experienceTitle].some((font) => getPrimaryFontFamily(font) !== 'Roboto Slab')) out.warnings.push('A slab heading sample used an unexpected primary font.');
+    if (!out.fonts.slabLoaded || getPrimaryFontFamily(out.fonts.slab) !== 'Roboto Slab') out.warnings.push('Roboto Slab did not load for the summary heading.');
+    if (!out.fonts.figtreeLoaded || getPrimaryFontFamily(out.fonts.body) !== 'Figtree') out.warnings.push('Figtree did not load for body text.');
     const figtreeSamples = Object.values(out.fonts.figtreeComputedSamples);
     const foundFigtreeSamples = figtreeSamples.filter((sample) => sample.found);
     const missingFigtreeSamples = Object.entries(out.fonts.figtreeComputedSamples).filter(([, sample]) => !sample.found).map(([key, sample]) => `${key}:${sample.selector}`);
     if (missingFigtreeSamples.length) out.warnings.push(`Figtree diagnostic selector missing: ${missingFigtreeSamples.join(', ')}`);
-    if (foundFigtreeSamples.some((sample) => !/Figtree/i.test(sample.fontFamily))) out.warnings.push('A Figtree body sample did not compute to Figtree.');
+    if (foundFigtreeSamples.some((sample) => sample.primaryFontFamily !== 'Figtree')) out.warnings.push('A Figtree body sample did not compute to Figtree.');
     if (foundFigtreeSamples.some((sample) => sample.fontVariantLigatures !== 'none')) out.warnings.push('Figtree ligatures are not disabled.');
     if (foundFigtreeSamples.some((sample) => sample.fontKerning !== 'normal')) out.warnings.push('Figtree kerning is not natural.');
     if (foundFigtreeSamples.some((sample) => sample.fontFeatureSettings !== 'normal')) out.warnings.push('Figtree feature settings are not natural.');
     if (foundFigtreeSamples.some((sample) => sample.fontSynthesis !== 'none')) out.warnings.push('Figtree font synthesis is not disabled.');
     if (foundFigtreeSamples.some((sample) => !['normal', '0px'].includes(sample.letterSpacing))) out.warnings.push('Figtree letter spacing uses fixed tracking.');
     if (foundFigtreeSamples.some((sample) => !['normal', '0px'].includes(sample.wordSpacing))) out.warnings.push('Figtree word spacing uses fixed spacing.');
-    if (out.fonts.skillHeadingSamples.some((sample) => !/Roboto Slab/i.test(sample.fontFamily) || /Figtree|Arial|Times New Roman/i.test(sample.fontFamily))) out.warnings.push('A skill heading does not use Roboto Slab.');
+    if (out.fonts.skillHeadingSamples.some((sample) => sample.primaryFontFamily !== 'Roboto Slab')) out.warnings.push('A skill heading does not use Roboto Slab.');
     if (out.fonts.figtreeComputedSamples.summary?.fontStyle !== 'italic') out.warnings.push('Summary text is not italic.');
     if (out.fonts.figtreeComputedSamples.supplementary?.found && out.fonts.figtreeComputedSamples.supplementary.fontStyle !== 'italic') out.warnings.push('Supplementary text is not italic.');
     if (out.summary.actualLines !== out.summary.targetLines || out.summary.selectionSucceeded !== true) out.warnings.push('Summary is not exactly four visible lines.');
@@ -748,9 +772,10 @@ async function extractPdfJsText(pdf, options, joinStats) {
 }
 
 function runPopplerExtraction(pdfPath, variant, mode) {
-  const suffix = mode === 'raw' ? 'raw' : 'layout';
+  const modeArgs = { raw: ['-raw'], default: [], layout: ['-layout'] };
+  const suffix = { raw: 'raw', default: 'default', layout: 'layout' }[mode];
   const outputPath = `dist/text-${variant}-poppler-${suffix}.txt`;
-  const args = ['-enc', 'UTF-8', mode === 'raw' ? '-raw' : '-layout', pdfPath, outputPath];
+  const args = ['-enc', 'UTF-8', ...(modeArgs[mode] || []), pdfPath, outputPath];
   const result = spawnSync('pdftotext', args, { encoding: 'utf8' });
   if (result.status !== 0) {
     return { outputPath, text: '', error: result.stderr || result.error?.message || 'pdftotext failed', args };
@@ -797,31 +822,42 @@ async function buildAtsReport(pdfPath, metrics, requiredTerms) {
   }
   const pdfJsAnalysis = analyzeExtractedText(extractedText, required);
   const popplerRaw = runPopplerExtraction(pdfPath, variantId, 'raw');
+  const popplerDefault = runPopplerExtraction(pdfPath, variantId, 'default');
   const popplerLayout = runPopplerExtraction(pdfPath, variantId, 'layout');
   const popplerRawAnalysis = analyzeExtractedText(popplerRaw.text, required);
+  const popplerDefaultAnalysis = analyzeExtractedText(popplerDefault.text, []);
   const popplerLayoutAnalysis = analyzeExtractedText(popplerLayout.text, required);
-  const primaryAtsSuccess = popplerRaw.error === null
+  const primaryContentSuccess = popplerRaw.error === null
     && popplerRawAnalysis.missingTerms.length === 0
     && popplerRawAnalysis.brokenTokensDetected.length === 0
     && popplerRaw.text.trim().length > 100;
   const lower = popplerRawAnalysis.normalizedText;
   const keywordTerms = [...new Set(cv.skillSections.flatMap((section) => section.items.flatMap((item) => item.atsSynonyms || item.tags || [])))];
   const keywordHits = keywordTerms.filter((term) => lower.includes(normalizeAtsText(term)));
-  const orderChecks = [cv.person.name, cv.headline, cv.person.email, cv.summaryText, cv.skillSections[0]?.title, 'SPRACHEN', cv.experiences[0]?.period, 'SOFTWARE & TOOLS', 'REFERENZEN', 'EINTRITT', 'PENSUM'].filter(Boolean).map((term) => normalizeAtsText(term));
-  const readingOrderValid = orderChecks.every((term, index) => {
-    const current = lower.indexOf(term);
-    if (current < 0) return false;
-    if (index === 0) return true;
-    const previous = lower.indexOf(orderChecks[index - 1]);
-    return previous >= 0 && previous <= current;
+  const readingOrderTerms = [cv.person.name, 'KURZPROFIL', cv.skillSections[0]?.title, 'SPRACHEN', cv.experiences[0]?.period, 'SOFTWARE & TOOLS', 'REFERENZEN', 'EINTRITT', 'PENSUM'].filter(Boolean);
+  const readingOrderText = popplerDefaultAnalysis.normalizedText;
+  let previousPosition = -1;
+  const readingOrderChecks = readingOrderTerms.map((term) => {
+    const normalizedTerm = normalizeAtsText(term);
+    const position = readingOrderText.indexOf(normalizedTerm);
+    const found = position >= 0;
+    const inOrder = found && position >= previousPosition;
+    if (inOrder) previousPosition = position;
+    return { term, position, found, inOrder };
   });
+  const readingOrderValid = popplerDefault.error === null && popplerDefault.text.trim().length > 100 && readingOrderChecks.every((check) => check.found && check.inOrder);
+  const readingOrderSuccess = popplerDefault.error === null && readingOrderValid === true;
+  const primaryAtsSuccess = primaryContentSuccess && readingOrderSuccess;
   const pdfJsSuccess = pdfJsAnalysis.missingTerms.length === 0 && pdfJsAnalysis.brokenTokensDetected.length === 0;
   const popplerLayoutSuccess = !popplerLayout.error && popplerLayoutAnalysis.missingTerms.length === 0 && popplerLayoutAnalysis.brokenTokensDetected.length === 0;
   return {
     textExtractable: primaryAtsSuccess || textExtractable,
     readingOrderValid,
-    readingOrderExtractor: 'poppler-raw',
+    readingOrderExtractor: 'poppler-default',
+    readingOrderChecks,
     primaryExtractor: 'poppler-raw',
+    primaryContentSuccess,
+    readingOrderSuccess,
     primarySuccess: primaryAtsSuccess,
     requiredTerms: required,
     requiredTermsPresent: popplerRawAnalysis.requiredTermsPresent,
@@ -838,7 +874,8 @@ async function buildAtsReport(pdfPath, metrics, requiredTerms) {
     selectedPdfJsMode,
     pdfJsModes,
     extractors: {
-      popplerRaw: { role: 'primary-ats-extractor', gatesProductionSuccess: true, success: primaryAtsSuccess, missingTerms: popplerRawAnalysis.missingTerms, brokenTokensDetected: popplerRawAnalysis.brokenTokensDetected, extractionSentinelsPresent: popplerRawAnalysis.extractionSentinelsPresent, outputPath: popplerRaw.outputPath, error: popplerRaw.error, args: popplerRaw.args },
+      popplerRaw: { role: 'primary-content-extractor', gatesContentSuccess: true, success: primaryContentSuccess, missingTerms: popplerRawAnalysis.missingTerms, brokenTokensDetected: popplerRawAnalysis.brokenTokensDetected, extractionSentinelsPresent: popplerRawAnalysis.extractionSentinelsPresent, outputPath: popplerRaw.outputPath, error: popplerRaw.error, args: popplerRaw.args },
+      popplerDefault: { role: 'primary-reading-order-extractor', gatesReadingOrderSuccess: true, success: readingOrderSuccess, readingOrderValid, readingOrderChecks, outputPath: popplerDefault.outputPath, error: popplerDefault.error, args: popplerDefault.args },
       popplerLayout: { role: 'layout-diagnostic', gatesProductionSuccess: false, success: popplerLayoutSuccess, missingTerms: popplerLayoutAnalysis.missingTerms, brokenTokensDetected: popplerLayoutAnalysis.brokenTokensDetected, extractionSentinelsPresent: popplerLayoutAnalysis.extractionSentinelsPresent, outputPath: popplerLayout.outputPath, error: popplerLayout.error, args: popplerLayout.args },
       pdfjs: { role: 'secondary-diagnostic', gatesProductionSuccess: false, success: pdfJsSuccess, missingTerms: pdfJsAnalysis.missingTerms, brokenTokensDetected: pdfJsAnalysis.brokenTokensDetected, extractionSentinelsPresent: pdfJsAnalysis.extractionSentinelsPresent, selectedMode: selectedPdfJsMode },
     },
@@ -867,7 +904,7 @@ metrics.ats = await buildAtsReport(`dist/Lebenslauf_Adam-Dolinsky_${variantId}.p
 metrics.reviewQueue = buildReviewQueue();
 
 const report = {
-  success: renderer === 'playwright' && pageCount === 2 && metrics.summary.selectionSucceeded === true && metrics.summary.actualLines === metrics.summary.targetLines && metrics.overflows.length === 0 && metrics.collisions.length === 0 && metrics.warnings.length === 0 && metrics.ats.textExtractable && metrics.ats.primarySuccess === true && metrics.ats.missingTerms.length === 0 && metrics.ats.brokenTokensDetected.length === 0 && !metrics.ats.keywordStuffingRisk && !metrics.ats.hiddenTextDetected,
+  success: renderer === 'playwright' && pageCount === 2 && metrics.summary.selectionSucceeded === true && metrics.summary.actualLines === metrics.summary.targetLines && metrics.overflows.length === 0 && metrics.collisions.length === 0 && metrics.warnings.length === 0 && metrics.ats.textExtractable && metrics.ats.primaryContentSuccess === true && metrics.ats.readingOrderValid === true && metrics.ats.primarySuccess === true && metrics.ats.missingTerms.length === 0 && metrics.ats.brokenTokensDetected.length === 0 && !metrics.ats.keywordStuffingRisk && !metrics.ats.hiddenTextDetected,
   variant: variantId,
   renderer,
   renderedAt: new Date().toISOString(),
