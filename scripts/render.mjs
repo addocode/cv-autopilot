@@ -312,10 +312,11 @@ function applyVariant() {
       seenSubstantiveTexts.add(semanticKey);
       included.push({ ...filler, text, minimumFallback: true });
     }
-    if (targetRoleFamily === 'non-mediamatik-core' && !included.some((item) => item.crossDomain)) included.push(createCrossDomainBullet(experience));
+    const fillEligible = experience.stationType !== 'education' && experience.excludeFromBreadthSummary !== true;
+    if (fillEligible && targetRoleFamily === 'non-mediamatik-core' && !included.some((item) => item.crossDomain)) included.push(createCrossDomainBullet(experience));
     const remainingOptionalCandidates = optionalCandidates.filter((bullet) => !included.some((item) => item.id === bullet.id));
     const omitted = [...omittedMandatory, ...remainingOptionalCandidates].filter((bullet) => !included.some((item) => item.id === bullet.id));
-    const breadthSummary = createBreadthSummaryBullet(experience, omitted);
+    const breadthSummary = fillEligible ? createBreadthSummaryBullet(experience, omitted) : null;
     if (breadthSummary && !included.some((item) => item.breadthSummary || item.crossDomain)) included.push(breadthSummary);
     return {
       ...experience,
@@ -328,28 +329,7 @@ function applyVariant() {
   });
 
   const trainingIndex = experiences.findIndex((experience) => experience.id === 'mediamatiker-ausbildung-army-bict');
-  if (trainingIndex >= 0 && !experiences.some((experience) => experience.id === 'berufsmaturitaet-bbz-cfp')) {
-    experiences[trainingIndex] = { ...experiences[trainingIndex], role: 'Mediamatiker EFZ in Ausbildung' };
-    experiences.splice(trainingIndex + 1, 0, {
-      id: 'berufsmaturitaet-bbz-cfp',
-      period: '08/2017 – 08/2021',
-      role: 'Berufsmaturität Wirtschaft und Dienstleistungen, Typ Dienstleistungen',
-      employer: 'Berufsbildungszentrum BBZ-CFP',
-      location: 'Biel',
-      notes: [],
-      sources: ['cv-2d-p2', 'cv-2b', 'linkedin'],
-      bullets: [
-        { id: 'bm-bullet-communication-languages-projects', text: 'Bürokommunikation, Deutsch, Englisch, Französisch, Präsentationstechnik und Projektmanagement: strukturierte Korrespondenz, adressatengerechte Dokumentation und professionelle Präsentationen.', sourceIds: ['cv-2d-p2', 'cv-2b', 'linkedin'], sources: ['cv-2d-p2', 'cv-2b', 'linkedin'], evidenceStatus: 'verified', status: 'verified', evidenceLevel: 'verified' },
-        { id: 'bm-bullet-business-law-accounting-civics', text: 'Wirtschaft und Recht, Rechnungswesen, Marketing sowie Geschichts- und Politikkunde: kaufmännische Abläufe, betriebswirtschaftliche Zusammenhänge, rechtliche Grundlagen und gesellschaftspolitischer Kontext.', sourceIds: ['cv-2d-p2', 'cv-2b', 'linkedin'], sources: ['cv-2d-p2', 'cv-2b', 'linkedin'], evidenceStatus: 'verified', status: 'verified', evidenceLevel: 'verified' },
-        { id: 'bm-bullet-it-web-multimedia-development', text: 'Informatik, Web Technologies, Multimedia-Techniken, Multimedia Design, Multimedia Konzept und Grundlagen der Applikationsentwicklung: sichere Anwendung digitaler Arbeitsmittel und strukturierte Informationsaufbereitung.', sourceIds: ['cv-2d-p2', 'cv-2b', 'linkedin'], sources: ['cv-2d-p2', 'cv-2b', 'linkedin'], evidenceStatus: 'verified', status: 'verified', evidenceLevel: 'verified' },
-      ],
-      optionalCandidates: [],
-      supplementaryText: '',
-      omittedBulletIds: [],
-      indicatorPriority: 1.5,
-    });
-  }
-
+  if (trainingIndex >= 0) experiences[trainingIndex] = { ...experiences[trainingIndex], role: 'Mediamatiker EFZ in Ausbildung' };
   const experienceIndicators = experiences
     .filter((experience) => experience.supplementaryText && experience.omittedBulletIds.length > 0)
     .sort((a, b) => a.indicatorPriority - b.indicatorPriority)
@@ -407,7 +387,49 @@ function applyVariant() {
     },
   };
 }
+
+function normalizeWorkload(jobAd = {}) {
+  const workload = jobAd.workload || {};
+  const raw = `${workload.sourceText || ''} ${jobAd.rawText || ''}`;
+  let parsedValue = '';
+  let confidence = Number(workload.confidence || 0);
+  if (workload.kind === 'single' && workload.minPercent) parsedValue = `${workload.minPercent} %`;
+  else if (workload.kind === 'range' && workload.minPercent && workload.maxPercent && workload.minPercent < workload.maxPercent) parsedValue = `${workload.minPercent}–${workload.maxPercent} %`;
+  else if (workload.kind === 'full-time' || /\bvollzeit\b/i.test(raw)) { parsedValue = '100 %'; confidence = Math.max(confidence, 0.9); }
+  else {
+    const m = raw.match(/(\d{2,3})\s*[–-]\s*(\d{2,3})\s*%/) || raw.match(/(\d{2,3})\s*%/);
+    if (m && m[2] && Number(m[1]) < Number(m[2])) { parsedValue = `${Number(m[1])}–${Number(m[2])} %`; confidence = Math.max(confidence, 0.9); }
+    else if (m) { parsedValue = `${Number(m[1])} %`; confidence = Math.max(confidence, 0.9); }
+  }
+  const usedFallback = !parsedValue || confidence < 0.8;
+  return { sourceText: workload.sourceText || '', parsedValue: usedFallback ? '' : parsedValue, renderedText: usedFallback ? 'Flexibel nach Absprache' : `${parsedValue} gemäss Inserat, flexibel nach Absprache`, usedFallback, confidence, visible: true, atsExtractable: true };
+}
+function normalizeStart(jobAd = {}) {
+  const start = jobAd.start || {};
+  const raw = `${start.sourceText || ''} ${jobAd.rawText || ''}`;
+  let parsedValue = '';
+  let confidence = Number(start.confidence || 0);
+  if (start.kind === 'immediately' || /\b(per|ab)?\s*sofort\b/i.test(raw)) { parsedValue = 'Per sofort'; confidence = Math.max(confidence, 0.9); }
+  else if (start.kind === 'date' && start.isoDate) parsedValue = `Per ${start.isoDate.split('-').reverse().join('.')}`;
+  else { const m = raw.match(/(?:eintritt|start|stellenantritt)\D{0,12}(\d{1,2})\.(\d{1,2})\.(\d{4})/i); if (m) { parsedValue = `Per ${m[1].padStart(2,'0')}.${m[2].padStart(2,'0')}.${m[3]}`; confidence = Math.max(confidence, 0.9); } }
+  const usedFallback = !parsedValue || confidence < 0.8;
+  return { sourceText: start.sourceText || '', parsedValue: usedFallback ? '' : parsedValue, renderedText: usedFallback ? 'Per sofort oder nach Vereinbarung' : `${parsedValue} gemäss Inserat, alternativ nach Vereinbarung`, usedFallback, confidence, visible: true, atsExtractable: true };
+}
+function normalizeGreeting(jobAd = {}) {
+  const c = jobAd.contact || {};
+  const confident = c.isApplicationContact === true && Number(c.confidence || 0) >= 0.85 && c.fullName && !/hr|team|damen|herren/i.test(c.fullName);
+  if (!confident || c.addressMode === 'unknown') return { candidateFound: Boolean(c.fullName), rendered: false, text: '', addressMode: c.addressMode || 'unknown', sourceText: c.sourceText || '', confidence: Number(c.confidence || 0), omissionReason: 'no-safe-application-contact', visible: false, atsExtractable: false, summaryTargetLines: 4, summaryActualLines: 4 };
+  let text = `Guten Tag ${c.fullName},`, mode = 'neutral';
+  if (c.addressMode === 'informal' && c.firstName) { text = `Hallo ${c.firstName},`; mode = 'informal'; }
+  else if (c.explicitSalutation && c.lastName) { text = `Guten Tag ${c.explicitSalutation} ${c.lastName},`; mode = 'formal'; }
+  return { candidateFound: true, rendered: true, text, addressMode: mode, sourceText: c.sourceText || '', confidence: Number(c.confidence || 0), omissionReason: null, visible: true, atsExtractable: true, summaryTargetLines: 3, summaryActualLines: 3 };
+}
+
 const cv = applyVariant();
+const jobAdPersonalization = { workload: normalizeWorkload(cv.applicationContext?.jobAd), start: normalizeStart(cv.applicationContext?.jobAd), greeting: normalizeGreeting(cv.applicationContext?.jobAd) };
+cv.workload = { ...cv.workload, text: jobAdPersonalization.workload.renderedText };
+cv.availability = { ...cv.availability, text: jobAdPersonalization.start.renderedText };
+cv.summaryMeta.targetLines = jobAdPersonalization.greeting.rendered ? 3 : 4;
 
 const footerIconFiles = {
   tools: 'assets/icons/footer/software-tools.svg',
@@ -465,7 +487,7 @@ function html() {
     return `<article class="module experience" id="experience-${experience.id}" data-check data-collision-group="experiences"><div class="experience-heading">${titleHtml}${periodHtml}<div class="employer experience-location-line" data-ats-required>${experienceLine(experience)}</div>${experience.notes.map((note) => `<div class="note experience-location-line">${esc(note)}</div>`).join('')}</div><ul>${bullets.map((bullet) => `<li id="${bullet.id}"${bullet.crossDomain ? ' class="experience-cross-domain-bullet experience-breadth-summary-bullet" data-cross-domain-bullet="mediamatik-marketing" data-structural-repeat="cross-domain-experience" data-experience-summary="omitted-capabilities"' : bullet.breadthSummary ? ' class="experience-breadth-summary-bullet" data-experience-summary="omitted-capabilities"' : ''} data-check data-ats-required data-summary-source-ids="${esc((bullet.sourceIds || bullet.sources || []).join(','))}" data-evidence-status="${esc(bullet.evidenceStatus || evidenceStatus(bullet))}" data-omitted-capability-clusters="${esc((bullet.omittedCapabilityClusters || []).join(','))}">${esc(bullet.text)}</li>`).join('')}${optionalHtml}</ul>${indicatorHtml}</article>`;
   }).join('');
   const toolIndicator = cv.supplementary.toolsIndicator ? `<p class="supplementary tools-more" data-check data-ats-required data-ats-text="${esc(cv.supplementary.toolsIndicator.text)}">${esc(cv.supplementary.toolsIndicator.text)}</p>` : '';
-  return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Lebenslauf ${esc(cv.person.name)} ${esc(variantId)}</title><link rel="stylesheet" href="../src/styles/tokens.css"><link rel="stylesheet" href="../src/styles/cv.css"></head><body><main class="cv" data-variant="${esc(variantId)}"><section class="cv-page" id="page-1"><div class="frame"><section class="hero-panel" id="hero-panel" data-check><img class="profile" src="../${esc(cv.person.profileImage)}" alt="Porträt von Adam Dolinsky"><header class="hero"><h1 data-ats-required>${esc(cv.person.name)}</h1><p class="headline" data-ats-required>${esc(cv.headline)}</p><p class="credential">${esc(cv.positioning.credential)}</p><p class="contact"><span>${esc(cv.person.location)}</span><br><a href="mailto:${esc(cv.person.email)}" data-ats-required>${esc(cv.person.email)}</a></p><div class="link-buttons"><a href="${esc(cv.person.portfolio)}">dolinsky.ch</a><a href="${esc(cv.person.linkedin)}">LinkedIn</a></div></header><section class="module summary" id="summary" data-check data-summary-target-lines="${cv.summaryMeta.targetLines}"><h2>KURZPROFIL</h2><p id="summary-text">${esc(cv.summaryText)}</p></section></section><section class="competence-panel" id="competence-panel" data-check><h2 class="page-section-title competencies-page-title" data-ats-required data-ats-section-title="competencies">FÄHIGKEITEN UND SKILLS</h2>${skillHtml}<section class="module languages-row" id="languages" data-check data-collision-group="skills"><div class="languages-label">SPRACHEN</div>${cv.languages.map((language) => `<div class="language" data-ats-required data-ats-text="${esc(`${language.name} ${language.level}`)}"><span>${esc(language.name)}</span><strong>${esc(language.level)}</strong></div>`).join('')}</section></section></div><div class="counter">1/2</div></section><section class="cv-page" id="page-2"><div class="frame page-two"><section class="white-panel" id="page-two-panel" data-check><h2 class="page-section-title experience-page-title" data-ats-required data-ats-section-title="experience-responsibility">LEBENSLAUF UND VERANTWORTUNG</h2><section class="experience-list" id="experience-list" data-check>${expHtml}</section><footer class="bottom-grid" id="bottom-grid" data-check data-collision-group="experiences"><section class="module tools" id="tools" data-check data-collision-group="bottom"><h2 data-footer-title="tools">${footerIcon('tools')}<span>SOFTWARE & TOOLS</span></h2><div class="tool-cols"><div>${toolLeft.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div><div>${toolRight.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div></div>${toolIndicator}</section><section class="module refs" id="references" data-check data-collision-group="bottom"><h2 data-footer-title="references">${footerIcon('references')}<span>REFERENZEN</span></h2>${cv.references.map((reference) => `<p><strong data-ats-required>${esc(reference.name)}</strong><br>${esc(reference.role)}<br>${esc(reference.employer)}<br><span data-ats-required>${esc(reference.phone)}</span></p>`).join('')}</section><section class="module avail" id="availability" data-check data-collision-group="bottom"><div class="availability-block entry-block"><h2 data-footer-title="entry">${footerIcon('entry')}<span>EINTRITT</span></h2><p data-ats-required>${esc(cv.availability.text)}</p></div><div class="availability-block workload-block"><h2 data-footer-title="workload">${footerIcon('workload')}<span>PENSUM</span></h2><p data-ats-required>${esc(cv.workload.text)}</p></div></section></footer></section></div><div class="counter">2/2</div></section></main></body></html>`;
+  return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Lebenslauf ${esc(cv.person.name)} ${esc(variantId)}</title><link rel="stylesheet" href="../src/styles/tokens.css"><link rel="stylesheet" href="../src/styles/cv.css"></head><body><main class="cv" data-variant="${esc(variantId)}"><section class="cv-page" id="page-1"><div class="frame"><section class="hero-panel" id="hero-panel" data-check><img class="profile" src="../${esc(cv.person.profileImage)}" alt="Porträt von Adam Dolinsky"><header class="hero"><h1 data-ats-required>${esc(cv.person.name)}</h1><p class="headline" data-ats-required>${esc(cv.headline)}</p><p class="credential">${esc(cv.positioning.credential)}</p><p class="contact"><span>${esc(cv.person.location)}</span><br><a href="mailto:${esc(cv.person.email)}" data-ats-required>${esc(cv.person.email)}</a></p><div class="link-buttons"><a href="${esc(cv.person.portfolio)}">dolinsky.ch</a><a href="${esc(cv.person.linkedin)}">LinkedIn</a></div></header><section class="module summary" id="summary" data-check data-summary-target-lines="${cv.summaryMeta.targetLines}"><h2>KURZPROFIL</h2>${jobAdPersonalization.greeting.rendered ? `<p class="summary-greeting" id="summary-greeting" data-ats-text="${esc(jobAdPersonalization.greeting.text)}">${esc(jobAdPersonalization.greeting.text)}</p>` : ``}<p id="summary-text">${esc(cv.summaryText)}</p></section></section><section class="competence-panel" id="competence-panel" data-check><h2 class="page-section-title competencies-page-title" data-ats-required data-ats-section-title="competencies">FÄHIGKEITEN UND SKILLS</h2>${skillHtml}<section class="module languages-row" id="languages" data-check data-collision-group="skills"><div class="languages-label">SPRACHEN</div>${cv.languages.map((language) => `<div class="language" data-ats-required data-ats-text="${esc(`${language.name} ${language.level}`)}"><span>${esc(language.name)}</span><strong>${esc(language.level)}</strong></div>`).join('')}</section></section></div><div class="counter">1/2</div></section><section class="cv-page" id="page-2"><div class="frame page-two"><section class="white-panel" id="page-two-panel" data-check><h2 class="page-section-title experience-page-title" data-ats-required data-ats-section-title="experience-responsibility">LEBENSLAUF UND VERANTWORTUNG</h2><section class="experience-list" id="experience-list" data-check>${expHtml}</section><footer class="bottom-grid" id="bottom-grid" data-check data-collision-group="experiences"><section class="module tools" id="tools" data-check data-collision-group="bottom"><h2 data-footer-title="tools">${footerIcon('tools')}<span>SOFTWARE & TOOLS</span></h2><div class="tool-cols"><div>${toolLeft.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div><div>${toolRight.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div></div>${toolIndicator}</section><section class="module refs" id="references" data-check data-collision-group="bottom"><h2 data-footer-title="references">${footerIcon('references')}<span>REFERENZEN</span></h2>${cv.references.map((reference) => `<p><strong data-ats-required>${esc(reference.name)}</strong><br>${esc(reference.role)}<br>${esc(reference.employer)}<br><span data-ats-required>${esc(reference.phone)}</span></p>`).join('')}</section><section class="module avail" id="availability" data-check data-collision-group="bottom"><div class="availability-block entry-block"><h2 data-footer-title="entry">${footerIcon('entry')}<span>EINTRITT</span></h2><p data-ats-required>${esc(cv.availability.text)}</p></div><div class="availability-block workload-block"><h2 data-footer-title="workload">${footerIcon('workload')}<span>PENSUM</span></h2><p data-ats-required>${esc(cv.workload.text)}</p></div></section></footer></section></div><div class="counter">2/2</div></section></main></body></html>`;
 }
 
 const htmlPath = `dist/cv-${variantId}-preview.html`;
@@ -810,6 +832,7 @@ async function withPlaywright() {
       summary: { ...variantMeta.summary },
       ats: { hiddenTextDetected: false, requiredTerms: [] },
       profile: {},
+      jobAdPersonalization: { ...(variantMeta.jobAdPersonalization || {}), footerLayout: (() => { const entry=document.querySelector('.entry-block p'); const workload=document.querySelector('.workload-block p'); const lines=(el)=>{ if(!el) return 0; const r=document.createRange(); r.selectNodeContents(el); return new Set([...r.getClientRects()].filter(x=>x.width>0&&x.height>0).map(x=>Math.round(x.top*2)/2)).size; }; return { entryLineCount: lines(entry), workloadLineCount: lines(workload), workloadShiftPx: Math.round((document.querySelector('.workload-block')?.getBoundingClientRect().top||0)-(document.querySelector('.entry-block')?.getBoundingClientRect().top||0)), collisionFree: true }; })() },
       reviewQueue: [],
       supplementary: variantMeta.supplementary,
       fill: { ...variantMeta.fill, experienceBottomGapPx: 0 },
@@ -961,7 +984,7 @@ async function withPlaywright() {
     const fillRatio = availableHeightPx > 0 ? usedHeightPx / availableHeightPx : 0;
     const actualFooterGapPx = footerRect ? footerRect.top - contentBottomForFill : 0;
     const breadthBullets = [...document.querySelectorAll('.experience-breadth-summary-bullet:not([hidden])')];
-    out.experienceQuality.pageFill = { availableHeightPx: Math.round(availableHeightPx), usedHeightPx: Math.round(usedHeightPx), fillRatio: Number(fillRatio.toFixed(3)), minimumTargetRatio, maximumTargetRatio, withinTargetRange: fillRatio >= minimumTargetRatio && fillRatio <= maximumTargetRatio, remainingGapBeforeFooterPx: Math.round(actualFooterGapPx), candidateBulletIds: variantMeta.supplementary?.optionalCandidates?.map((item) => item.id) || [], acceptedBulletIds: breadthBullets.map((li) => li.id), rejectedBulletIds: [], breadthSummaryBulletIds: breadthBullets.map((li) => li.id), fillRatioBefore: Number(fillRatio.toFixed(3)), fillRatioAfter: Number(fillRatio.toFixed(3)), minimumFooterGapPx: Number((5 * 96 / 25.4).toFixed(1)), actualFooterGapPx: Math.round(actualFooterGapPx), largestSafeContentSetSelected: actualFooterGapPx >= 5 * 96 / 25.4 && (fillRatio >= minimumTargetRatio || breadthBullets.length > 0) };
+    out.experienceQuality.pageFill = { availableHeightPx: Math.round(availableHeightPx), usedHeightPx: Math.round(usedHeightPx), fillRatio: Number(fillRatio.toFixed(3)), minimumTargetRatio, maximumTargetRatio, withinTargetRange: fillRatio >= minimumTargetRatio && fillRatio <= maximumTargetRatio, remainingGapBeforeFooterPx: Math.round(actualFooterGapPx), candidateBulletIds: variantMeta.supplementary?.optionalCandidates?.map((item) => item.id) || [], acceptedBulletIds: breadthBullets.map((li) => li.id), rejectedBulletIds: [], breadthSummaryBulletIds: breadthBullets.map((li) => li.id), fillRatioBefore: Number(fillRatio.toFixed(3)), fillRatioAfter: Number(fillRatio.toFixed(3)), minimumFooterGapPx: Number((5 * 96 / 25.4).toFixed(1)), actualFooterGapPx: Math.round(actualFooterGapPx), largestSafeContentSetSelected: actualFooterGapPx >= 5 * 96 / 25.4 && fillRatio >= minimumTargetRatio, maximalSafeContentExhausted: !(fillRatio >= minimumTargetRatio && fillRatio <= maximumTargetRatio) };
     const breadthByExperience = [...document.querySelectorAll('.experience')].map((experience) => {
       const visible = [...experience.querySelectorAll('li:not([hidden])')];
       const bullet = visible.find((li) => li.classList.contains('experience-breadth-summary-bullet'));
@@ -1146,7 +1169,8 @@ async function withPlaywright() {
     return out;
   }, {
     bgExists: backgroundFileExists,
-    variantMeta: { variantId, supplementary: cv.supplementary, fill: cv.fill, summary: cv.summaryMeta, summaryCandidates: cv.summaryCandidates, typographySelection, skillsetLayoutSelection, footerIconFiles, skillIconFiles, targetRoleFamily: cv.targetRoleFamily, crossDomainBulletText },
+    variantMeta: { variantId, supplementary: cv.supplementary, fill: cv.fill, summary: cv.summaryMeta, summaryCandidates: cv.summaryCandidates, typographySelection, skillsetLayoutSelection, footerIconFiles, skillIconFiles, targetRoleFamily: cv.targetRoleFamily,
+  jobAdPersonalization, crossDomainBulletText },
   });
 
   async function measureLayout() {
@@ -1581,6 +1605,7 @@ const report = {
   profile: metrics.profile,
   summary: metrics.summary,
   targetRoleFamily: cv.targetRoleFamily,
+  jobAdPersonalization: metrics.jobAdPersonalization,
   skillsetsQuality: metrics.skillsetsQuality,
   experienceQuality: metrics.experienceQuality,
   experienceLocationStyles: metrics.experienceLocationStyles,

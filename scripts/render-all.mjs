@@ -223,7 +223,7 @@ const spacingChecks = {
 };
 experienceChecks.communicationPageFilledAdvantageously = allReportsPresent && reports['communication-content']?.experienceQuality?.pageFill?.largestSafeContentSetSelected === true;
 experienceChecks.breadthSummaryPolicyPassed = allReportsPresent && allReports.every((report) => report.experienceQuality?.breadthSummaryPolicy?.allRenderedLast === true && report.experienceQuality?.breadthSummaryPolicy?.allEvidenceBacked === true);
-experienceChecks.combinedTrainingCredentialPassed = allReportsPresent && allReports.every((report) => report.experienceQuality?.combinedTrainingCredential?.visible === true && report.experienceQuality?.combinedTrainingCredential?.evidenceStatus === 'verified');
+experienceChecks.trainingStationsSplitPassed = allReportsPresent && allReports.every((report) => report.experienceQuality?.trainingStations?.split === true && report.experienceQuality?.trainingStations?.bmVerified === true && report.experienceQuality?.combinedTrainingCredential?.removed === true);
 const remainingDifferences = [];
 if (!allReportsPresent) remainingDifferences.push('Production render failed before PDF/report generation');
 for (const variant of variants) {
