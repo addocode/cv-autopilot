@@ -1,87 +1,83 @@
-# ACTIVE CODEX TASK — Review Runde 46
+# ACTIVE CODEX TASK — Review Runde 48
 
 ## Verbindlicher Arbeitskontext
 
-Arbeite ausschliesslich im bestehenden privaten Repository `addocode/cv-autopilot` auf dem bereits ausgewählten Branch:
+Arbeite ausschliesslich im privaten Repository `addocode/cv-autopilot` auf dem bereits ausgewählten Branch:
 
 `codex/verifiziere-icon-hashes-und-svg-geometrie`
 
 und im bestehenden PR #6.
 
 - Erstelle keinen neuen Branch.
-- Erstelle keinen PR #9.
+- Erstelle keinen PR #10.
+- Rufe `make_pr` nicht auf.
 - Merge weder PR #6 noch PR #5.
 - Verändere PR #1–#4 nicht.
 - Suche nicht nach privaten PR-Kommentaren.
 - Diese Datei enthält den vollständigen aktiven Auftrag.
-- Wo ältere Anweisungen widersprechen, gilt diese Datei.
+- Frühere Review-Dateien dienen nur als Historie. Bei Widersprüchen gilt Review Runde 48.
 
 ## Pflichtprüfung vor Arbeitsbeginn
 
 1. Führe `git log -1 --format=%H` aus.
 2. Vergleiche die Ausgabe mit der im Startprompt genannten erwarteten Head-SHA.
-3. Prüfe, dass diese Datei mit `# ACTIVE CODEX TASK — Review Runde 46` beginnt.
+3. Prüfe, dass diese Datei mit `# ACTIVE CODEX TASK — Review Runde 48` beginnt.
 4. Bei Abweichung: keine Dateien verändern, keinen Commit erstellen und ausschliesslich `STALE SNAPSHOT` melden.
 
 ---
 
-# Ausgangslage: Workflow Run 45
+# 1. Ausgangslage: Workflow Run 49
 
-Run 45 auf dem konsolidierten Stand von PR #8/PR #6 erzeugte erfolgreich:
+Run 49 erzeugte vollständig:
 
 - vier PDFs
 - acht PNGs
 - vier Render-Reports
-- Poppler-/PDF.js-/Font-Artefakte
+- Poppler-, PDF.js- und Font-Artefakte
 - exakt zwei Seiten pro Variante
 - keine Overflows
 - keine Collisions
-- die neue Greeting-, EINTRITT- und PENSUM-Darstellung
+- keine Warnungen
 
-Der Workflow ist dennoch rot:
+Die Änderungen aus Review Runde 47 sind visuell richtig und werden eingefroren:
 
-```text
-renderAllExitCode: 1
-renderTestsExitCode: 1
-```
+- Hero-Höhe `98mm`
+- Identitätsgruppe `5mm` nach oben
+- Kurzprofilblock `2.8mm` nach oben
+- weisse Fläche Seite 1 insgesamt `10mm` nach oben erweitert
+- `FÄHIGKEITEN UND SKILLS` höher mit natürlichem Abstand zum ersten Skillset
+- Kurzprofil und Greeting als ein einziger Fliesstext
+- ohne Greeting weiterhin vier Zeilen
+- neutraler Produktionskontext ohne Demo-Person
+- `EINTRITT: Per sofort oder nach Vereinbarung`
+- `PENSUM: Flexibel nach Absprache`
+- Seite-2-Blaufläche `11mm`
 
-Alle vier Reports sind `success: false`.
+Diese Werte und das sichtbare Layout dürfen nicht zurückgebaut, verkleinert oder enger gesetzt werden.
 
-Die reale Diagnose aus den Produktionsartefakten lautet:
+Run 49 ist dennoch rot. Reale Produktionsdiagnose:
 
-1. Die BM-Station besitzt in den Masterdaten drei Pflichtbullets, im finalen DOM/PDF werden aber nur zwei sichtbar. Dadurch ist `bmVerified: false`.
-2. In `administration-gever` zählt die Cross-Domain-Reportlogik die BM weiterhin mit: `expectedStationCount: 6`, `renderedStationCount: 5`, `missingExperienceIds: ["berufsmaturitaet-bbz-cfp"]`.
-3. Die adaptive Experience-Füllung hat weiterhin keinen echten Kandidatenpool: `candidateBulletIds: []` und `fillRatioBefore === fillRatioAfter`.
-4. `communication-content` liegt bei ca. `0.819` statt mindestens `0.88`.
-5. `cms-web-process` liegt bei ca. `0.782` statt mindestens `0.82`.
-6. Die verlangten realen Layoutmetriken fehlen weiterhin im Report.
-7. Veraltete Tests erwarten noch vier Kurzprofilzeilen trotz Greeting, die alte Eintrittsformulierung sowie ungefähr 28 mm statt 11 mm unteren Seitenstreifen.
-8. Die privaten Masterdaten enthalten aktuell dauerhaft die Demo-Person `Anna Müller`, `80–100 %` und `Eintritt per sofort`. Dadurch erscheinen diese fiktiven Werte in jedem normalen Render. Demo-/Testdaten dürfen niemals als Produktionsstandard im Masterprofil stehen.
+1. Die BM besitzt im Master drei Pflichtbullets, im finalen DOM/PDF aber nur zwei.
+2. `bmVerified === false` und `bmExcludedFromAdaptivePruning === false` in allen vier Reports.
+3. `candidateBulletIds: []` in allen Varianten.
+4. Es findet keine echte Experience-Auswahl statt: `fillRatioBefore === fillRatioAfter`.
+5. `communication-content` liegt bei ungefähr `0.819` statt mindestens `0.88`.
+6. `cms-web-process` liegt bei ungefähr `0.782` statt mindestens `0.82`.
+7. Veraltete Render-Tests erwarten weiterhin Demo-Personalisierung, alten Eintrittstext und ungefähr 28mm statt den realen 11mm unteren Blaustreifen.
 
-Diese Runde muss die tatsächliche Render- und Auswahlfunktion korrigieren. Es reicht nicht, nur Erfolgsgates oder Testwerte abzuschwächen.
+Es reicht nicht, Tests oder Erfolgsgates abzuschwächen. Die tatsächliche DOM-Auswahl und die Pflichtinhalte müssen korrigiert werden.
 
 ---
 
-# 1. BM besitzt immer exakt drei sichtbare Pflichtbullets
+# 2. BM: exakt drei unveränderliche Pflichtbullets
 
-Die Station:
+Station:
 
 `berufsmaturitaet-bbz-cfp`
 
-ist eine Pflicht-Ausbildungsstation.
+## 2.1 Masterdaten ergänzen
 
-Verbindlich:
-
-- alle drei Master-Bullets werden in jeder Variante sichtbar gerendert
-- kein BM-Bullet darf durch Variantenauswahl, Bullet-Limit, Page-Fill, Kürzung oder adaptive Auswahl entfernt oder versteckt werden
-- kein BM-Bullet ist ein optionaler Füllkandidat
-- Reihenfolge exakt wie in den Masterdaten
-- kein zusätzlicher Cross-Domain- oder Breadth-Summary-Bullet
-- alle drei besitzen sichtbare `data-summary-source-ids`
-- alle drei besitzen `data-evidence-status="verified"`
-- alle drei erscheinen in HTML, PDF, Poppler Raw, Poppler Default und PDF.js
-
-Empfohlene Modellierung:
+Ergänze datengetrieben:
 
 ```json
 {
@@ -93,11 +89,32 @@ Empfohlene Modellierung:
 }
 ```
 
-oder eine gleichwertige sauber validierte Struktur.
+Alle drei vorhandenen BM-Bullets bleiben unverändert, `verified` und source-backed.
 
-`applyVariant()` muss für solche Stationen alle Pflichtbullets übernehmen, bevor allgemeine Experience-Limits angewendet werden.
+## 2.2 `applyVariant()` korrigieren
 
-Report-Gate:
+Der aktuelle allgemeine Pfad:
+
+```js
+.filter(selected...)
+.slice(0, variant.maxBulletsPerExperience)
+```
+
+entfernt den dritten BM-Bullet. Pflichtstationen mit `excludeFromAdaptivePruning === true` beziehungsweise `requiredVisibleBulletCount` dürfen diesen allgemeinen Selektions- und Kürzungspfad nicht verwenden.
+
+Verbindlich:
+
+- alle drei BM-Bullets werden vor Variantenselektion übernommen
+- keine `.slice(maxBulletsPerExperience)` für diese Station
+- kein `hiddenBulletIds`-Filter für die drei Pflichtbullets
+- kein optionaler Kandidat
+- kein Breadth-Summary
+- kein Cross-Domain-Bullet
+- Reihenfolge exakt wie im Master
+- exakt drei sichtbare `<li>` in jeder Variante
+- alle drei im HTML, PDF, Poppler Raw, Poppler Default und PDF.js
+
+Report:
 
 ```json
 {
@@ -112,323 +129,375 @@ Report-Gate:
 
 ---
 
-# 2. BM vollständig aus Cross-Domain- und Breadth-Zählern ausschliessen
+# 3. Cross-Domain- und Breadth-Ausnahmen vollständig datengetrieben
 
-Die bisherige Erzeugung des Cross-Domain-Bullets berücksichtigt die BM bereits teilweise. Die spätere DOM-/Reportauswertung zählt sie aber weiterhin als erwartete Station.
+Alle DOM- und Reportzähler müssen Education-Stationen sowie explizite Ausschlussflags respektieren.
 
-Ergänze am `<article class="experience">` datengetriebene Attribute, beispielsweise:
+Für BM gilt überall:
 
-```html
-data-station-type="education"
-data-exclude-cross-domain="true"
-data-exclude-breadth-summary="true"
+```text
+eligible: false
+exclusionReason: education-station
 ```
 
-Berechne `expectedStationCount`, `missingExperienceIds`, `allRenderedLast`, `allStationsHaveMinimumSubstantiveBullets` und alle zugehörigen Gates ausschliesslich aus berechtigten Stationen:
+BM darf nicht einbezogen werden in:
 
-```js
-stationType !== 'education' && excludeFromCrossDomain !== true
-```
+- `expectedStationCount`
+- `renderedStationCount`
+- `missingExperienceIds`
+- `allRenderedLast`
+- Cross-Domain-Zähler
+- Breadth-Summary-Zähler
+- adaptive Kandidaten
+- adaptive Pruning- oder Kürzungslogik
 
-Für `administration-gever` gilt:
-
-- BM ist nicht erwartet
-- BM ist nicht fehlend
-- BM beeinflusst `allRenderedLast` nicht
-- `missingExperienceIds` ist leer
-- `expectedStationCount === renderedStationCount`
-- Cross-Domain-Policy ist vollständig grün
-
-Die BM darf zu Diagnosezwecken in `byExperience` erscheinen, dann aber mit:
+Für `administration-gever` muss danach gelten:
 
 ```json
 {
-  "eligible": false,
-  "exclusionReason": "education-station"
+  "missingExperienceIds": [],
+  "expectedStationCount": 5,
+  "renderedStationCount": 5
 }
 ```
+
+oder dieselbe korrekte Anzahl, falls die Anzahl berechtigter operativer Stationen datengetrieben anders ermittelt wird. Entscheidend ist: BM ist nie erwartet und nie fehlend.
 
 ---
 
-# 3. Echte adaptive Experience-Füllung implementieren
+# 4. Echter Experience-Kandidatenpool
 
-Die aktuelle Logik meldet `experience-layout-selection`, verwendet für `candidateBulletIds` aber weiterhin den falschen globalen Pfad `variantMeta.supplementary.optionalCandidates`. Deshalb ist der Kandidatenpool leer.
+Der aktuelle Fehler liegt in `applyVariant()`:
 
-## 3.1 Kandidaten bereits in `applyVariant()` erhalten
+- `omittedMandatory` wird zwar ermittelt, danach aber nicht als DOM-Kandidat erhalten.
+- `experience.optionalCandidates` enthält nur `remainingOptionalCandidates`.
+- deshalb rendert `optionalHtml` keine geeigneten ausgelassenen regulären Bullets.
+- die Metrik liest zwar den DOM, findet aber `candidateBulletIds: []`.
 
-Pro Experience-Station müssen getrennt erhalten bleiben:
+## 4.1 Detailkandidaten im Datenmodell erhalten
 
-- sichtbare verpflichtende Kernbullets
-- ausgelassene reguläre, source-backed Bullets
-- verbleibende optionale, source-backed Bullets
-- belegte längere Textvarianten
-- nachrangiger Breadth-Summary-Kandidat
+Erzeuge pro Station eine getrennte Liste, beispielsweise:
 
-Ausgelassene reguläre Bullets dürfen nicht verworfen werden. Rendere sie als versteckte Kandidaten mit eindeutigen Datenattributen, beispielsweise:
-
-```html
-<li
-  hidden
-  data-fill-state="candidate"
-  data-fill-kind="experience-detail-bullet"
-  data-experience-id="..."
-  data-fill-id="..."
-  data-fill-priority="..."
-  data-source-ids="..."
-  data-evidence-status="verified|defensible_inference"
->
+```js
+experience.detailCandidates
 ```
 
-BM-Bullets und bereits sichtbare Inhalte dürfen nie Kandidaten sein.
+Sie umfasst in dieser Reihenfolge:
 
-## 3.2 Kandidatenpool aus dem realen DOM erzeugen
+1. ausgelassene reguläre Bullets aus `experience.bullets`
+2. verbleibende optionale Bullets
+3. vorhandene belegte längere Textvarianten
 
-Der Pool für `experience-layout-selection` muss aus den tatsächlich gerenderten versteckten Experience-Kandidaten erzeugt werden, nicht aus `supplementary.optionalCandidates`.
+Nur aufnehmen, wenn:
 
-Berichte mindestens:
+- nicht bereits sichtbar
+- nicht in `hiddenBulletIds`
+- keine identische ID
+- keine semantische Dublette zu sichtbaren oder bereits aufgenommenen Kandidaten
+- Source-IDs vorhanden
+- Evidence-Status `verified` oder `defensible_inference`
+- nicht `inferred_review_required`
+- Station nicht Education und nicht `excludeFromAdaptivePruning`
 
-```json
-{
-  "candidateBulletIds": [],
-  "acceptedBulletIds": [],
-  "rejectedBulletIds": [],
-  "rejections": [
-    {
-      "id": "...",
-      "reason": "duplicate-content|overflow|collision|footer-gap|over-target|lower-priority"
-    }
-  ]
-}
+Jeder Kandidat erhält mindestens:
+
+```text
+data-fill-state="candidate"
+data-fill-kind="experience-detail-bullet"
+data-experience-id="..."
+data-fill-id="..."
+data-fill-priority="..."
+data-source-ids="..."
+data-evidence-status="..."
+hidden
 ```
 
-## 3.3 Auswahlreihenfolge
+`candidateBulletIds` muss aus diesen realen DOM-Elementen stammen.
 
-1. Pflichtinhalte inklusive aller drei BM-Bullets rendern.
-2. Reale Baseline messen.
-3. Detailkandidaten global nach Stellenrelevanz, Evidence-Stärke, zusätzlichem Informationswert und Priorität sortieren.
-4. Jeden Kandidaten einzeln sichtbar schalten.
-5. Layout neu messen.
-6. Kandidaten behalten oder mit konkretem Grund wieder ausblenden.
-7. Erst nach Ausschöpfung der Detailkandidaten einen Breadth-Summary-Kandidaten prüfen.
-8. Bei Erreichen des Mindestzielwerts stoppen, sofern der Füllgrad höchstens `0.96` beträgt.
+## 4.2 Breadth-Summary korrekt nachrangig
 
-Akzeptanz nur bei:
+Für normale Varianten darf ein Breadth-Summary nicht bereits vor der Auswahl als automatischer sichtbarer Baseline-Bullet eingefügt werden.
+
+- Detailkandidaten werden zuerst geprüft.
+- Danach darf maximal ein Breadth-Summary pro berechtigter Station als versteckter Kandidat geprüft werden.
+- Ein akzeptierter Breadth-Summary ist immer der letzte sichtbare Bullet seiner Station.
+- BM erhält nie einen solchen Kandidaten.
+
+GEVER-Ausnahme:
+
+- der feste Cross-Domain-Bullet bleibt für jede berechtigte operative Station sichtbar
+- er bleibt immer letzter Bullet
+- neu akzeptierte Detailbullets müssen im DOM vor diesem strukturellen Schlussbullet stehen
+
+---
+
+# 5. Tatsächlicher Render-Schritt `experience-layout-selection`
+
+Der aktuelle Code setzt nur den Namen der Render-Stage und schreibt später Messwerte. Er führt keine Kandidatenauswahl aus.
+
+Implementiere vor `initial-layout-metrics` einen eigenen Playwright-/Browser-Schritt, beispielsweise:
+
+```js
+const experienceLayoutSelection = await page.evaluate(async (...) => { ... })
+```
+
+und übergib dessen Resultat danach an die finalen Metriken.
+
+## 5.1 Baseline messen
+
+Nach dem Rendern aller Pflichtinhalte und vor dem Einblenden von Kandidaten:
+
+- `fillRatioBefore`
+- `actualFooterGapPx`
+- Seitenzahl
+- Overflows
+- Collisions
+- sichtbare semantische Texte
+
+## 5.2 Kandidaten sortieren
+
+Globale Reihenfolge:
+
+1. Stellenrelevanz / `jobAdMatchScore`
+2. `verified` vor `defensible_inference`
+3. zusätzlicher Informationswert
+4. `fillPriority`
+5. stabile DOM-Reihenfolge
+
+Detailbullets immer vor Breadth-Summary-Kandidaten.
+
+## 5.3 Jeden Kandidaten einzeln testen
+
+Für jeden Kandidaten:
+
+1. sichtbar schalten
+2. zwei Animation Frames und `document.fonts.ready` abwarten
+3. Layout neu messen
+4. behalten oder wieder ausblenden
+5. Ablehnungsgrund protokollieren
+
+Akzeptieren nur bei:
 
 - exakt zwei Seiten
 - keine Overflows
 - keine Collisions
 - kein abgeschnittener Text
-- mindestens 5 mm Footerabstand
+- mindestens 5mm Abstand zur Footer-Trennlinie
+- finaler Füllgrad höchstens `0.96`
 - keine semantische Dublette
-- eindeutige ID
-- Source-IDs vorhanden
-- `verified` oder `defensible_inference`
-- finaler Füllgrad höchstens 0.96
+- gültige Source-IDs und Evidence
+- GEVER-Schlussbullet bleibt letzter Bullet
 
-## 3.4 Zielwerte
+Ablehnungsgründe mindestens:
 
-- `communication-content`: `0.88–0.96`
+```text
+duplicate-content
+overflow
+collision
+footer-gap
+over-target
+invalid-evidence
+lower-priority
+```
+
+## 5.4 Zielwerte
+
 - `general`: `0.82–0.96`
+- `communication-content`: `0.88–0.96`
 - `administration-gever`: `0.82–0.96`
 - `cms-web-process`: `0.82–0.96`
 
-Der dritte verpflichtende BM-Bullet zählt zum echten Seiteninhalt. Danach sollen vorhandene source-backed Detailkandidaten die noch fehlende Fläche sinnvoll ausfüllen.
+Der dritte BM-Bullet zählt zum realen Inhalt. Danach ergänzen Detailkandidaten die fehlende Fläche.
 
-Verbindlich:
+Für den finalen aktuellen Datenbestand verbindlich:
 
-- `candidateBulletIds` ist für Communication und CMS nicht leer, sofern geeignete ausgelassene Inhalte existieren
-- `fillRatioAfter > fillRatioBefore`, wenn ein Kandidat angenommen wurde
-- `withinTargetRange === true` für alle vier finalen Produktionsvarianten
-- kein False Positive durch blosses Vorhandensein eines Breadth-Summary-Bullets
+- `candidateBulletIds` ist bei Communication und CMS nicht leer
+- `fillRatioAfter > fillRatioBefore`, sobald mindestens ein Kandidat akzeptiert wurde
+- `withinTargetRange === true` bei allen vier Varianten
+- `largestSafeContentSetSelected === true` nur nach echter gemessener Auswahl
+- kein False Positive durch blossen Breadth-Summary-Bullet
 
-`largestSafeContentSetSelected` darf nur `true` sein, wenn die finale Auswahl wirklich gemessen, alle angenommenen Kandidaten sicher sind und der Zielbereich erreicht wurde.
-
----
-
-# 4. Produktionsprofil von Demo-Stelleninserat trennen
-
-Entferne aus `data/private/cv.master.json` die dauerhaft fiktiven Produktionswerte:
-
-- `Anna Müller`
-- `80–100 %`
-- `Eintritt per sofort`
-- `Wir freuen uns auf dich`
-
-Das Masterprofil enthält standardmässig einen leeren/neutralen Anwendungskontext, beispielsweise:
+Report mindestens:
 
 ```json
 {
-  "applicationContext": {
-    "jobAd": {
-      "rawText": "",
-      "sourceId": "",
-      "workload": {
-        "kind": "unspecified",
-        "minPercent": null,
-        "maxPercent": null,
-        "sourceText": "",
-        "confidence": 0
-      },
-      "start": {
-        "kind": "unspecified",
-        "isoDate": null,
-        "sourceText": "",
-        "confidence": 0
-      },
-      "contact": null
-    }
+  "pageFill": {
+    "candidateBulletIds": [],
+    "acceptedBulletIds": [],
+    "rejectedBulletIds": [],
+    "rejections": [],
+    "fillRatioBefore": 0,
+    "fillRatioAfter": 0,
+    "withinTargetRange": true,
+    "largestSafeContentSetSelected": true,
+    "maximalSafeContentExhausted": false
   }
 }
 ```
 
-Normale Render ohne konkretes Stelleninserat zeigen daher:
+Finale Metriken müssen die Resultate von `experienceLayoutSelection` übernehmen, nicht nachträglich leere Arrays neu erzeugen.
+
+---
+
+# 6. Personalisierung und R47-Layout einfrieren
+
+Keine sichtbare Regression zulässig.
+
+## 6.1 Neutraler Produktionsrender
+
+Ohne `--application-context`:
 
 ```text
 EINTRITT: Per sofort oder nach Vereinbarung
 PENSUM: Flexibel nach Absprache
 ```
 
-und keine Greeting-Zeile.
+- kein Greeting
+- kein leerer Greeting-Platzhalter
+- Kurzprofil exakt vier Zeilen
+- keine Demo-Namen oder Demo-Werte
 
-Die Anna-/80–100-/Sofort-Daten gehören ausschliesslich in eine Testfixture, beispielsweise:
+## 6.2 Informelle Fixture
 
-`tests/fixtures/application-context-informal.json`
+Mit `tests/fixtures/application-context-informal.json`:
 
-Ergänze eine saubere Einspeisung des aktuellen Bewerbungskontexts, bevorzugt:
+- genau ein `#summary-text`
+- kein `.summary-greeting`
+- Fliesstext beginnt sinngemäss mit `Hallo Anna, ich bin ...`
+- dieselbe Schrift, Grösse, Kursivstellung und Zeilenhöhe wie der restliche Kurzprofiltext
+- exakt vier Zeilen
+- individuelles Pensum und Eintritt sichtbar und ATS-extrahierbar
 
-```bash
-node scripts/render.mjs --variant general --application-context tests/fixtures/application-context-informal.json
-```
+## 6.3 Formelle Fixture
 
-Alternativ ist eine gleichwertige klar dokumentierte JSON-Eingabe zulässig.
+Mit `tests/fixtures/application-context-formal.json`:
 
-Priorität:
+- Fliesstext beginnt `Guten Tag Frau Müller, ich bin ...`
+- keine separate Zeile oder Sondertypografie
+- exakt vier Zeilen
 
-1. explizit übergebener validierter Bewerbungskontext
-2. aktueller neutraler Master-Fallback
+## 6.4 Unsichere Fixture
 
-Keine Demo-Person darf in normalen vier Produktionsvarianten sichtbar sein.
+Mit `tests/fixtures/application-context-unsafe.json`:
 
----
+- kein Greeting
+- kein Name geraten
+- neutraler Kurzprofiltext mit vier Zeilen
 
-# 5. Personalisierungslogik vollständig testen
+## 6.5 Geometrie
 
-## 5.1 Normaler Produktionsrender ohne Job-Ad-Fixture
-
-Erwartet:
-
-- Greeting nicht gerendert
-- kein leerer Greeting-Abstand
-- Kurzprofil weiterhin vier Zeilen
-- `PENSUM: Flexibel nach Absprache`
-- `EINTRITT: Per sofort oder nach Vereinbarung`
-- Report `usedFallback: true`
-
-## 5.2 Informelle Fixture
-
-Mit der bestehenden Anna-Testfixture:
-
-- `Hallo Anna,`
-- `80–100 % gemäss Inserat, flexibel nach Absprache`
-- `Per sofort gemäss Inserat, alternativ nach Vereinbarung`
-- Kurzprofil drei Zeilen plus eine Greeting-Zeile
-- keine Kollision
-
-## 5.3 Formelle Fixture
-
-Ergänze eine Fixture, z. B. mit explizitem `Frau Müller` und formeller Ansprache:
-
-- `Guten Tag Frau Müller,`
-- niemals `Hallo Anna,`
-
-## 5.4 Unsichere Fixture
-
-Bei unklarer/generischer Kontaktangabe:
-
-- Greeting vollständig weglassen
-- keine Namens- oder Geschlechtsvermutung
-- `omissionReason` gesetzt
-
----
-
-# 6. Reale Layoutmetriken ergänzen
-
-Die Felder fehlen in Run 45 vollständig. Berechne sie aus realen `getBoundingClientRect()`-/Computed-Style-Messungen.
-
-Mindestens:
+Aus realen DOM-Messungen:
 
 ```json
 {
-  "layout": {
-    "pageOneWhiteExtensionUpMm": 7,
-    "heroPanelHeightMm": 101,
-    "languageAbsoluteShiftPx": 0,
-    "pageOneExtensionPassed": true,
-    "pageTwoWhiteExtensionMm": 17,
-    "pageTwoBlueStripHeightMm": 11,
-    "pageTwoFooterShiftPx": 64.3,
-    "pageTwoFooterShiftPassed": true
-  }
+  "heroPanelHeightMm": 98,
+  "pageOneWhiteExtensionUpMm": 10,
+  "identityClusterShiftUpMm": 5,
+  "summaryBlockShiftUpMm": 2.8,
+  "pageTwoBlueStripHeightMm": 11,
+  "pageTwoWhiteExtensionMm": 17
 }
 ```
 
-Toleranzen:
+Toleranz höchstens ±0.3mm bei CSS-/Pixelumrechnung.
 
-- Millimeterwerte ±0.5 mm
-- Pixelwerte ±2 px
+Nicht verändern:
 
-Berechnungsprinzip:
-
-- `heroPanelHeightMm`: reale Hero-Höhe
-- `pageOneWhiteExtensionUpMm`: 108 mm minus reale Hero-Höhe
-- `languageAbsoluteShiftPx`: gemessene Abweichung der unteren Sprachverankerung vom definierten unveränderten Bottom-Anker, nicht hartcodiert
-- `pageTwoBlueStripHeightMm`: reale Distanz zwischen White-Panel-Unterkante und Frame-Unterkante
-- `pageTwoWhiteExtensionMm`: 28 mm minus reale blaue Resthöhe
-- `pageTwoFooterShiftPx`: reale Verschiebung gegenüber der früheren 28-mm-Unterkante
-
-Die Boolean-Felder müssen aus diesen Messungen abgeleitet werden.
+- Schriftgrössen
+- Icongrössen
+- horizontale Kompression
+- Footer-Spalten
+- Profilbildgrösse
+- Sprachposition
+- Seitenzahl
 
 ---
 
-# 7. Veraltete Tests korrigieren, ohne Gates abzuschwächen
+# 7. Veraltete Tests korrigieren
 
-Aktualisiere echte Altannahmen:
+Passe Tests an die tatsächliche finale Spezifikation an, nicht um Fehler zu verstecken.
 
-1. Kurzprofil:
-   - Greeting sichtbar → `targetLines === 3`, `actualLines === 3` plus eine Greeting-Zeile
-   - Greeting nicht sichtbar → `targetLines === 4`, `actualLines === 4`
-2. Footer-Unterkante:
-   - nicht mehr ungefähr 28 mm
-   - reale blaue Resthöhe ungefähr 11 mm
-3. ATS-Terme:
-   - nicht mehr zwingend alter String `nach Vereinbarung oder sofort`
-   - normale Produktion prüft `Per sofort oder nach Vereinbarung`
-   - personalisierte Fixture prüft ihren tatsächlich gerenderten Stellenwert
-4. Experience-Stationen:
-   - separate BM-Station erhöht die Stationsanzahl
-   - alle Experience-Location- und Gap-Arrays müssen die reale Stationszahl besitzen
-5. Page-Fill:
-   - finaler Zielbereich echt erreicht
-   - kein `largestSafeContentSetSelected: true` bei zu geringer Füllung
+## 7.1 Standardrender
 
-Keine Tests entfernen, nur auf die neue fachlich korrekte Struktur umstellen.
+Erwarte:
+
+```text
+Per sofort oder nach Vereinbarung
+Flexibel nach Absprache
+```
+
+Nicht mehr erwarten:
+
+```text
+nach Vereinbarung oder sofort
+80–100 % gemäss Inserat ...
+Hallo Anna,
+```
+
+im neutralen Produktionsrender.
+
+## 7.2 Footer-/Blauflächenmessung
+
+Der alte Test `pageTwoFooterHeightPx > 95 && < 115` ist veraltet.
+
+Neu datengetrieben prüfen:
+
+- `pageTwoBlueStripHeightMm` ungefähr `11`
+- `pageTwoFooterHeightPx` ungefähr `42px` bei 96dpi, mit sinnvoller Toleranz
+- `pageTwoWhiteExtensionMm` ungefähr `17`
+- blauer Streifen sichtbar
+- Footer vollständig im White Panel
+
+## 7.3 BM
+
+In jeder Variante:
+
+- `bmBulletCount === 3`
+- `bmVerified === true`
+- `bmExcludedFromAdaptivePruning === true`
+
+## 7.4 Fill
+
+Nicht bloss `largestSafeContentSetSelected` statisch prüfen. Zusätzlich:
+
+- Kandidatenpool vorhanden, wo Daten vorhanden sind
+- angenommene IDs sind im finalen DOM sichtbar
+- abgelehnte IDs bleiben verborgen
+- `fillRatioAfter` entspricht der finalen DOM-Messung
+- alle vier Varianten im Zielbereich
+
+## 7.5 Fixture-Rendering
+
+Ergänze mindestens einen echten Playwright-Layouttest für informelle und formelle Fixture, isoliert von den vier neutralen Produktionsartefakten. Nutze einen temporären Ausgabepfad oder einen sicheren Output-Suffix, damit die normalen Produktionsartefakte nicht überschrieben werden.
+
+Prüfe:
+
+- integrierter Fliesstext
+- keine `.summary-greeting`
+- exakt vier Zeilen
+- korrekte Anrede
+- korrekte Footerpersonalisierung
+- keine Kollision
 
 ---
 
-# 8. Report-Success- und Visual-Review-Gates
+# 8. Success-Gates
 
-`report.success` darf erst `true` sein, wenn zusätzlich gilt:
+`report.success` pro Variante nur bei:
 
-- BM getrennt und direkt nach der Mediamatiker-Ausbildung
-- exakt drei sichtbare, verifizierte BM-Bullets
-- BM aus Cross-Domain/Breadth/Adaptive-Pruning ausgeschlossen
-- Cross-Domain-Policy vollständig erfüllt
-- Page-Fill innerhalb Zielbereich
-- Personalisierungsfallback oder übergebener Kontext korrekt und sichtbar
-- Footer kollisionsfrei
-- Layout-Erweiterungsmetriken bestanden
+- exakt zwei Seiten
+- keine Overflows
+- keine Collisions
+- warnings leer
+- ATS vollständig
+- drei BM-Bullets und BM-Verifikation grün
+- korrekte Education-Ausnahmen
+- echter Experience-Kandidatenpool
+- echter gemessener finaler Füllgrad im Zielbereich
+- R47-Geometrie erfüllt
+- neutraler Produktionskontext korrekt
 
-`visual-review-round-17.json` muss danach liefern:
+`visual-review-round-17.json`:
 
 ```json
 {
@@ -437,29 +506,11 @@ Keine Tests entfernen, nur auf die neue fachlich korrekte Struktur umstellen.
 }
 ```
 
----
-
-# 9. Visuelle Grenzen
-
-Die aktuelle Gestaltung bleibt eingefroren:
-
-- keine Schrift verkleinern
-- keine Schrift komprimieren
-- kein `scaleX`
-- kein negatives `letter-spacing`
-- keine SVG- oder Iconänderung
-- keine Änderung der Grundfarben
-- keine Änderung des Profilbilds
-- keine dritte Seite
-- Footer-Spalten und Footer-Typografie beibehalten
-- Greeting bleibt dezent wie in Run 45
-- EINTRITT/PENSUM bleiben in der aktuellen gut lesbaren Form
-
-Der dritte BM-Bullet und zusätzliche Detailbullets müssen durch die vorhandene freie Experience-Fläche aufgenommen werden, nicht durch engere Typografie.
+Der finale Guard muss `skipped` sein, weil beide Exit-Codes `0` sind.
 
 ---
 
-# 10. Vollständiger Workflow
+# 9. Vollständiger Workflow
 
 Ausführen:
 
@@ -476,41 +527,47 @@ Danach den Live-GitHub-Workflow vollständig abwarten.
 
 Erfolg erst bei:
 
-- `renderAllExitCode: 0`
-- `renderTestsExitCode: 0`
-- finaler Guard skipped
-- alle vier Reports `success: true`
-- visual review `overallSuccess: true`
-- `remainingDifferences: []`
-- exakt zwei Seiten pro Variante
-- `overflows: []`
-- `collisions: []`
-- `warnings: []`
+```text
+renderAllExitCode: 0
+renderTestsExitCode: 0
+allReportsSuccessful: true
+visualReviewOverallSuccess: true
+final guard: skipped
+```
+
+Erzeuge beziehungsweise erhalte:
+
+- vier finale PDFs
+- acht finale PNGs
+- vollständige Reports
+- Poppler-/PDF.js-/Font-Artefakte
+- achtseitige Kontaktübersicht
 
 ---
 
-# 11. Abschlussbericht
+# 10. Abschlussbericht
 
 Berichte mindestens:
 
-1. Start-HEAD und lokaler Commit-SHA
-2. Live-Head-SHA des bestehenden PR #6
-3. Workflow-Run-Link und Schrittstatus
-4. beide Exit-Codes und finaler Guard
-5. BM-Bulletzahl und Evidence-/Source-Status pro Variante
-6. Cross-Domain expected/rendered/missing pro Variante
-7. Candidate-, accepted- und rejected-Bullet-IDs pro Variante
-8. `fillRatioBefore` und `fillRatioAfter` pro Variante
-9. Fallback-Produktionswerte ohne Job-Ad-Fixture
-10. Ergebnisse informelle, formelle und unsichere Fixture
-11. Greeting-/Summary-Zeilenmessung
-12. Footer-Zeilen und Kollisionen
-13. reale Layout-Erweiterungsmetriken
-14. PageCount, Overflows, Collisions und Warnungen
-15. ATS-/Poppler-/PDF.js-Ergebnisse
-16. `report.success` pro Variante
-17. Visual-Review-Ergebnis
-18. Pfad zur achtseitigen Kontaktübersicht
-19. Bestätigung: kein PR #9 und nichts gemergt
+1. lokaler Commit-SHA
+2. Live-Head-SHA von PR #6
+3. Workflow-Run-Link
+4. Status aller Workflow-Schritte
+5. beide Exit-Codes und finaler Guard
+6. BM-Bulletzahl und Verifikation je Variante
+7. Cross-Domain-/Breadth-Ausnahmen
+8. candidate/accepted/rejected IDs je Variante
+9. fillRatioBefore und fillRatioAfter je Variante
+10. Footerabstand je Variante
+11. PageCount, Overflows, Collisions, warnings
+12. neutrale Job-Ad-Werte
+13. informelle/formelle/unsichere Fixture-Ergebnisse
+14. Kurzprofil-Zeilenzahl
+15. R47-Geometriemessungen
+16. ATS-/Poppler-/PDF.js-Ergebnisse
+17. report.success je Variante
+18. visual-review overallSuccess und remainingDifferences
+19. Pfad zur Kontaktübersicht
+20. Bestätigung: kein neuer Branch, kein PR #10, nichts gemergt
 
-Beginne jetzt ohne weitere Rückfrage.
+Beginne jetzt und fahre ohne weitere Rückfrage fort.
