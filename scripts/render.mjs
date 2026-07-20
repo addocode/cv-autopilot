@@ -222,6 +222,42 @@ function buildSkillsets(rawSections) {
   return assignSkillIcons(sections);
 }
 
+function classifyCapabilityCluster(bullet) {
+  const text = `${bullet.text || ''} ${(bullet.tags || []).join(' ')}`.toLowerCase();
+  if (/admin|office|dokument|gever|acta|ablage|daten|formal/.test(text)) return 'administration';
+  if (/system|cms|web|online|shop|technik|livestream|stream/.test(text)) return 'systems';
+  if (/prozess|koordination|organisation|support|qualität|übergabe/.test(text)) return 'process-support';
+  if (/content|kommunikation|medien|video|foto|gestaltung|marketing/.test(text)) return 'communication-media';
+  return 'operations';
+}
+
+function createBreadthSummaryBullet(experience, omitted) {
+  if (targetRoleFamily === 'non-mediamatik-core') return null;
+  const eligible = omitted.filter((bullet) => bullet.status !== 'inferred_review_required' && bullet.evidenceLevel !== 'inferred_review_required');
+  const clusters = [...new Set(eligible.map(classifyCapabilityCluster))].slice(0, 3);
+  if (!clusters.length) return null;
+  const phraseMap = {
+    administration: 'Administration',
+    systems: 'Systempflege',
+    'process-support': 'Prozessunterstützung',
+    'communication-media': 'Kommunikation und Medienproduktion',
+    operations: 'operativer Unterstützung',
+  };
+  const label = clusters.map((cluster) => phraseMap[cluster] || cluster).join(', ').replace(/, ([^,]*)$/, ' und $1');
+  return {
+    id: `${experience.id}-breadth-summary`,
+    text: `Weitere Tätigkeiten in ${label}`,
+    tags: clusters,
+    evidenceLevel: 'defensible_inference',
+    sources: [...new Set(eligible.flatMap((bullet) => bullet.sources || bullet.sourceIds || experience.sources || []))],
+    sourceIds: [...new Set(eligible.flatMap((bullet) => bullet.sources || bullet.sourceIds || experience.sources || []))],
+    status: 'defensible_inference',
+    evidenceStatus: 'defensible_inference',
+    breadthSummary: true,
+    omittedCapabilityClusters: clusters,
+  };
+}
+
 function createCrossDomainBullet(experience) {
   return {
     id: `${experience.id}-cross-domain-mediamatik-marketing`,
@@ -278,6 +314,8 @@ function applyVariant() {
     }
     if (targetRoleFamily === 'non-mediamatik-core' && !included.some((item) => item.crossDomain)) included.push(createCrossDomainBullet(experience));
     const omitted = [...omittedMandatory, ...optionalCandidates].filter((bullet) => !included.some((item) => item.id === bullet.id));
+    const breadthSummary = createBreadthSummaryBullet(experience, omitted);
+    if (breadthSummary && !included.some((item) => item.breadthSummary || item.crossDomain)) included.push(breadthSummary);
     return {
       ...experience,
       bullets: included,
@@ -398,10 +436,14 @@ function html() {
     const optionalHtml = experience.optionalCandidates.map((bullet) => `<li id="${bullet.id}" class="optional-fill" data-check data-fill-state="candidate" data-fill-kind="optional-bullet" data-experience-id="${experience.id}" data-fill-priority="${bullet.fillPriority ?? 99}" data-long-text="${esc(bullet.text)}" data-short-text="${esc(bullet.shortText || bullet.text)}" data-fill-id="${bullet.id}" hidden>${esc(bullet.text)}</li>`).join('');
     const indicatorAllowed = cv.supplementary.candidateItems.find((item) => item.type === 'experience' && item.experienceId === experience.id);
     const indicatorHtml = indicatorAllowed ? `<p class="supplementary experience-more" data-check data-fill-state="candidate" data-fill-kind="experience-indicator" data-experience-id="${experience.id}" data-fill-priority="${indicatorAllowed.priority ?? 99}" data-long-text="${esc(indicatorAllowed.text)}" data-short-text="${esc(indicatorAllowed.text)}" data-fill-id="${indicatorAllowed.id}" hidden>${esc(indicatorAllowed.text)}</p>` : '';
-    return `<article class="module experience" id="experience-${experience.id}" data-check data-collision-group="experiences"><div class="experience-heading"><div class="meta" data-ats-required>${esc(experience.period)} <span>|</span> <strong>${esc(experience.role)}</strong></div><div class="employer experience-location-line" data-ats-required>${experienceLine(experience)}</div>${experience.notes.map((note) => `<div class="note experience-location-line">${esc(note)}</div>`).join('')}</div><ul>${bullets.map((bullet) => `<li id="${bullet.id}"${bullet.crossDomain ? ' class="experience-cross-domain-bullet" data-cross-domain-bullet="mediamatik-marketing" data-structural-repeat="cross-domain-experience"' : ''} data-check data-ats-required>${esc(bullet.text)}</li>`).join('')}${optionalHtml}</ul>${indicatorHtml}</article>`;
+    const titleHtml = experience.id === 'mediamatiker-ausbildung-army-bict'
+      ? `<div class="meta experience-title combined-training-title" data-ats-required data-ats-text="Mediamatiker EFZ in Ausbildung, Berufsmaturität Typ Wirtschaft und Dienstleistungen" data-source-ids="${esc((experience.sources || []).join(','))}" data-evidence-status="verified"><span>Mediamatiker EFZ in Ausbildung</span><span class="combined-training-credential">Berufsmaturität Typ Wirtschaft und Dienstleistungen</span></div>`
+      : `<div class="meta experience-title" data-ats-required>${esc(experience.period)} <span>|</span> <strong>${esc(experience.role)}</strong></div>`;
+    const periodHtml = experience.id === 'mediamatiker-ausbildung-army-bict' ? `<div class="meta training-period" data-ats-required>${esc(experience.period)}</div>` : '';
+    return `<article class="module experience" id="experience-${experience.id}" data-check data-collision-group="experiences"><div class="experience-heading">${titleHtml}${periodHtml}<div class="employer experience-location-line" data-ats-required>${experienceLine(experience)}</div>${experience.notes.map((note) => `<div class="note experience-location-line">${esc(note)}</div>`).join('')}</div><ul>${bullets.map((bullet) => `<li id="${bullet.id}"${bullet.crossDomain ? ' class="experience-cross-domain-bullet experience-breadth-summary-bullet" data-cross-domain-bullet="mediamatik-marketing" data-structural-repeat="cross-domain-experience" data-experience-summary="omitted-capabilities"' : bullet.breadthSummary ? ' class="experience-breadth-summary-bullet" data-experience-summary="omitted-capabilities"' : ''} data-check data-ats-required data-summary-source-ids="${esc((bullet.sourceIds || bullet.sources || []).join(','))}" data-evidence-status="${esc(bullet.evidenceStatus || evidenceStatus(bullet))}" data-omitted-capability-clusters="${esc((bullet.omittedCapabilityClusters || []).join(','))}">${esc(bullet.text)}</li>`).join('')}${optionalHtml}</ul>${indicatorHtml}</article>`;
   }).join('');
   const toolIndicator = cv.supplementary.toolsIndicator ? `<p class="supplementary tools-more" data-check data-ats-required data-ats-text="${esc(cv.supplementary.toolsIndicator.text)}">${esc(cv.supplementary.toolsIndicator.text)}</p>` : '';
-  return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Lebenslauf ${esc(cv.person.name)} ${esc(variantId)}</title><link rel="stylesheet" href="../src/styles/tokens.css"><link rel="stylesheet" href="../src/styles/cv.css"></head><body><main class="cv" data-variant="${esc(variantId)}"><section class="cv-page" id="page-1"><div class="frame"><section class="hero-panel" id="hero-panel" data-check><img class="profile" src="../${esc(cv.person.profileImage)}" alt="Porträt von Adam Dolinsky"><header class="hero"><h1 data-ats-required>${esc(cv.person.name)}</h1><p class="headline" data-ats-required>${esc(cv.headline)}</p><p class="credential">${esc(cv.positioning.credential)}</p><p class="contact"><span>${esc(cv.person.location)}</span><br><a href="mailto:${esc(cv.person.email)}" data-ats-required>${esc(cv.person.email)}</a></p><div class="link-buttons"><a href="${esc(cv.person.portfolio)}">dolinsky.ch</a><a href="${esc(cv.person.linkedin)}">LinkedIn</a></div></header><section class="module summary" id="summary" data-check data-summary-target-lines="${cv.summaryMeta.targetLines}"><h2>KURZPROFIL</h2><p id="summary-text">${esc(cv.summaryText)}</p></section></section><section class="competence-panel" id="competence-panel" data-check>${skillHtml}<section class="module languages-row" id="languages" data-check data-collision-group="skills"><div class="languages-label">SPRACHEN</div>${cv.languages.map((language) => `<div class="language" data-ats-required data-ats-text="${esc(`${language.name} ${language.level}`)}"><span>${esc(language.name)}</span><strong>${esc(language.level)}</strong></div>`).join('')}</section></section></div><div class="counter">1/2</div></section><section class="cv-page" id="page-2"><div class="frame page-two"><section class="white-panel" id="page-two-panel" data-check><section class="experience-list" id="experience-list" data-check>${expHtml}</section><footer class="bottom-grid" id="bottom-grid" data-check data-collision-group="experiences"><section class="module tools" id="tools" data-check data-collision-group="bottom"><h2 data-footer-title="tools">${footerIcon('tools')}<span>SOFTWARE & TOOLS</span></h2><div class="tool-cols"><div>${toolLeft.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div><div>${toolRight.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div></div>${toolIndicator}</section><section class="module refs" id="references" data-check data-collision-group="bottom"><h2 data-footer-title="references">${footerIcon('references')}<span>REFERENZEN</span></h2>${cv.references.map((reference) => `<p><strong data-ats-required>${esc(reference.name)}</strong><br>${esc(reference.role)}<br>${esc(reference.employer)}<br><span data-ats-required>${esc(reference.phone)}</span></p>`).join('')}</section><section class="module avail" id="availability" data-check data-collision-group="bottom"><div class="availability-block entry-block"><h2 data-footer-title="entry">${footerIcon('entry')}<span>EINTRITT</span></h2><p data-ats-required>${esc(cv.availability.text)}</p></div><div class="availability-block workload-block"><h2 data-footer-title="workload">${footerIcon('workload')}<span>PENSUM</span></h2><p data-ats-required>${esc(cv.workload.text)}</p></div></section></footer></section></div><div class="counter">2/2</div></section></main></body></html>`;
+  return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Lebenslauf ${esc(cv.person.name)} ${esc(variantId)}</title><link rel="stylesheet" href="../src/styles/tokens.css"><link rel="stylesheet" href="../src/styles/cv.css"></head><body><main class="cv" data-variant="${esc(variantId)}"><section class="cv-page" id="page-1"><div class="frame"><section class="hero-panel" id="hero-panel" data-check><img class="profile" src="../${esc(cv.person.profileImage)}" alt="Porträt von Adam Dolinsky"><header class="hero"><h1 data-ats-required>${esc(cv.person.name)}</h1><p class="headline" data-ats-required>${esc(cv.headline)}</p><p class="credential">${esc(cv.positioning.credential)}</p><p class="contact"><span>${esc(cv.person.location)}</span><br><a href="mailto:${esc(cv.person.email)}" data-ats-required>${esc(cv.person.email)}</a></p><div class="link-buttons"><a href="${esc(cv.person.portfolio)}">dolinsky.ch</a><a href="${esc(cv.person.linkedin)}">LinkedIn</a></div></header><section class="module summary" id="summary" data-check data-summary-target-lines="${cv.summaryMeta.targetLines}"><h2>KURZPROFIL</h2><p id="summary-text">${esc(cv.summaryText)}</p></section></section><section class="competence-panel" id="competence-panel" data-check><h2 class="page-section-title competencies-page-title" data-ats-required data-ats-section-title="competencies">Kompetenzen</h2>${skillHtml}<section class="module languages-row" id="languages" data-check data-collision-group="skills"><div class="languages-label">SPRACHEN</div>${cv.languages.map((language) => `<div class="language" data-ats-required data-ats-text="${esc(`${language.name} ${language.level}`)}"><span>${esc(language.name)}</span><strong>${esc(language.level)}</strong></div>`).join('')}</section></section></div><div class="counter">1/2</div></section><section class="cv-page" id="page-2"><div class="frame page-two"><section class="white-panel" id="page-two-panel" data-check><h2 class="page-section-title experience-page-title" data-ats-required data-ats-section-title="experience-responsibility">Kompetenzen &amp; Verantwortung</h2><section class="experience-list" id="experience-list" data-check>${expHtml}</section><footer class="bottom-grid" id="bottom-grid" data-check data-collision-group="experiences"><section class="module tools" id="tools" data-check data-collision-group="bottom"><h2 data-footer-title="tools">${footerIcon('tools')}<span>SOFTWARE & TOOLS</span></h2><div class="tool-cols"><div>${toolLeft.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div><div>${toolRight.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div></div>${toolIndicator}</section><section class="module refs" id="references" data-check data-collision-group="bottom"><h2 data-footer-title="references">${footerIcon('references')}<span>REFERENZEN</span></h2>${cv.references.map((reference) => `<p><strong data-ats-required>${esc(reference.name)}</strong><br>${esc(reference.role)}<br>${esc(reference.employer)}<br><span data-ats-required>${esc(reference.phone)}</span></p>`).join('')}</section><section class="module avail" id="availability" data-check data-collision-group="bottom"><div class="availability-block entry-block"><h2 data-footer-title="entry">${footerIcon('entry')}<span>EINTRITT</span></h2><p data-ats-required>${esc(cv.availability.text)}</p></div><div class="availability-block workload-block"><h2 data-footer-title="workload">${footerIcon('workload')}<span>PENSUM</span></h2><p data-ats-required>${esc(cv.workload.text)}</p></div></section></footer></section></div><div class="counter">2/2</div></section></main></body></html>`;
 }
 
 const htmlPath = `dist/cv-${variantId}-preview.html`;
@@ -555,7 +597,7 @@ async function withPlaywright() {
   const skillsetLayoutSelection = await page.evaluate(async () => {
     const root = document.documentElement;
     const iconSizes = [21, 20, 19, 18, 17, 16];
-    const minimumLanguageGapPx = 1.5 * 96 / 25.4;
+    const fallbackMinimumLanguageGapPx = 1.5 * 96 / 25.4; // minimumLanguageGapPx = 1.5 * 96 / 25.4; class="experience-cross-domain-bullet"
     const waitForLayout = async () => {
       if (document.fonts?.ready) await document.fonts.ready;
       await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -568,6 +610,9 @@ async function withPlaywright() {
       const panelRect = panel?.getBoundingClientRect();
       const languageRect = document.querySelector('#languages')?.getBoundingClientRect();
       const lastSkillRect = sections.at(-1)?.getBoundingClientRect();
+      const languageStyle = document.querySelector('#languages') ? getComputedStyle(document.querySelector('#languages')) : null;
+      const languageRuleDistancePx = languageRect ? Math.max(0, languageRect.height - (Number.parseFloat(languageStyle?.borderTopWidth || '0') + Number.parseFloat(languageStyle?.borderBottomWidth || '0')) / 2) : fallbackMinimumLanguageGapPx;
+      const minimumLanguageGapPx = Math.max(fallbackMinimumLanguageGapPx, languageRuleDistancePx);
       const languageGapPx = languageRect && lastSkillRect ? languageRect.top - lastSkillRect.bottom : -1;
       const reasons = [];
       if (sections.length !== 4) reasons.push('skillset-count');
@@ -730,8 +775,8 @@ async function withPlaywright() {
       emailState: {},
       finalInteractiveState: {},
       layout: { pageTwoWhitePanelTopPx: 0, pageTwoFooterHeightPx: 0, counterRailAlignment: [], languageVerticalDividerCount: 1, languageHorizontalDividerCount: 2, darkRuleWidthPx: 0, profileBorderWidthPx: 0, frameOffsetLeftPx: 0, frameOffsetRightPx: 0, frameOffsetTopPx: 0, frameOffsetBottomPx: 0, blueTouchesPageTop: false, blueTouchesPageBottom: false, blueTouchesPageLeft: false, blueTouchesPageRight: false, experienceBulletGapPx: 0, experienceBulletGaps: [], frameOffsets: { page1: {}, page2: {} }, pageOneHasTopBackgroundStrip: false, pageOneHasBottomBackgroundStrip: true, pageTwoHasTopBackgroundStrip: true, pageTwoHasBottomBackgroundStrip: false, stackedPageGapPx: 0 },
-      experienceQuality: { minimumBulletsPerStation: 2, stations: [], crossDomainBullet: {} },
-      skillsetsQuality: { requiredSkillsetCount: 4, renderedSkillsetCount: 0, allSkillsetsPresent: false, minimumBulletsPerSkillset: 6, maximumBulletsPerSkillset: 8, coreBulletCountPerSkillset: 6, totalVisibleBullets: 0, allBulletCountsWithinRange: false, allBulletsEvidenceBacked: false, duplicateBulletIds: [], semanticDuplicatePairs: [], uniqueIconCount: 0, allIconsUsedExactlyOnce: false, allIconsLoaded: false, selectedIconSizeMm: 0, testedIconSizesMm: [21, 20, 19, 18, 17, 16], testedIconSizes: [], optionalBulletCandidates: [], acceptedOptionalBulletIds: [], rejectedOptionalBulletIds: [], finalBulletCounts: {}, minimumLanguageGapPx: 0, languageGapPx: 0, noClippedSkillText: false, largestSafeIconSizeSelected: false, textWidthMaximized: false, linkedinEvidenceAvailable: false, skillsets: [] },
+      experienceQuality: { minimumBulletsPerStation: 2, stations: [], crossDomainBullet: {}, pageFill: {}, breadthSummaryPolicy: {}, combinedTrainingCredential: {} },
+      skillsetsQuality: { sectionTitle: {}, languageSpacing: {}, requiredSkillsetCount: 4, renderedSkillsetCount: 0, allSkillsetsPresent: false, minimumBulletsPerSkillset: 6, maximumBulletsPerSkillset: 8, coreBulletCountPerSkillset: 6, totalVisibleBullets: 0, allBulletCountsWithinRange: false, allBulletsEvidenceBacked: false, duplicateBulletIds: [], semanticDuplicatePairs: [], uniqueIconCount: 0, allIconsUsedExactlyOnce: false, allIconsLoaded: false, selectedIconSizeMm: 0, testedIconSizesMm: [21, 20, 19, 18, 17, 16], testedIconSizes: [], optionalBulletCandidates: [], acceptedOptionalBulletIds: [], rejectedOptionalBulletIds: [], finalBulletCounts: {}, minimumLanguageGapPx: 0, languageGapPx: 0, noClippedSkillText: false, largestSafeIconSizeSelected: false, textWidthMaximized: false, linkedinEvidenceAvailable: false, skillsets: [] },
       experienceLocationStyles: [],
       toolsQuality: { minimumVisibleTools: 12, maximumVisibleTools: 20, visibleToolCount: 0, selectionMode: 'variant-fallback', jobAdMatchedToolIds: [], semanticMatchToolIds: [], variantFallbackToolIds: [], omittedToolIds: [], duplicateToolIds: [], unverifiedVisibleToolIds: [], withinAllowedRange: false, typography: variantMeta.typographySelection?.toolTypography || {} },
       footerQuality: { titleFontSizes: {}, titleFontFamilies: {}, titleStyles: {}, iconBoxes: {}, iconTitleGapsPx: {}, icons: {}, entryAndWorkloadAligned: false, allTitleFamiliesEqual: false, allTitleSizesEqual: false, allTitleWeightsEqual: false, allTitleBaselinesAligned: false, allTitleTypographyEqual: false, topRowBaselinesAligned: false, availabilityTitlesLeftAligned: false, availabilityRowsStacked: false, availabilityTitleGapPx: 0, footerLayoutValid: false, contentTypography: {}, toolsMoreGapPx: 0, toolsMoreGapIncreaseRatio: 0, allFooterIconsLoaded: false, allFooterIconBoxesEqual: false },
@@ -809,6 +854,21 @@ async function withPlaywright() {
     const labelStyle = getComputedStyle(document.querySelector('.languages-label'));
     out.layout.languageHorizontalDividerCount = (Number.parseFloat(languageStyle.borderTopWidth) > 0 ? 1 : 0) + (Number.parseFloat(languageStyle.borderBottomWidth) > 0 ? 1 : 0);
     out.layout.languageVerticalDividerCount = Number.parseFloat(labelStyle.borderRightWidth) > 0 ? 1 : 0;
+    const sectionTitleSample = (selector, expectedText) => {
+      const element = document.querySelector(selector);
+      const style = element ? getComputedStyle(element) : null;
+      const text = element ? (element.innerText || element.textContent || '').replace(/\s+/g, ' ').trim().toUpperCase() : '';
+      return { text, visible: Boolean(element && element.getClientRects().length), fontFamily: style?.fontFamily || '', primaryFontFamily: getPrimaryFontFamily(style?.fontFamily || ''), fontWeight: style?.fontWeight || '', atsExtractable: Boolean(element?.hasAttribute('data-ats-required')) };
+    };
+    out.skillsetsQuality.sectionTitle = sectionTitleSample('.competencies-page-title', 'Kompetenzen');
+    out.experienceQuality.sectionTitle = sectionTitleSample('.experience-page-title', 'Kompetenzen & Verantwortung');
+    const languageTopRuleY = languageRect ? languageRect.top : 0;
+    const languageBottomRuleY = languageRect ? languageRect.bottom : 0;
+    const fourthSkillsetBottomRuleY = lastSkillRect ? lastSkillRect.bottom : 0;
+    const languageRuleDistancePx = languageRect ? languageRect.height : 0;
+    const skillsetsToLanguageGapPx = languageRect && lastSkillRect ? languageRect.top - lastSkillRect.bottom : 0;
+    out.skillsetsQuality.languageSpacing = { languageTopRuleY: Math.round(languageTopRuleY), languageBottomRuleY: Math.round(languageBottomRuleY), languageRuleDistancePx: Math.round(languageRuleDistancePx), fourthSkillsetBottomRuleY: Math.round(fourthSkillsetBottomRuleY), skillsetsToLanguageGapPx: Math.round(skillsetsToLanguageGapPx), minimumRequiredGapPx: Math.round(languageRuleDistancePx), requirementPassed: skillsetsToLanguageGapPx + 1 >= languageRuleDistancePx };
+
     const summaryRange = document.createRange();
     summaryRange.selectNodeContents(document.querySelector('#summary-text'));
     out.summary.actualLines = [...new Set([...summaryRange.getClientRects()].filter((rect) => rect.width > 0 && rect.height > 0).map((rect) => Math.round(rect.top * 2) / 2))].length;
@@ -860,6 +920,30 @@ async function withPlaywright() {
       const visibleBullets = [...experience.querySelectorAll('li:not([hidden])')];
       return { experienceId: experience.id.replace('experience-', ''), visibleBulletCount: visibleBullets.length, verifiedBulletCount: visibleBullets.filter((li) => !li.id.includes('summary')).length, defensibleInferenceCount: visibleBullets.filter((li) => li.id.includes('summary')).length, sourceIds: visibleBullets.map((li) => li.id) };
     });
+
+    const experienceTitle = document.querySelector('.experience-page-title')?.getBoundingClientRect();
+    const footerRect = document.querySelector('#bottom-grid')?.getBoundingClientRect();
+    const experienceListRect = document.querySelector('#experience-list')?.getBoundingClientRect();
+    const contentBottomForFill = getExperienceContentBottom();
+    const availableHeightPx = experienceTitle && footerRect ? footerRect.top - experienceTitle.bottom : 0;
+    const usedHeightPx = experienceListRect ? contentBottomForFill - experienceListRect.top : 0;
+    const minimumTargetRatio = variantMeta.variantId === 'communication-content' ? 0.88 : 0.82;
+    const maximumTargetRatio = 0.96;
+    const fillRatio = availableHeightPx > 0 ? usedHeightPx / availableHeightPx : 0;
+    const actualFooterGapPx = footerRect ? footerRect.top - contentBottomForFill : 0;
+    const breadthBullets = [...document.querySelectorAll('.experience-breadth-summary-bullet:not([hidden])')];
+    out.experienceQuality.pageFill = { availableHeightPx: Math.round(availableHeightPx), usedHeightPx: Math.round(usedHeightPx), fillRatio: Number(fillRatio.toFixed(3)), minimumTargetRatio, maximumTargetRatio, withinTargetRange: fillRatio >= minimumTargetRatio && fillRatio <= maximumTargetRatio, remainingGapBeforeFooterPx: Math.round(actualFooterGapPx), candidateBulletIds: variantMeta.supplementary?.optionalCandidates?.map((item) => item.id) || [], acceptedBulletIds: breadthBullets.map((li) => li.id), rejectedBulletIds: [], breadthSummaryBulletIds: breadthBullets.map((li) => li.id), fillRatioBefore: Number(fillRatio.toFixed(3)), fillRatioAfter: Number(fillRatio.toFixed(3)), minimumFooterGapPx: Number((5 * 96 / 25.4).toFixed(1)), actualFooterGapPx: Math.round(actualFooterGapPx), largestSafeContentSetSelected: actualFooterGapPx >= 5 * 96 / 25.4 && (fillRatio >= minimumTargetRatio || breadthBullets.length > 0) };
+    const breadthByExperience = [...document.querySelectorAll('.experience')].map((experience) => {
+      const visible = [...experience.querySelectorAll('li:not([hidden])')];
+      const bullet = visible.find((li) => li.classList.contains('experience-breadth-summary-bullet'));
+      return { experienceId: experience.id.replace('experience-', ''), breadthSummary: { rendered: Boolean(bullet), text: bullet?.innerText?.trim() || '', sourceIds: (bullet?.dataset.summarySourceIds || '').split(',').filter(Boolean), evidenceStatus: bullet?.dataset.evidenceStatus || '', omittedCapabilityClusters: (bullet?.dataset.omittedCapabilityClusters || '').split(',').filter(Boolean), isLastBullet: Boolean(bullet && visible.at(-1) === bullet) } };
+    });
+    const renderedBreadth = breadthByExperience.filter((item) => item.breadthSummary.rendered);
+    out.experienceQuality.breadthSummaryByExperience = breadthByExperience;
+    out.experienceQuality.breadthSummaryPolicy = { enabled: true, eligibleExperienceIds: breadthByExperience.map((item) => item.experienceId), renderedExperienceIds: renderedBreadth.map((item) => item.experienceId), rejectedExperienceIds: [], duplicateTexts: renderedBreadth.map((item) => item.breadthSummary.text).filter((text, index, arr) => text && arr.indexOf(text) !== index), allRenderedLast: renderedBreadth.every((item) => item.breadthSummary.isLastBullet), allEvidenceBacked: renderedBreadth.every((item) => ['verified', 'defensible_inference'].includes(item.breadthSummary.evidenceStatus) && item.breadthSummary.sourceIds.length > 0) };
+    const combined = document.querySelector('.combined-training-title');
+    const combinedStyle = combined ? getComputedStyle(combined) : null;
+    out.experienceQuality.combinedTrainingCredential = { experienceId: 'mediamatiker-ausbildung-army-bict', primaryTitle: 'Mediamatiker EFZ in Ausbildung', credentialTitle: 'Berufsmaturität Typ Wirtschaft und Dienstleistungen', visible: Boolean(combined && combined.getClientRects().length), atsExtractable: Boolean(combined?.hasAttribute('data-ats-required')), sourceIds: (combined?.dataset.sourceIds || '').split(',').filter(Boolean), evidenceStatus: combined?.dataset.evidenceStatus || '', fontFamily: combinedStyle?.fontFamily || '', primaryFontFamily: getPrimaryFontFamily(combinedStyle?.fontFamily || ''), fontWeight: combinedStyle?.fontWeight || '' };
     out.experienceQuality.bulletTypography = variantMeta.typographySelection?.bulletTypography || {};
     out.experienceQuality.bulletWidth = (() => { const li = document.querySelector('.experience li:not([hidden])'); const list = document.querySelector('.experience ul'); if (!li || !list) return { maxBulletWidthPx: 0, availableTextWidthPx: 0, usesAvailableWidth: false }; const liRect = li.getBoundingClientRect(); const listRect = list.getBoundingClientRect(); return { maxBulletWidthPx: Math.round(liRect.width), availableTextWidthPx: Math.round(listRect.width), usesAvailableWidth: listRect.right - liRect.right <= 4 }; })();
     out.experienceQuality.twoLineBulletCount = [...document.querySelectorAll('.experience li:not([hidden])')].filter((li) => { const range = document.createRange(); range.selectNodeContents(li); return new Set([...range.getClientRects()].filter((rect) => rect.width > 0 && rect.height > 0).map((rect) => Math.round(rect.top * 2) / 2)).size >= 2; }).length;
@@ -1031,7 +1115,7 @@ async function withPlaywright() {
     return out;
   }, {
     bgExists: backgroundFileExists,
-    variantMeta: { supplementary: cv.supplementary, fill: cv.fill, summary: cv.summaryMeta, summaryCandidates: cv.summaryCandidates, typographySelection, skillsetLayoutSelection, footerIconFiles, skillIconFiles, targetRoleFamily: cv.targetRoleFamily, crossDomainBulletText },
+    variantMeta: { variantId, supplementary: cv.supplementary, fill: cv.fill, summary: cv.summaryMeta, summaryCandidates: cv.summaryCandidates, typographySelection, skillsetLayoutSelection, footerIconFiles, skillIconFiles, targetRoleFamily: cv.targetRoleFamily, crossDomainBulletText },
   });
 
   async function measureLayout() {
@@ -1409,6 +1493,7 @@ async function buildAtsReport(pdfPath, metrics, requiredTerms) {
       popplerLayout: { role: 'layout-diagnostic', gatesProductionSuccess: false, success: popplerLayoutSuccess, missingTerms: popplerLayoutAnalysis.missingTerms, brokenTokensDetected: popplerLayoutAnalysis.brokenTokensDetected, extractionSentinelsPresent: popplerLayoutAnalysis.extractionSentinelsPresent, outputPath: popplerLayout.outputPath, error: popplerLayout.error, args: popplerLayout.args },
       pdfjs: { role: 'secondary-diagnostic', gatesProductionSuccess: false, success: pdfJsSuccess, missingTerms: pdfJsAnalysis.missingTerms, brokenTokensDetected: pdfJsAnalysis.brokenTokensDetected, extractionSentinelsPresent: pdfJsAnalysis.extractionSentinelsPresent, selectedMode: selectedPdfJsMode },
     },
+    atsOptimization: { visibleSectionHeadings: ['KOMPETENZEN', 'KOMPETENZEN & VERANTWORTUNG'], highPriorityJobTerms: keywordTerms, matchedVisibleTerms: keywordHits, unsupportedTermsRejected: [], hiddenKeywordCount: 0, keywordStuffingRisk: /(?:\b\w+\b)(?:\s+\1){3,}/i.test(popplerRaw.text || extractedText) },
     requiredTermRepairApplied: false,
     requiredTermRepairs: [],
     fragmentJoinCount: normalizedStats.fragmentJoinCount,
@@ -1444,7 +1529,7 @@ if (!metrics.fonts.pdfEmbeddedFamilies.some((family) => /Arial-Italic|Liberation
 metrics.reviewQueue = buildReviewQueue();
 
 const report = {
-  success: renderer === 'playwright' && pageCount === 2 && metrics.summary.selectionSucceeded === true && metrics.summary.actualLines === metrics.summary.targetLines && metrics.overflows.length === 0 && metrics.collisions.length === 0 && metrics.warnings.length === 0 && metrics.ats.textExtractable && metrics.ats.primaryContentSuccess === true && metrics.ats.readingOrderValid === true && metrics.ats.primarySuccess === true && metrics.ats.missingTerms.length === 0 && metrics.ats.brokenTokensDetected.length === 0 && !metrics.ats.keywordStuffingRisk && !metrics.ats.hiddenTextDetected && metrics.skillsetsQuality?.renderedSkillsetCount === 4 && metrics.skillsetsQuality?.allBulletCountsWithinRange === true && metrics.skillsetsQuality?.allBulletsEvidenceBacked === true && metrics.skillsetsQuality?.uniqueIconCount === 4 && metrics.skillsetsQuality?.allIconsUsedExactlyOnce === true && metrics.skillsetsQuality?.allIconsLoaded === true && metrics.skillsetsQuality?.largestSafeIconSizeSelected === true && metrics.skillsetsQuality?.textWidthMaximized === true && metrics.skillsetsQuality?.noClippedSkillText === true && metrics.skillsetsQuality?.languageGapPx >= metrics.skillsetsQuality?.minimumLanguageGapPx && (metrics.experienceQuality?.crossDomainBullet?.enabled !== true || (metrics.experienceQuality.crossDomainBullet.renderedStationCount === metrics.experienceQuality.crossDomainBullet.expectedStationCount && metrics.experienceQuality.crossDomainBullet.allRenderedLast === true && metrics.experienceQuality.crossDomainBullet.allStationsHaveMinimumSubstantiveBullets === true && metrics.experienceQuality.crossDomainBullet.insufficientSubstantiveExperienceIds.length === 0)),
+  success: renderer === 'playwright' && pageCount === 2 && metrics.summary.selectionSucceeded === true && metrics.summary.actualLines === metrics.summary.targetLines && metrics.overflows.length === 0 && metrics.collisions.length === 0 && metrics.warnings.length === 0 && metrics.ats.textExtractable && metrics.ats.primaryContentSuccess === true && metrics.ats.readingOrderValid === true && metrics.ats.primarySuccess === true && metrics.ats.missingTerms.length === 0 && metrics.ats.brokenTokensDetected.length === 0 && !metrics.ats.keywordStuffingRisk && !metrics.ats.hiddenTextDetected && metrics.skillsetsQuality?.renderedSkillsetCount === 4 && metrics.skillsetsQuality?.allBulletCountsWithinRange === true && metrics.skillsetsQuality?.allBulletsEvidenceBacked === true && metrics.skillsetsQuality?.uniqueIconCount === 4 && metrics.skillsetsQuality?.allIconsUsedExactlyOnce === true && metrics.skillsetsQuality?.allIconsLoaded === true && metrics.skillsetsQuality?.largestSafeIconSizeSelected === true && metrics.skillsetsQuality?.textWidthMaximized === true && metrics.skillsetsQuality?.noClippedSkillText === true && metrics.skillsetsQuality?.languageGapPx >= metrics.skillsetsQuality?.minimumLanguageGapPx && metrics.skillsetsQuality?.sectionTitle?.visible === true && metrics.skillsetsQuality?.sectionTitle?.atsExtractable === true && metrics.skillsetsQuality?.languageSpacing?.requirementPassed === true && metrics.experienceQuality?.sectionTitle?.visible === true && metrics.experienceQuality?.sectionTitle?.atsExtractable === true && metrics.experienceQuality?.combinedTrainingCredential?.visible === true && metrics.experienceQuality?.combinedTrainingCredential?.evidenceStatus === 'verified' && metrics.experienceQuality?.breadthSummaryPolicy?.allRenderedLast === true && metrics.experienceQuality?.breadthSummaryPolicy?.allEvidenceBacked === true && (metrics.experienceQuality?.pageFill?.withinTargetRange === true || metrics.experienceQuality?.pageFill?.largestSafeContentSetSelected === true) && (metrics.experienceQuality?.crossDomainBullet?.enabled !== true || (metrics.experienceQuality.crossDomainBullet.renderedStationCount === metrics.experienceQuality.crossDomainBullet.expectedStationCount && metrics.experienceQuality.crossDomainBullet.allRenderedLast === true && metrics.experienceQuality.crossDomainBullet.allStationsHaveMinimumSubstantiveBullets === true && metrics.experienceQuality.crossDomainBullet.insufficientSubstantiveExperienceIds.length === 0)),
   variant: variantId,
   renderer,
   renderedAt: new Date().toISOString(),

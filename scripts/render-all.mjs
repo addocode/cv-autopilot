@@ -209,6 +209,21 @@ const skillsetChecks = {
   languagesNotColliding: allReportsPresent && allReports.every((report) => (report.skillsetsQuality?.languageGapPx ?? 1) >= 0 && (report.collisions || []).every((collision) => !String(collision.elementA + collision.elementB).includes('languages'))),
 };
 experienceChecks.crossDomainBulletPolicyPassed = allReportsPresent && allReports.every((report) => report.experienceQuality?.crossDomainBullet?.enabled !== true || (report.experienceQuality.crossDomainBullet.renderedStationCount === report.experienceQuality.crossDomainBullet.expectedStationCount && report.experienceQuality.crossDomainBullet.allRenderedLast === true));
+const sectionHeadingChecks = {
+  competenciesHeadingVisible: allReportsPresent && allReports.every((report) => report.skillsetsQuality?.sectionTitle?.visible === true),
+  competenciesHeadingRobotoSlab: allReportsPresent && allReports.every((report) => report.skillsetsQuality?.sectionTitle?.primaryFontFamily === 'Roboto Slab' && report.skillsetsQuality?.sectionTitle?.fontWeight === '700'),
+  competenciesHeadingAtsExtractable: allReportsPresent && allReports.every((report) => report.skillsetsQuality?.sectionTitle?.atsExtractable === true),
+  experienceHeadingVisible: allReportsPresent && allReports.every((report) => report.experienceQuality?.sectionTitle?.visible === true),
+  experienceHeadingRobotoSlab: allReportsPresent && allReports.every((report) => report.experienceQuality?.sectionTitle?.primaryFontFamily === 'Roboto Slab' && report.experienceQuality?.sectionTitle?.fontWeight === '700'),
+  experienceHeadingAtsExtractable: allReportsPresent && allReports.every((report) => report.experienceQuality?.sectionTitle?.atsExtractable === true),
+};
+const spacingChecks = {
+  skillsetsLanguageGapPassed: allReportsPresent && allReports.every((report) => report.skillsetsQuality?.languageSpacing?.requirementPassed === true),
+  footerGapPassed: allReportsPresent && allReports.every((report) => (report.experienceQuality?.pageFill?.actualFooterGapPx ?? 0) >= (report.experienceQuality?.pageFill?.minimumFooterGapPx ?? 18.9)),
+};
+experienceChecks.communicationPageFilledAdvantageously = allReportsPresent && reports['communication-content']?.experienceQuality?.pageFill?.largestSafeContentSetSelected === true;
+experienceChecks.breadthSummaryPolicyPassed = allReportsPresent && allReports.every((report) => report.experienceQuality?.breadthSummaryPolicy?.allRenderedLast === true && report.experienceQuality?.breadthSummaryPolicy?.allEvidenceBacked === true);
+experienceChecks.combinedTrainingCredentialPassed = allReportsPresent && allReports.every((report) => report.experienceQuality?.combinedTrainingCredential?.visible === true && report.experienceQuality?.combinedTrainingCredential?.evidenceStatus === 'verified');
 const remainingDifferences = [];
 if (!allReportsPresent) remainingDifferences.push('Production render failed before PDF/report generation');
 for (const variant of variants) {
@@ -230,6 +245,8 @@ for (const [key, value] of Object.entries(footerChecks)) if (!value) remainingDi
 for (const [key, value] of Object.entries(experienceChecks)) if (!value) remainingDifferences.push(`experience check failed: ${key}`);
 for (const [key, value] of Object.entries(toolChecks)) if (!value) remainingDifferences.push(`tool check failed: ${key}`);
 for (const [key, value] of Object.entries(skillsetChecks)) if (!value) remainingDifferences.push(`skillset check failed: ${key}`);
+for (const [key, value] of Object.entries(sectionHeadingChecks)) if (!value) remainingDifferences.push(`section heading check failed: ${key}`);
+for (const [key, value] of Object.entries(spacingChecks)) if (!value) remainingDifferences.push(`spacing check failed: ${key}`);
 const overallSuccess = allReportsPresent
   && artifactCompleteness.complete
   && allReports.every((report) => report.success === true)
@@ -239,6 +256,8 @@ const overallSuccess = allReportsPresent
   && Object.values(experienceChecks).every(Boolean)
   && Object.values(toolChecks).every(Boolean)
   && Object.values(skillsetChecks).every(Boolean)
+  && Object.values(sectionHeadingChecks).every(Boolean)
+  && Object.values(spacingChecks).every(Boolean)
   && remainingDifferences.length === 0;
 const visualReview = {
   reportsPresent,
@@ -256,6 +275,8 @@ const visualReview = {
   experienceChecks,
   toolChecks,
   skillsetChecks,
+  sectionHeadingChecks,
+  spacingChecks,
   pageTransition: {
     pageOneTopInset: allReportsPresent ? Boolean(firstLayout.pageOneHasTopBackgroundStrip) : false,
     pageOneBottomContinuous: allReportsPresent ? firstLayout.pageOneHasBottomBackgroundStrip === false : false,
