@@ -610,10 +610,15 @@ async function withPlaywright() {
       const panelRect = panel?.getBoundingClientRect();
       const languageRect = document.querySelector('#languages')?.getBoundingClientRect();
       const lastSkillRect = sections.at(-1)?.getBoundingClientRect();
-      const languageStyle = document.querySelector('#languages') ? getComputedStyle(document.querySelector('#languages')) : null;
-      const languageRuleDistancePx = languageRect ? Math.max(0, languageRect.height - (Number.parseFloat(languageStyle?.borderTopWidth || '0') + Number.parseFloat(languageStyle?.borderBottomWidth || '0')) / 2) : fallbackMinimumLanguageGapPx;
+      const languageElement = document.querySelector('#languages');
+      const languageStyle = languageElement ? getComputedStyle(languageElement) : null;
+      const lastSkillStyle = sections.at(-1) ? getComputedStyle(sections.at(-1)) : null;
+      const languageTopRuleCenterY = languageRect ? languageRect.top + (Number.parseFloat(languageStyle?.borderTopWidth || '0') / 2) : 0;
+      const languageBottomRuleCenterY = languageRect ? languageRect.bottom - (Number.parseFloat(languageStyle?.borderBottomWidth || '0') / 2) : 0;
+      const fourthSkillsetBottomRuleCenterY = lastSkillRect ? lastSkillRect.bottom - (Number.parseFloat(lastSkillStyle?.borderBottomWidth || '0') / 2) : 0;
+      const languageRuleDistancePx = languageRect ? languageBottomRuleCenterY - languageTopRuleCenterY : fallbackMinimumLanguageGapPx;
       const minimumLanguageGapPx = Math.max(fallbackMinimumLanguageGapPx, languageRuleDistancePx);
-      const languageGapPx = languageRect && lastSkillRect ? languageRect.top - lastSkillRect.bottom : -1;
+      const languageGapPx = languageRect && lastSkillRect ? languageTopRuleCenterY - fourthSkillsetBottomRuleCenterY : -1;
       const reasons = [];
       if (sections.length !== 4) reasons.push('skillset-count');
       for (const section of sections) {
@@ -862,13 +867,6 @@ async function withPlaywright() {
     };
     out.skillsetsQuality.sectionTitle = sectionTitleSample('.competencies-page-title', 'Kompetenzen');
     out.experienceQuality.sectionTitle = sectionTitleSample('.experience-page-title', 'Kompetenzen & Verantwortung');
-    const languageTopRuleY = languageRect ? languageRect.top : 0;
-    const languageBottomRuleY = languageRect ? languageRect.bottom : 0;
-    const fourthSkillsetBottomRuleY = lastSkillRect ? lastSkillRect.bottom : 0;
-    const languageRuleDistancePx = languageRect ? languageRect.height : 0;
-    const skillsetsToLanguageGapPx = languageRect && lastSkillRect ? languageRect.top - lastSkillRect.bottom : 0;
-    out.skillsetsQuality.languageSpacing = { languageTopRuleY: Math.round(languageTopRuleY), languageBottomRuleY: Math.round(languageBottomRuleY), languageRuleDistancePx: Math.round(languageRuleDistancePx), fourthSkillsetBottomRuleY: Math.round(fourthSkillsetBottomRuleY), skillsetsToLanguageGapPx: Math.round(skillsetsToLanguageGapPx), minimumRequiredGapPx: Math.round(languageRuleDistancePx), requirementPassed: skillsetsToLanguageGapPx + 1 >= languageRuleDistancePx };
-
     const summaryRange = document.createRange();
     summaryRange.selectNodeContents(document.querySelector('#summary-text'));
     out.summary.actualLines = [...new Set([...summaryRange.getClientRects()].filter((rect) => rect.width > 0 && rect.height > 0).map((rect) => Math.round(rect.top * 2) / 2))].length;
@@ -885,6 +883,15 @@ async function withPlaywright() {
     const dividerRects = skillSections.map((section) => section.getBoundingClientRect());
     const languageRect = document.querySelector('#languages')?.getBoundingClientRect();
     const lastSkillRect = skillSections.at(-1)?.getBoundingClientRect();
+    const measuredLanguageStyle = document.querySelector('#languages') ? getComputedStyle(document.querySelector('#languages')) : null;
+    const measuredLastSkillStyle = skillSections.at(-1) ? getComputedStyle(skillSections.at(-1)) : null;
+    const languageTopRuleY = languageRect ? languageRect.top + (Number.parseFloat(measuredLanguageStyle?.borderTopWidth || '0') / 2) : 0;
+    const languageBottomRuleY = languageRect ? languageRect.bottom - (Number.parseFloat(measuredLanguageStyle?.borderBottomWidth || '0') / 2) : 0;
+    const fourthSkillsetBottomRuleY = lastSkillRect ? lastSkillRect.bottom - (Number.parseFloat(measuredLastSkillStyle?.borderBottomWidth || '0') / 2) : 0;
+    const languageRuleDistancePx = languageRect ? languageBottomRuleY - languageTopRuleY : 0;
+    const skillsetsToLanguageGapPx = languageRect && lastSkillRect ? languageTopRuleY - fourthSkillsetBottomRuleY : 0;
+    out.skillsetsQuality.languageSpacing = { languageTopRuleY: Math.round(languageTopRuleY), languageBottomRuleY: Math.round(languageBottomRuleY), languageRuleDistancePx: Math.round(languageRuleDistancePx), fourthSkillsetBottomRuleY: Math.round(fourthSkillsetBottomRuleY), skillsetsToLanguageGapPx: Math.round(skillsetsToLanguageGapPx), minimumRequiredGapPx: Math.round(languageRuleDistancePx), requirementPassed: skillsetsToLanguageGapPx + 1 >= languageRuleDistancePx };
+
     out.skillsetsQuality.renderedSkillsetCount = skillSections.length;
     out.skillsetsQuality.allSkillsetsPresent = skillSections.length === out.skillsetsQuality.requiredSkillsetCount;
     out.skillsetsQuality.skillsets = skillSections.map((section) => {
