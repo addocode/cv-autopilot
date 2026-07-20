@@ -1,187 +1,331 @@
-# ACTIVE CODEX TASK — Review Runde 43
+# ACTIVE CODEX TASK — Review Runde 44
 
 ## Verbindlicher Arbeitskontext
 
-Arbeite ausschliesslich im bestehenden privaten Repository `addocode/cv-autopilot` auf dem bereits ausgewählten Branch `codex/verifiziere-icon-hashes-und-svg-geometrie` und im bestehenden PR #6.
+Arbeite ausschliesslich im bestehenden privaten Repository `addocode/cv-autopilot` auf dem bereits ausgewählten Branch:
+
+`codex/uberprufe-head-sha-auf-branch-codex/verifiziere-icon-hashes`
+
+und im bestehenden gestapelten PR #7.
 
 - Erstelle keinen neuen Branch.
-- Erstelle keinen PR #7.
-- Merge weder PR #6 noch PR #5.
+- Erstelle keinen PR #8.
+- Merge weder PR #7 noch PR #6 oder PR #5.
 - Verändere PR #1–#4 nicht.
-- Suche nicht nach PR-Kommentaren.
-- Verwende keine GitHub CLI.
+- Suche nicht nach privaten PR-Kommentaren.
 - Diese Datei enthält den vollständigen aktiven Auftrag.
-- Wo ältere Anweisungen im Repository widersprechen, gilt diese Datei.
+- Wo ältere Anweisungen widersprechen, gilt diese Datei.
 
 ## Pflichtprüfung vor Arbeitsbeginn
 
 1. Führe `git log -1 --format=%H` aus.
-2. Vergleiche das Ergebnis mit der im Startprompt genannten erwarteten Head-SHA.
-3. Prüfe, dass diese Datei `ACTIVE_CODEX_TASK.md` vorhanden ist und mit `# ACTIVE CODEX TASK — Review Runde 43` beginnt.
-4. Falls die SHA abweicht oder diese Datei fehlt: keine Dateien verändern, keinen Commit erstellen und mit `STALE SNAPSHOT` abbrechen.
+2. Vergleiche die Ausgabe mit der im Startprompt genannten erwarteten Head-SHA.
+3. Prüfe, dass diese Datei mit `# ACTIVE CODEX TASK — Review Runde 44` beginnt.
+4. Bei Abweichung: keine Dateien verändern, keinen Commit erstellen und ausschliesslich `STALE SNAPSHOT` melden.
 
 ---
 
-## Ausgangslage
+## Ausgangslage: Run 40
 
-Der letzte Produktionsworkflow war technisch grün. Review Runde 42 wurde jedoch nur oberflächlich umgesetzt:
+PR #7 rendert alle vier PDFs und acht PNGs. Visuell funktionieren bereits:
 
-- Die Berufsmaturität ist weiterhin mit der Mediamatiker-Ausbildung kombiniert.
-- Der BM-Titel lautet fälschlich `Berufsmaturität Wirtschaft und Dienstleistungen, Typ Wirtschaft`.
-- Korrekt ist `Berufsmaturität Wirtschaft und Dienstleistungen, Typ Dienstleistungen`.
-- Die gewünschten Abschnittstitel wurden nicht umgesetzt.
-- Die 7-mm-Erweiterung auf Seite 1 wurde nicht umgesetzt.
-- Die 15–17-mm-Erweiterung auf Seite 2 wurde nicht umgesetzt.
-- Die adaptive Experience-Füllung ist weiterhin ein False Positive.
+- getrennte Mediamatiker- und Berufsmaturitätsstation
+- offizieller BM-Titel `Berufsmaturität Wirtschaft und Dienstleistungen, Typ Dienstleistungen`
+- drei verifizierte BM-Bullets
+- `FÄHIGKEITEN UND SKILLS`
+- `LEBENSLAUF UND VERANTWORTUNG`
+- Hero-Höhe 101 mm
+- Seite-2-Footerhöhe 11 mm
+- sichtbare obere Trennlinie des ersten Skillsets
+- exakt zwei Seiten
+- keine Overflows oder Collisions
 
-Diese Runde muss die tatsächliche Darstellung, Datenstruktur und Renderlogik umsetzen. Es reicht nicht, nur Tests oder Report-Erwartungen anzupassen.
+Der Workflow ist trotzdem rot. Run-40-Diagnose:
+
+```text
+renderAllExitCode: 1
+renderTestsExitCode: 1
+```
+
+Nur `administration-gever` meldet `success: false`.
+
+Reale Fehler:
+
+1. Die GEVER-Cross-Domain-Policy zählt die BM-Station fälschlich als normale Erfahrungsstation und erwartet dort den Bullet `Weitere Tätigkeiten aus dem Mediamatik- und Marketingbereich`, obwohl die BM-Station ausdrücklich davon ausgenommen ist.
+2. Der Visual Review prüft noch das entfernte Gate `combinedTrainingCredentialPassed` statt die getrennten Ausbildungsstationen.
+3. Die angebliche `experience-layout-selection` ist noch keine echte Auswahl. In den Reports sind `candidateBulletIds: []` und `fillRatioBefore === fillRatioAfter`.
+4. `communication-content` liegt bei ca. 0.854 statt mindestens 0.88; `cms-web-process` bei ca. 0.817 statt mindestens 0.82.
+5. Die geforderten Layout-Erweiterungsmetriken fehlen im Report.
+6. Die BM-Station ist aktuell hart in `scripts/render.mjs` erzeugt und verletzt damit die datengetriebene Single Source of Truth.
+
+Diese Runde behebt genau diese Punkte. Seite-1-Design, Fonts, SVGs, Footer-Typografie und sichtbare Texte bleiben ansonsten unverändert.
 
 ---
 
-## 1. Ausbildung und Berufsmaturität als getrennte Stationen
+## 1. Berufsmaturität in die Datenquelle verschieben
 
-Entferne die kombinierte `.combined-training-title`-Darstellung vollständig.
+Entferne die hart codierte Erzeugung der BM-Station aus `applyVariant()` in `scripts/render.mjs`.
 
-Erzeuge zwei eigenständige, unmittelbar aufeinanderfolgende Stationen:
+Lege die BM-Station in der bestehenden Master-Datenquelle für Experiences ab, analog zu den übrigen Stationen. Aktualisiere bei Bedarf:
 
-```text
-08/2017 – 08/2021 | Mediamatiker EFZ in Ausbildung
-<bereits verifizierte Ausbildungsinstitution und Ort unverändert aus den vorhandenen Daten übernehmen>
-```
+- `data/private/cv.master.json`
+- öffentliche Beispieldaten
+- Schema
+- `data/sources/source-map.json`
+- relevante Variantenkonfigurationen
 
-Direkt darunter:
+Verbindliche Daten:
 
-```text
-08/2017 – 08/2021 | Berufsmaturität Wirtschaft und Dienstleistungen, Typ Dienstleistungen
-Berufsbildungszentrum BBZ-CFP, Biel
-```
-
-Die Berufsmaturität ist eine eigene Ausbildungsstation, keine berufliche Tätigkeit.
-
-Keine ATS-Dublette und kein künstlich zusammengefügter Parent-Term.
-
-### Verbindliche BM-Bullets
-
-Die BM-Station erhält exakt diese drei sichtbaren Bullets:
-
-```text
-Bürokommunikation, Deutsch, Englisch, Französisch, Präsentationstechnik und Projektmanagement: strukturierte Korrespondenz, adressatengerechte Dokumentation und professionelle Präsentationen.
-```
-
-```text
-Wirtschaft und Recht, Rechnungswesen, Marketing sowie Geschichts- und Politikkunde: kaufmännische Abläufe, betriebswirtschaftliche Zusammenhänge, rechtliche Grundlagen und gesellschaftspolitischer Kontext.
-```
-
-```text
-Informatik, Web Technologies, Multimedia-Techniken, Multimedia Design, Multimedia Konzept und Grundlagen der Applikationsentwicklung: sichere Anwendung digitaler Arbeitsmittel und strukturierte Informationsaufbereitung.
-```
-
-Alle drei Bullets:
-
-- `evidenceStatus: verified`
-- Source-IDs aus bestehenden Ausbildungs-, Zeugnis- und LinkedIn-Quellen
-- sichtbar im HTML, PDF und PNG
-- extrahierbar über Poppler Raw, Poppler Default und PDF.js
-
-Die BM-Station besitzt genau diese drei Bullets und keinen Breadth-Summary- oder GEVER-Cross-Domain-Bullet.
-
----
-
-## 2. Einheitliches Titellayout aller Stationen
-
-Jede berufliche oder Ausbildungsstation auf Seite 2 verwendet:
-
-```text
-MM/YYYY – MM/YYYY | Bezeichnung der Position
-Name Institution, Ort
-```
-
-Für laufende Stationen ist `MM/YYYY – heute` zulässig.
-
-Verbindlich:
-
-- Zeitraum und Position in derselben ersten Zeile
-- Trennzeichen exakt ` | `
-- erste Zeile Roboto Slab 700 in bestehender Experience-Farbe und -Grösse
-- zweite Zeile Arial/Liberation Sans 700
-- keine kleinere Sonderdarstellung für Ausbildung oder BM
-- bestehende verifizierte Arbeitgeber-, Institutions- und Ortsdaten übernehmen
-- keine Institution oder Ortsangabe erfinden
-
----
-
-## 3. Neuer Haupttitel Seite 1
-
-Ersetze den sichtbaren Titel durch exakt:
-
-```text
-FÄHIGKEITEN UND SKILLS
-```
-
-Gestaltung:
-
-- Roboto Slab 700
-- Farbe exakt wie die horizontalen Trennlinien (`var(--rule)` beziehungsweise identischer berechneter Farbwert)
-- exakt 2 px grösser als die bisherige Abschnittstitelgrösse von 9.9 pt, bevorzugt `calc(9.9pt + 2px)`
-- Grossschreibung
-- natürliche Laufweite
-- keine Kompression
-- linksbündig mit Profilbild und `KURZPROFIL`
-- kein Padding auf Höhe der Skill-Textspalte
-
-Die horizontale Linie oberhalb des ersten Skillsets muss immer sichtbar sein. Da der Titel nun vor dem ersten Skillset steht, verwende einen robusten Selektor wie:
-
-```css
-.competencies-page-title + .skill-section {
-  border-top: var(--rule-width) solid var(--rule);
+```json
+{
+  "id": "berufsmaturitaet-bbz-cfp",
+  "period": "08/2017 – 08/2021",
+  "role": "Berufsmaturität Wirtschaft und Dienstleistungen, Typ Dienstleistungen",
+  "employer": "Berufsbildungszentrum BBZ-CFP",
+  "location": "Biel",
+  "experienceType": "education-credential",
+  "fixedBullets": true,
+  "excludeFromCrossDomainPolicy": true,
+  "excludeFromBreadthSummary": true
 }
 ```
 
-oder eine gleichwertige Lösung.
+Die Station steht in der Datenreihenfolge unmittelbar nach `mediamatiker-ausbildung-army-bict`.
+
+Sie besitzt exakt die drei bereits definierten BM-Bullets, jeweils:
+
+- `evidenceStatus: verified`
+- reale Source-IDs
+- keine optionalen Kandidaten
+- kein Breadth-Summary
+- kein GEVER-Cross-Domain-Bullet
+
+Keine sichtbaren BM-Texte ändern.
 
 ---
 
-## 4. Neuer Haupttitel Seite 2
+## 2. GEVER-Cross-Domain-Policy korrekt auf berechtigte Stationen begrenzen
 
-Ersetze den sichtbaren Titel durch exakt:
+Die Cross-Domain-Policy gilt nur für berechtigte berufliche beziehungsweise operative Erfahrungsstationen.
+
+Nicht berechtigt sind insbesondere Stationen mit:
 
 ```text
-LEBENSLAUF UND VERANTWORTUNG
+experienceType === "education-credential"
+excludeFromCrossDomainPolicy === true
 ```
 
-Gestaltung identisch zum Seite-1-Titel:
+Passe alle Berechnungen konsistent an:
 
-- Roboto Slab 700
-- Trennliniengrau
-- exakt gleiche Schriftgrösse
-- Grossschreibung
-- natürliche Laufweite
-- sichtbar und ATS-extrahierbar
+- `expectedStationCount`
+- `renderedStationCount`
+- `missingExperienceIds`
+- `allRenderedLast`
+- `allStationsHaveMinimumSubstantiveBullets`
+- `insufficientSubstantiveExperienceIds`
+- `byExperience`
+- Report-Success-Gate
+- Visual Review
+- Tests
+
+Erwartet für `administration-gever`:
+
+- BM-Station wird nicht als fehlend gemeldet.
+- Die fünf berechtigten Stationen besitzen weiterhin exakt einen Cross-Domain-Bullet als letzten Bullet.
+- BM besitzt exakt null Cross-Domain-Bullets.
+- `warnings: []`.
+- `report.success: true`.
+
+Reportstruktur je Station darf ergänzen:
+
+```json
+{
+  "experienceId": "berufsmaturitaet-bbz-cfp",
+  "eligible": false,
+  "exclusionReason": "education-credential"
+}
+```
 
 ---
 
-## 5. Seite 1 um 7 mm nach oben erweitern
+## 3. Veraltetes Combined-Training-Gate vollständig ersetzen
 
-Erweitere die weisse Kompetenzfläche auf Seite 1 um exakt 7 mm nach oben.
+Die kombinierte Ausbildungsdarstellung ist entfernt und darf nicht mehr als Erfolgskriterium verlangt werden.
 
-Bevorzugte Umsetzung:
+Behalte höchstens eine Diagnose:
 
-- Hero-/Blauflächenhöhe von 108 mm auf 101 mm reduzieren
-- Competence-Panel entsprechend um 7 mm vergrössern
-- sämtliche Inhalte der weissen Fläche rücken nach oben
-- der Bereich `SPRACHEN` bleibt durch seine untere Verankerung an derselben absoluten Y-Position
+```json
+{
+  "combinedTrainingCredential": {
+    "removed": true,
+    "visible": false
+  }
+}
+```
+
+Sie darf kein Produktions-Gate mehr sein.
+
+Ersetze in Report, Visual Review und Tests:
+
+```text
+combinedTrainingCredentialPassed
+```
+
+mit echten getrennten Prüfungen, zum Beispiel:
+
+```json
+{
+  "trainingStationsSplitPassed": true,
+  "trainingStationVisible": true,
+  "bmStationVisible": true,
+  "bmDirectlyAfterTraining": true,
+  "bmVerified": true,
+  "bmHasExactlyThreeBullets": true,
+  "bmExcludedFromCrossDomainPolicy": true,
+  "bmExcludedFromBreadthSummary": true
+}
+```
+
+`visual-review-round-17.json` darf keine Differenz bezüglich `combinedTrainingCredentialPassed` mehr enthalten.
+
+---
+
+## 4. Echte `experience-layout-selection` implementieren
+
+Ein blosses Umbenennen von `renderStage` reicht nicht.
+
+Implementiere vor `initial-layout-metrics` einen realen Browser-Auswahlschritt, analog zur Skillset-Auswahl.
+
+### Kandidatenpool
+
+Der Pool umfasst je Station:
+
+1. ausgelassene reguläre, source-backed Bullets
+2. noch nicht sichtbare optionale, source-backed Bullets
+3. vorhandene belegte Langfassungen, falls semantisch nicht redundant
+4. erst danach höchstens einen Breadth-Summary-Bullet
+
+Ausgeschlossen:
+
+- bereits sichtbare IDs
+- semantische Dubletten
+- `inferred_review_required`
+- unbelegte Aussagen
+- BM-Station
+- generische Fülltexte ohne neue Information
+
+Die Kandidaten müssen schon im Preview-DOM als `hidden` vorliegen oder datengetrieben sicher injiziert werden.
+
+### Auswahlreihenfolge
+
+Sortiere global nach:
+
+```text
+Stellenrelevanz
+→ Evidence-Stärke
+→ Arbeitgebernutzen
+→ zusätzlicher Informationswert
+→ Fill-Priority
+→ stabile ID-Reihenfolge
+```
+
+Für jeden Kandidaten:
+
+1. einzeln einblenden
+2. Fonts/Layout abwarten
+3. Seitenzahl, Overflows, Collisions, Text-Clipping und Footerabstand messen
+4. bei sicherem Layout behalten, sonst wieder ausblenden
+5. nach jedem akzeptierten Kandidaten Füllgrad neu messen
+6. bei Erreichen des Zielbereichs stoppen
+
+Detailbullets müssen vor Breadth-Summary-Bullets geprüft werden.
+
+### Layoutbedingungen
+
+Ein Kandidat ist nur sicher bei:
+
+- exakt zwei Seiten
+- `overflows: []`
+- `collisions: []`
+- kein abgeschnittener Text
+- mindestens 5 mm Abstand zur Footer-Trennlinie
+- kein Kontakt mit Bottom-Grid
+- Source-IDs vorhanden
+- Evidence-Status `verified` oder `defensible_inference`
+
+### Zielwerte
+
+```text
+communication-content: 0.88–0.96
+alle übrigen Varianten: 0.82–0.96
+```
+
+Run-40-Ausgangswerte:
+
+```text
+general: 0.928
+communication-content: 0.854
+administration-gever: 0.873
+cms-web-process: 0.817
+```
+
+General und Administration dürfen nicht unnötig überfüllt werden. Communication benötigt voraussichtlich mindestens einen echten Zusatzbullet, CMS/Web mindestens einen kleinen Zusatzbullet.
+
+### Report
+
+```json
+{
+  "experienceQuality": {
+    "pageFill": {
+      "fillRatioBefore": 0,
+      "fillRatioAfter": 0,
+      "candidateBulletIds": [],
+      "acceptedBulletIds": [],
+      "rejectedBulletIds": [],
+      "rejectionReasonsById": {},
+      "breadthSummaryBulletIds": [],
+      "withinTargetRange": true,
+      "maximalSafeContentExhausted": false,
+      "largestSafeContentSetSelected": true,
+      "actualFooterGapPx": 0
+    }
+  }
+}
+```
 
 Verbindlich:
 
-- Profilbild, Name, Kontakt, Buttons und Kurzprofil bleiben vollständig sichtbar
-- keine Kollision zwischen Kurzprofil und weisser Fläche
-- Sprachbereich-Verschiebung maximal ±1 px gegenüber dem letzten grünen Referenzrun
-- genau vier Skillsets
-- 6–8 Bullets je Skillset
-- Sprachabstandsregel weiterhin erfüllt
-- keine Schriftgrösse reduzieren
+- Für Communication und CMS dürfen `candidateBulletIds` nicht leer sein.
+- `fillRatioAfter` muss bei mindestens einer dieser Varianten grösser als `fillRatioBefore` sein.
+- `largestSafeContentSetSelected` darf nicht durch `breadthBullets.length > 0` künstlich wahr werden.
+- Entferne jede False-Positive-Logik wie:
 
-Report:
+```js
+fillRatio >= minimumTargetRatio || breadthBullets.length > 0
+```
+
+Das Produktions-Gate lautet:
+
+```text
+withinTargetRange === true
+ODER
+(maximalSafeContentExhausted === true UND alle realen Kandidaten wurden mit Gründen geprüft)
+```
+
+Ziel ist ausdrücklich, die vorhandenen belegten Inhalte so auszuschöpfen, dass Communication und CMS den Zielwert erreichen.
+
+---
+
+## 5. Layout-Erweiterungen real messen und berichten
+
+Die sichtbaren Anpassungen sind vorhanden, aber die Reportfelder fehlen.
+
+Ergänze echte Browsermessungen, keine bloss hart codierten `true`-Werte.
+
+### Seite 1
+
+Referenz-Hero-Höhe vorher: 108 mm.
+Aktuell erwartet: 101 mm.
 
 ```json
 {
@@ -194,223 +338,128 @@ Report:
 }
 ```
 
----
+`languageAbsoluteShiftPx` wird gegenüber der letzten grünen Referenzposition gemessen; bei 794×1123 lag die obere Sprachregel bei ungefähr 1069 px. Toleranz ±1 px.
 
-## 6. Seite 2 und Footer um 15–17 mm nach unten erweitern
+### Seite 2
 
-Erweitere die weisse Fläche auf Seite 2 nach unten um die grösste sichere Distanz zwischen 15 und 17 mm.
-
-Verschiebe gleichzeitig den gesamten Bereich ab der horizontalen Trennlinie oberhalb von `SOFTWARE & TOOLS` nach unten, inklusive:
-
-- Trennlinie
-- SOFTWARE & TOOLS
-- REFERENZEN
-- EINTRITT
-- PENSUM
-- Footer-Icons
-
-Bevorzugte Umsetzung:
-
-- `--page-two-footer-height` beziehungsweise White-Panel-Bottom-Offset um 15–17 mm reduzieren
-- `.bottom-grid` unverändert am unteren Rand des White Panels verankern
-
-Verbindlich:
-
-- verbleibender blauer unterer Balken mindestens 8 mm sichtbar
-- Seitenzähler `2/2` vollständig sichtbar
-- Footer vollständig innerhalb des Rahmens
-- Footer-Typografie, Icons, Spalten und Abstände unverändert
-- keine dritte Seite
-- keine Kollisionen oder Overflows
-
-Report:
+Referenz-`--page-two-footer-height`: 28 mm.
+Aktuell erwartet: 11 mm.
 
 ```json
 {
   "layout": {
     "pageTwoWhiteExtensionMm": 17,
-    "pageTwoBlueStripHeightMm": 0,
-    "pageTwoFooterShiftPx": 0,
+    "pageTwoBlueStripHeightMm": 11,
+    "pageTwoFooterShiftPx": 64,
+    "pageTwoFooterShiftMm": 17,
     "pageTwoFooterShiftPassed": true
   }
 }
 ```
 
-Falls 17 mm nicht sicher sind, verwende 16 mm oder 15 mm und dokumentiere den real gewählten Wert.
+Messe tatsächliche Werte aus den DOM-Rechtecken und berechneten Styles. Rundungstoleranz maximal 0.5 mm beziehungsweise 2 px.
+
+Zusätzlich prüfen:
+
+- blauer Balken mindestens 8 mm
+- Seitenzähler sichtbar
+- Footer vollständig innerhalb des Rahmens
+- Footer-Typografie und Icons unverändert
 
 ---
 
-## 7. Echte adaptive Experience-Füllung
+## 6. Abschnittstitel-Metriken vervollständigen
 
-Implementiere einen echten Render-Schritt:
+Für beide Titel messen:
 
-```text
-experience-layout-selection
-```
+- exakter Text
+- sichtbar
+- ATS-extrahierbar
+- `Roboto Slab`
+- Gewicht 700
+- berechnete Farbe identisch mit `var(--rule)`
+- Schriftgrösse exakt 2 px über 9.9 pt
 
-Er muss vor `initial-layout-metrics` laufen.
+Für Seite 1 zusätzlich:
 
-### Kandidatenpool
+- linksbündig mit der linken Innenkante von Kurzprofil/Profilbild, Toleranz 1 px
+- obere Trennlinie vor dem ersten Skillset sichtbar
 
-Der Pool umfasst pro Station:
-
-1. ausgelassene reguläre source-backed Bullets
-2. vorhandene optionale source-backed Bullets
-3. belegbare längere Formulierungsvarianten
-4. erst danach maximal einen Breadth-Summary-Bullet
-
-Nicht verwenden:
-
-- bereits sichtbare Bullets
-- semantische Dubletten
-- identische IDs
-- `inferred_review_required`
-- unbelegte Aussagen
-
-### Reihenfolge
-
-1. verpflichtende Kernbullets rendern
-2. BM-Pflichtstation mit drei Bullets rendern
-3. aktuelle reale Füllung messen
-4. Detailkandidaten global nach Relevanz sortieren
-5. jeden Kandidaten einzeln einblenden
-6. Layout neu messen
-7. sicheren Kandidaten behalten oder wieder entfernen
-8. Breadth-Summary erst nach Ausschöpfung relevanter Detailkandidaten prüfen
-
-### Akzeptanz eines Kandidaten
-
-Nur behalten, wenn:
-
-- exakt zwei Seiten
-- keine Overflows
-- keine Collisions
-- keine abgeschnittenen Texte
-- kein Footer-Kontakt
-- mindestens 5 mm Abstand zur Footer-Trennlinie
-- keine semantische Dublette
-- Quelle und Evidence-Status vorhanden
-
-### Zielwerte
-
-- `communication-content`: Füllgrad 0.88–0.96
-- übrige Varianten: Füllgrad 0.82–0.96
-
-Entferne jede False-Positive-Logik wie:
-
-```js
-fillRatio >= minimumTargetRatio || breadthBullets.length > 0
-```
-
-Ein Breadth-Summary-Bullet allein erfüllt das Füllziel nicht.
-
-Wenn trotz aller sicheren belegten Kandidaten das Ziel nicht erreicht wird:
+Report:
 
 ```json
 {
-  "maximalSafeContentExhausted": true,
-  "withinTargetRange": false
+  "skillsetsQuality": {
+    "sectionTitle": {
+      "text": "FÄHIGKEITEN UND SKILLS",
+      "colorMatchesRule": true,
+      "fontSizeIncreasePx": 2,
+      "leftAlignedWithSummary": true,
+      "topRuleBeforeFirstSkillsetVisible": true
+    }
+  }
 }
 ```
 
-mit vollständiger Kandidatenliste und Ablehnungsgründen. Das darf kein künstliches `true` erzeugen.
+und analog für `LEBENSLAUF UND VERANTWORTUNG`.
 
 ---
 
-## 8. ATS-Reihenfolge
+## 7. Einheitliches Perioden-/Titellayout regressionssicher machen
 
-Die sichtbare Reihenfolge lautet:
+Jede Station verwendet dasselbe DOM-Schema:
 
 ```text
-Name
-Kontakt
-Kurzprofil
-Fähigkeiten und Skills
-vier Skillsets
-Sprachen
-Lebenslauf und Verantwortung
-Berufserfahrung
-Mediamatiker EFZ in Ausbildung
-Berufsmaturität Wirtschaft und Dienstleistungen, Typ Dienstleistungen
-Software & Tools
-Referenzen
-Eintritt
-Pensum
+Zeitraum | Position
+Institution, Ort
 ```
 
-Beide Haupttitel und beide Ausbildungsstationen müssen in Poppler Raw, Poppler Default und PDF.js sichtbar sein.
+Laufende Stationen dürfen `MM/YYYY – heute` verwenden.
 
-Keine versteckten Überschriften oder ATS-Aliase.
+Der wiederkehrende Schachfestival-Einsatz bleibt wahrheitsgetreu, wird aber numerisch vereinheitlicht:
 
----
+```text
+07/2019 / 07/2020 | Livestream-Operator & Assistent Eventorganisation
+```
 
-## 9. Eingefrorene Bereiche
+Nicht fälschlich als durchgehendes Arbeitsverhältnis mit Gedankenstrich darstellen.
 
-Keine Änderungen an:
+Prüfe:
 
-- Profilbildgrösse und -ausschnitt
-- Hintergrundbild
-- Farben ausser der expliziten grauen Haupttitel
-- Arial/Liberation Sans
-- Roboto Slab
-- bestehenden Schriftgrössen ausser exakt +2 px für die beiden Haupttitel
-- Buttons
-- Kurzprofiltext
-- Sprachinhalte
-- Skill-Icon-Dateien und Hashes
-- Footer-Typografie und Footer-Icons
-- Referenzen
-- Eintritt
-- Pensum
-- Toolauswahl und Toolschrift
-- Poppler-/PDF.js-Architektur
-- Workflow-Exit-Code-Architektur
-
-Nicht erlaubt:
-
-- kleinere Schrift
-- `scaleX`
-- `font-stretch`
-- negatives `letter-spacing`
-- versteckte Keywords
-- dritte Seite
-- erfundene Tatsachen
+- alle Titel verwenden Roboto Slab 700
+- alle Institutionszeilen Arial/Liberation Sans 700
+- Trennzeichen ` | ` genau einmal
+- keine alte `.training-period`
+- keine `.combined-training-title`
 
 ---
 
-## 10. Regressionstests
+## 8. Tests und Gates
 
-Ergänze Tests für:
+Ergänze echte Regressionstests für:
 
-1. Mediamatiker-Ausbildung und BM sind getrennte Stationen.
-2. BM steht direkt unter der Ausbildung.
-3. Beide besitzen `08/2017 – 08/2021`.
-4. BM-Titel lautet exakt `Berufsmaturität Wirtschaft und Dienstleistungen, Typ Dienstleistungen`.
-5. BM-Institution lautet exakt `Berufsbildungszentrum BBZ-CFP, Biel`.
-6. BM besitzt exakt drei Fachbullets.
-7. BM besitzt keinen Breadth-Summary- oder Cross-Domain-Bullet.
-8. Alle Stationen folgen `Zeitraum | Position` und `Institution, Ort`.
-9. Seite 1 ist 7 mm nach oben erweitert.
-10. Sprachbereich bleibt ±1 px an seiner Position.
-11. Seite 2 ist 15–17 mm nach unten erweitert.
-12. Footer wurde entsprechend nach unten verschoben.
-13. Blauer Balken bleibt mindestens 8 mm sichtbar.
-14. `FÄHIGKEITEN UND SKILLS` erscheint exakt einmal.
-15. `LEBENSLAUF UND VERANTWORTUNG` erscheint exakt einmal.
-16. Beide Titel verwenden Roboto Slab 700, Rule-Farbe und +2 px.
-17. Seite-1-Titel ist mit Profilbild/Kurzprofil linksbündig.
-18. obere Linie vor dem ersten Skillset ist sichtbar.
-19. adaptive Experience-Kandidaten werden tatsächlich einzeln getestet.
-20. Detailbullets werden vor Breadth-Summary priorisiert.
-21. keine False-Positive-Fülllogik.
-22. keine Schriftverkleinerung oder Kompression.
-23. exakt zwei Seiten, keine Overflows, keine Collisions, Warnungen leer.
+1. BM-Daten liegen in der Master-Datenquelle, nicht hart in `render.mjs`.
+2. BM ist direkt nach Mediamatiker-Ausbildung sortiert.
+3. BM besitzt exakt drei verifizierte Bullets.
+4. BM ist aus Cross-Domain- und Breadth-Summary-Policies ausgeschlossen.
+5. Administration erwartet nur berechtigte Cross-Domain-Stationen.
+6. Administration hat keine Warnung und `success: true`.
+7. Visual Review verwendet keine `combinedTrainingCredentialPassed`-Prüfung.
+8. `trainingStationsSplitPassed` und BM-Gates sind echt abgeleitet.
+9. `experience-layout-selection` besitzt Kandidatenpool, Einblende-/Rollback-Logik und reale Messung.
+10. Communication und CMS haben nichtleere Kandidatenlisten.
+11. `fillRatioAfter >= fillRatioBefore`; bei akzeptierten Kandidaten strikt grösser.
+12. Keine False-Positive-Fülllogik.
+13. Seite-1- und Seite-2-Erweiterungsmetriken sind real und bestehen.
+14. Abschnittstitel-Metriken bestehen.
+15. Exakt zwei Seiten, keine Overflows, Collisions oder Warnungen.
+16. Keine Schriftverkleinerung, keine Kompression, kein `scaleX`, kein negatives Tracking.
 
 ---
 
-## 11. Produktionsworkflow
+## 9. Vollständiger Workflow
 
-Führe vollständig aus:
+Führe lokal soweit möglich aus:
 
 ```bash
 npm install --no-audit --no-fund
@@ -421,48 +470,43 @@ npm run render:all
 npm run test:render
 ```
 
-Warte danach den Live-GitHub-Workflow vollständig ab, sofern Zugriff vorhanden ist. Ohne Remote-Zugriff lokale Ergebnisse ehrlich berichten.
+Ein lokaler Registry-403 darf dokumentiert werden. Der Commit muss trotzdem zum bestehenden PR-#7-Branch gepusht beziehungsweise über das bereitgestellte Tool aktualisiert werden, damit GitHub Actions den vollständigen Produktionslauf ausführt.
+
+Warte den Live-GitHub-Workflow vollständig ab, sofern die Umgebung dies ermöglicht.
 
 Erfolg erst bei:
 
-- `renderAllExitCode: 0`
-- `renderTestsExitCode: 0`
-- finaler Guard skipped
-- alle vier Reports `success: true`
-- visual-review `overallSuccess: true`
-- `remainingDifferences: []`
-- exakt zwei Seiten
-- keine Overflows, Collisions oder Warnungen
-- keine Schriftverkleinerung
-- keine unbelegten Inhalte
+```text
+renderAllExitCode: 0
+renderTestsExitCode: 0
+finaler Guard: skipped
+alle vier Reports success: true
+visual-review overallSuccess: true
+remainingDifferences: []
+```
 
 ---
 
-## 12. Abschlussantwort
+## 10. Abschlussantwort
 
-Berichte:
+Berichte danach:
 
 1. Start-HEAD und Ergebnis der Snapshot-Prüfung
-2. lokaler Commit-SHA
-3. tatsächlicher Live-Head-SHA, sofern abrufbar
-4. Workflow-Status, sofern abrufbar
-5. real gewählte Seite-1-Erweiterung in mm
-6. real gewählte Seite-2-Erweiterung in mm
-7. verbleibende blaue Balkenhöhe in mm
-8. Footer-Verschiebung in px/mm
-9. Sprachbereich-Verschiebung in px
-10. beide finalen Haupttitel mit Font, Farbe und Grösse
-11. Nachweis der oberen Skillset-Trennlinie
-12. alle Stationstitel im Standardformat
-13. BM-Station mit Zeitraum, Institution und drei Bullets
-14. Source-IDs und Evidence-Status der BM-Bullets
-15. Füllgrad vor und nach Auswahl pro Variante
-16. akzeptierte und abgelehnte Experience-Kandidaten samt Gründen
-17. PageCount, Overflows, Collisions und Warnungen pro Variante
-18. ATS-/Poppler-/PDF.js-Ergebnisse
-19. report.success pro Variante
-20. visual-review overallSuccess und remainingDifferences
-21. Pfad zur achtseitigen Kontaktübersicht
-22. Bestätigung: kein PR #7, nichts gemergt
+2. lokalen Commit-SHA
+3. tatsächlichen Live-Head-SHA von PR #7, sofern abrufbar
+4. Workflow-Run und Status aller Schritte
+5. renderAllExitCode, renderTestsExitCode, finalen Guard
+6. Cross-Domain-Zahlen für Administration inklusive ausgeschlossener BM-Station
+7. Visual-Review-Gates für getrennte Ausbildungsstationen
+8. Datenpfad der BM-Station und Source-Map-Einträge
+9. Fill-Ratio vor/nach pro Variante
+10. Kandidaten, akzeptierte Bullets und Ablehnungsgründe pro Variante
+11. gemessene 7-mm-/17-mm-Erweiterungen
+12. gemessene blaue Balkenhöhe und Footer-Verschiebung
+13. Abschnittstitel-Metriken
+14. PageCount, Overflows, Collisions, Warnungen
+15. ATS-/Poppler-/PDF.js-Ergebnisse
+16. Pfad zur achtseitigen Kontaktübersicht
+17. Bestätigung: kein PR #8, nichts gemergt
 
-Fahre nach erfolgreicher Snapshot-Prüfung ohne weitere Rückfrage fort.
+Beginne jetzt mit dem aktuellen Stand von PR #7 und fahre ohne weitere Rückfrage fort.
