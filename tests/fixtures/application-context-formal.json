@@ -1,29 +1,29 @@
 {
   "jobAd": {
-    "rawText": "Pensum 80–100 %. Eintritt per sofort. Kontakt: Frau Müller, Recruiting.",
-    "sourceId": "job-ad-current",
+    "rawText": "Pensum 80 %. Stellenantritt per 1. September 2026. Ansprechperson: Frau Anna Meier, HR-Leitung.",
+    "sourceId": "job-ad-fixture-formal-r49",
     "workload": {
-      "kind": "range",
+      "kind": "single",
       "minPercent": 80,
-      "maxPercent": 100,
-      "sourceText": "Pensum 80–100 %",
+      "maxPercent": 80,
+      "sourceText": "Pensum 80 %",
       "confidence": 0.99
     },
     "start": {
-      "kind": "immediately",
-      "isoDate": null,
-      "sourceText": "Eintritt per sofort",
+      "kind": "date",
+      "isoDate": "2026-09-01",
+      "sourceText": "Stellenantritt per 1. September 2026",
       "confidence": 0.99
     },
     "contact": {
-      "fullName": "Maria Müller",
-      "firstName": "Maria",
-      "lastName": "Müller",
+      "fullName": "Anna Meier",
+      "firstName": "Anna",
+      "lastName": "Meier",
       "explicitSalutation": "Frau",
-      "role": "Recruiting",
+      "role": "HR-Leitung",
       "addressMode": "formal",
-      "sourceText": "Kontakt: Frau Müller, Recruiting.",
-      "confidence": 0.95,
+      "sourceText": "Ansprechperson: Frau Anna Meier, HR-Leitung",
+      "confidence": 0.99,
       "isApplicationContact": true
     }
   }

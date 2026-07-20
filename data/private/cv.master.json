@@ -6,7 +6,8 @@
     "portfolio": "https://dolinsky.ch",
     "linkedin": "https://linkedin.com/in/adam-dolinsky",
     "profileImage": "assets/profile_img.png",
-    "backgroundImage": "assets/bg_img.jpeg"
+    "backgroundImage": "assets/bg_img.jpeg",
+    "businessPhone": "+41 41 413 22 22"
   },
   "positioning": {
     "defaultHeadline": "Digital Marketing · Web · Content · KI-gestützte Prozesse",
@@ -1366,7 +1367,9 @@
           ]
         }
       ],
-      "optionalBullets": []
+      "optionalBullets": [],
+      "requiredVisibleBulletCount": 3,
+      "excludeFromAdaptivePruning": true
     },
     {
       "id": "schachfestival-livestream-event",

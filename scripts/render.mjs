@@ -292,16 +292,19 @@ function applyVariant() {
   ]);
 
   const experiences = data.experiences.map((experience) => {
-    const included = experience.bullets
-      .filter((bullet) => selected.has(bullet.id) && !hidden.has(bullet.id))
-      .sort((a, b) => (priority.get(a.id) ?? 99) - (priority.get(b.id) ?? 99))
-      .slice(0, variant.maxBulletsPerExperience);
-    const omittedMandatory = experience.bullets.filter((bullet) => !included.some((item) => item.id === bullet.id));
+    const isProtectedEducation = experience.stationType === 'education' || experience.excludeFromAdaptivePruning === true || Number(experience.requiredVisibleBulletCount || 0) > 0;
+    const included = isProtectedEducation
+      ? experience.bullets.map((bullet) => ({ ...bullet }))
+      : experience.bullets
+        .filter((bullet) => selected.has(bullet.id) && !hidden.has(bullet.id))
+        .sort((a, b) => (priority.get(a.id) ?? 99) - (priority.get(b.id) ?? 99))
+        .slice(0, variant.maxBulletsPerExperience);
+    const omittedMandatory = isProtectedEducation ? [] : experience.bullets.filter((bullet) => !included.some((item) => item.id === bullet.id));
     const substantiveOptionalCandidates = (experience.optionalBullets || [])
       .filter((bullet) => (bullet.variantRelevance || []).includes(variantId))
       .sort((a, b) => (a.fillPriority ?? 99) - (b.fillPriority ?? 99))
       .map((bullet) => ({ ...bullet, experienceId: experience.id, candidateType: 'optional-bullet' }));
-    const optionalCandidates = targetRoleFamily === 'non-mediamatik-core' ? [] : substantiveOptionalCandidates;
+    const optionalCandidates = targetRoleFamily === 'non-mediamatik-core' || isProtectedEducation ? [] : substantiveOptionalCandidates;
     const minimumFillers = [...experience.bullets, ...substantiveOptionalCandidates]
       .filter((bullet) => !included.some((item) => item.id === bullet.id) && !hidden.has(bullet.id) && bullet.status !== 'inferred_review_required' && bullet.evidenceLevel !== 'inferred_review_required')
       .sort((a, b) => (priority.get(a.id) ?? a.fillPriority ?? 99) - (priority.get(b.id) ?? b.fillPriority ?? 99));
@@ -314,15 +317,16 @@ function applyVariant() {
       seenSubstantiveTexts.add(semanticKey);
       included.push({ ...filler, text, minimumFallback: true });
     }
-    const fillEligible = experience.stationType !== 'education' && experience.excludeFromBreadthSummary !== true;
+    const fillEligible = experience.stationType !== 'education' && experience.excludeFromBreadthSummary !== true && experience.excludeFromAdaptivePruning !== true;
     if (fillEligible && targetRoleFamily === 'non-mediamatik-core' && !included.some((item) => item.crossDomain)) included.push(createCrossDomainBullet(experience));
     const remainingOptionalCandidates = optionalCandidates.filter((bullet) => !included.some((item) => item.id === bullet.id));
     const omitted = [...omittedMandatory, ...remainingOptionalCandidates].filter((bullet) => !included.some((item) => item.id === bullet.id));
     const breadthSummary = fillEligible ? createBreadthSummaryBullet(experience, omitted) : null;
-    if (breadthSummary && !included.some((item) => item.breadthSummary || item.crossDomain)) included.push(breadthSummary);
+    
     return {
       ...experience,
       bullets: included,
+      detailCandidates: [...omittedMandatory, ...remainingOptionalCandidates].filter((bullet, index, arr) => fillEligible && !included.some((item) => item.id === bullet.id) && !hidden.has(bullet.id) && arr.findIndex((item) => item.id === bullet.id) === index && (bullet.sourceIds || bullet.sources || []).length > 0 && ['verified','defensible_inference'].includes(bullet.evidenceStatus || evidenceStatus(bullet)) && bullet.status !== 'inferred_review_required' && bullet.evidenceLevel !== 'inferred_review_required').map((bullet) => ({ ...bullet, experienceId: experience.id, candidateType: bullet.candidateType || 'regular-bullet' })),
       optionalCandidates: remainingOptionalCandidates,
       supplementaryText: experience.showSupplementaryWhenOmitted && omitted.length > 0 ? (experience.supplementaryText || experienceIndicatorText) : '',
       omittedBulletIds: omitted.map((bullet) => bullet.id),
@@ -369,7 +373,7 @@ function applyVariant() {
       candidateItems: supplementaryItems,
       renderedItems: [],
       rejectedItems: [],
-      optionalCandidates: experiences.flatMap((experience) => experience.optionalCandidates.map((bullet) => ({ ...bullet, text: bullet.text }))),
+      optionalCandidates: experiences.flatMap((experience) => (experience.detailCandidates || []).map((bullet) => ({ ...bullet, text: bullet.text }))),
       optionalVisibleBulletIds: [],
       omittedToolIds: omittedTools.map((tool) => tool.id),
       toolsIndicator,
@@ -493,7 +497,7 @@ function html() {
   const skillHtml = cv.skillSections.map((section) => `<section class="module skill-section" id="skill-${section.id}" data-skillset-id="${section.id}" data-skill-icon-id="${section.iconId}" data-check data-collision-group="skills"><div class="skill-icon-wrap">${skillIcon(section.iconId)}</div><div class="skill-copy"><h2 data-ats-required>${esc(section.title)}</h2><ul>${section.items.map((item) => `<li id="${item.id}"${item.skillOptional ? ' class="optional-skill-bullet" hidden' : ''} data-check data-ats-required data-skill-optional="${item.skillOptional ? 'true' : 'false'}" data-skillset-id="${section.id}" data-source-ids="${esc((item.sourceIds || item.sources || []).join(','))}" data-evidence-status="${esc(item.evidenceStatus || evidenceStatus(item))}" data-job-ad-match-score="${item.jobAdMatchScore ?? 0}">${esc(item.text)}</li>`).join('')}</ul></div></section>`).join('');
   const expHtml = cv.experiences.map((experience) => {
     const bullets = experience.bullets;
-    const optionalHtml = experience.optionalCandidates.map((bullet) => `<li id="${bullet.id}" class="optional-fill" data-check data-fill-state="candidate" data-fill-kind="experience-detail-bullet" data-experience-id="${experience.id}" data-fill-priority="${bullet.fillPriority ?? 99}" data-source-ids="${esc((bullet.sourceIds || bullet.sources || []).join(','))}" data-evidence-status="${esc(bullet.evidenceStatus || evidenceStatus(bullet))}" data-long-text="${esc(bullet.text)}" data-short-text="${esc(bullet.shortText || bullet.text)}" data-fill-id="${bullet.id}" hidden>${esc(bullet.text)}</li>`).join('');
+    const optionalHtml = (experience.detailCandidates || experience.optionalCandidates).map((bullet) => `<li id="${bullet.id}" class="optional-fill" data-check data-fill-state="candidate" data-fill-kind="experience-detail-bullet" data-experience-id="${experience.id}" data-fill-priority="${bullet.fillPriority ?? 99}" data-source-ids="${esc((bullet.sourceIds || bullet.sources || []).join(','))}" data-evidence-status="${esc(bullet.evidenceStatus || evidenceStatus(bullet))}" data-long-text="${esc(bullet.text)}" data-short-text="${esc(bullet.shortText || bullet.text)}" data-fill-id="${bullet.id}" hidden>${esc(bullet.text)}</li>`).join('');
     const indicatorAllowed = cv.supplementary.candidateItems.find((item) => item.type === 'experience' && item.experienceId === experience.id);
     const indicatorHtml = indicatorAllowed ? `<p class="supplementary experience-more" data-check data-fill-state="candidate" data-fill-kind="experience-indicator" data-experience-id="${experience.id}" data-fill-priority="${indicatorAllowed.priority ?? 99}" data-long-text="${esc(indicatorAllowed.text)}" data-short-text="${esc(indicatorAllowed.text)}" data-fill-id="${indicatorAllowed.id}" hidden>${esc(indicatorAllowed.text)}</p>` : '';
     const titleHtml = `<div class="meta experience-title" data-ats-required>${esc(experience.period)} <span>|</span> <strong data-ats-text="${esc(experience.role)}">${esc(experience.role)}</strong></div>`;
@@ -501,7 +505,7 @@ function html() {
     return `<article class="module experience" id="experience-${experience.id}" data-check data-collision-group="experiences" data-station-type="${esc(experience.stationType || 'experience')}" data-exclude-cross-domain="${experience.excludeFromCrossDomain === true ? 'true' : 'false'}" data-exclude-breadth-summary="${experience.excludeFromBreadthSummary === true ? 'true' : 'false'}" data-exclude-adaptive-pruning="${experience.excludeFromAdaptivePruning === true ? 'true' : 'false'}"><div class="experience-heading">${titleHtml}${periodHtml}<div class="employer experience-location-line" data-ats-required>${experienceLine(experience)}</div>${experience.notes.map((note) => `<div class="note experience-location-line">${esc(note)}</div>`).join('')}</div><ul>${bullets.map((bullet) => `<li id="${bullet.id}"${bullet.crossDomain ? ' class="experience-cross-domain-bullet experience-breadth-summary-bullet" data-cross-domain-bullet="mediamatik-marketing" data-structural-repeat="cross-domain-experience" data-experience-summary="omitted-capabilities"' : bullet.breadthSummary ? ' class="experience-breadth-summary-bullet" data-experience-summary="omitted-capabilities"' : ''} data-check data-ats-required data-summary-source-ids="${esc((bullet.sourceIds || bullet.sources || []).join(','))}" data-evidence-status="${esc(bullet.evidenceStatus || evidenceStatus(bullet))}" data-omitted-capability-clusters="${esc((bullet.omittedCapabilityClusters || []).join(','))}">${esc(bullet.text)}</li>`).join('')}${optionalHtml}</ul>${indicatorHtml}</article>`;
   }).join('');
   const toolIndicator = cv.supplementary.toolsIndicator ? `<p class="supplementary tools-more" data-check data-ats-required data-ats-text="${esc(cv.supplementary.toolsIndicator.text)}">${esc(cv.supplementary.toolsIndicator.text)}</p>` : '';
-  return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Lebenslauf ${esc(cv.person.name)} ${esc(variantId)}</title><link rel="stylesheet" href="../src/styles/tokens.css"><link rel="stylesheet" href="../src/styles/cv.css"></head><body><main class="cv" data-variant="${esc(variantId)}"><section class="cv-page" id="page-1"><div class="frame"><section class="hero-panel" id="hero-panel" data-check><img class="profile" src="../${esc(cv.person.profileImage)}" alt="Porträt von Adam Dolinsky"><header class="hero"><h1 data-ats-required>${esc(cv.person.name)}</h1><p class="headline" data-ats-required>${esc(cv.headline)}</p><p class="credential">${esc(cv.positioning.credential)}</p><p class="contact"><span>${esc(cv.person.location)}</span><br><a href="mailto:${esc(cv.person.email)}" data-ats-required>${esc(cv.person.email)}</a></p><div class="link-buttons"><a href="${esc(cv.person.portfolio)}">dolinsky.ch</a><a href="${esc(cv.person.linkedin)}">LinkedIn</a></div></header><section class="module summary" id="summary" data-check data-summary-target-lines="${cv.summaryMeta.targetLines}"><h2>KURZPROFIL</h2><p id="summary-text">${esc(cv.summaryText)}</p></section></section><section class="competence-panel" id="competence-panel" data-check><h2 class="page-section-title competencies-page-title" data-ats-required data-ats-section-title="competencies">FÄHIGKEITEN UND SKILLS</h2>${skillHtml}<section class="module languages-row" id="languages" data-check data-collision-group="skills"><div class="languages-label">SPRACHEN</div>${cv.languages.map((language) => `<div class="language" data-ats-required data-ats-text="${esc(`${language.name} ${language.level}`)}"><span>${esc(language.name)}</span><strong>${esc(language.level)}</strong></div>`).join('')}</section></section></div><div class="counter">1/2</div></section><section class="cv-page" id="page-2"><div class="frame page-two"><section class="white-panel" id="page-two-panel" data-check><h2 class="page-section-title experience-page-title" data-ats-required data-ats-section-title="experience-responsibility">LEBENSLAUF UND VERANTWORTUNG</h2><section class="experience-list" id="experience-list" data-check>${expHtml}</section><footer class="bottom-grid" id="bottom-grid" data-check data-collision-group="experiences"><section class="module tools" id="tools" data-check data-collision-group="bottom"><h2 data-footer-title="tools">${footerIcon('tools')}<span>SOFTWARE & TOOLS</span></h2><div class="tool-cols"><div>${toolLeft.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div><div>${toolRight.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div></div>${toolIndicator}</section><section class="module refs" id="references" data-check data-collision-group="bottom"><h2 data-footer-title="references">${footerIcon('references')}<span>REFERENZEN</span></h2>${cv.references.map((reference) => `<p><strong data-ats-required>${esc(reference.name)}</strong><br>${esc(reference.role)}<br>${esc(reference.employer)}<br><span data-ats-required>${esc(reference.phone)}</span></p>`).join('')}</section><section class="module avail" id="availability" data-check data-collision-group="bottom"><div class="availability-block entry-block"><h2 data-footer-title="entry">${footerIcon('entry')}<span>EINTRITT</span></h2><p data-ats-required>${esc(cv.availability.text)}</p></div><div class="availability-block workload-block"><h2 data-footer-title="workload">${footerIcon('workload')}<span>PENSUM</span></h2><p data-ats-required>${esc(cv.workload.text)}</p></div></section></footer></section></div><div class="counter">2/2</div></section></main></body></html>`;
+  return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Lebenslauf ${esc(cv.person.name)} ${esc(variantId)}</title><link rel="stylesheet" href="../src/styles/tokens.css"><link rel="stylesheet" href="../src/styles/cv.css"></head><body><main class="cv" data-variant="${esc(variantId)}"><section class="cv-page" id="page-1"><div class="frame"><section class="hero-panel" id="hero-panel" data-check><img class="profile" src="../${esc(cv.person.profileImage)}" alt="Porträt von Adam Dolinsky"><header class="hero"><h1 data-ats-required>${esc(cv.person.name)}</h1><p class="headline" data-ats-required>${esc(cv.headline)}</p><p class="credential">${esc(cv.positioning.credential)}</p><p class="contact"><span>${esc(cv.person.location)}</span></p><div class="hero-contact-actions-grid"><a class="hero-email" href="mailto:${esc(cv.person.email)}" data-ats-required>${esc(cv.person.email)}</a><a class="hero-phone" href="tel:+41414132222" data-ats-required>${esc(cv.person.businessPhone || '')}</a><div class="link-buttons"><a class="hero-button hero-portfolio" href="${esc(cv.person.portfolio)}">dolinsky.ch</a><a class="hero-button hero-linkedin" href="${esc(cv.person.linkedin)}">LinkedIn</a></div></div></header><section class="module summary" id="summary" data-check data-summary-target-lines="${cv.summaryMeta.targetLines}"><h2>KURZPROFIL</h2><p id="summary-text">${esc(cv.summaryText)}</p></section></section><section class="competence-panel" id="competence-panel" data-check><h2 class="page-section-title competencies-page-title" data-ats-required data-ats-section-title="competencies">FÄHIGKEITEN UND SKILLS</h2>${skillHtml}<section class="module languages-row" id="languages" data-check data-collision-group="skills"><div class="languages-label">SPRACHEN</div>${cv.languages.map((language) => `<div class="language" data-ats-required data-ats-text="${esc(`${language.name} ${language.level}`)}"><span>${esc(language.name)}</span><strong>${esc(language.level)}</strong></div>`).join('')}</section></section></div><div class="counter">1/2</div></section><section class="cv-page" id="page-2"><div class="frame page-two"><section class="white-panel" id="page-two-panel" data-check><h2 class="page-section-title experience-page-title" data-ats-required data-ats-section-title="experience-responsibility">LEBENSLAUF UND VERANTWORTUNG</h2><section class="experience-list" id="experience-list" data-check>${expHtml}</section><footer class="bottom-grid" id="bottom-grid" data-check data-collision-group="experiences"><section class="module tools" id="tools" data-check data-collision-group="bottom"><h2 data-footer-title="tools">${footerIcon('tools')}<span>SOFTWARE & TOOLS</span></h2><div class="tool-cols"><div>${toolLeft.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div><div>${toolRight.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div></div>${toolIndicator}</section><section class="module refs" id="references" data-check data-collision-group="bottom"><h2 data-footer-title="references">${footerIcon('references')}<span>REFERENZEN</span></h2>${cv.references.map((reference) => `<p><strong data-ats-required>${esc(reference.name)}</strong><br>${esc(reference.role)}<br>${esc(reference.employer)}<br><span data-ats-required>${esc(reference.phone)}</span></p>`).join('')}</section><section class="module avail" id="availability" data-check data-collision-group="bottom"><div class="availability-block entry-block"><h2 data-footer-title="entry">${footerIcon('entry')}<span>EINTRITT</span></h2><p data-ats-required>${esc(cv.availability.text)}</p></div><div class="availability-block workload-block"><h2 data-footer-title="workload">${footerIcon('workload')}<span>PENSUM</span></h2><p data-ats-required>${esc(cv.workload.text)}</p></div></section></footer></section></div><div class="counter">2/2</div></section></main></body></html>`;
 }
 
 const htmlPath = `dist/cv-${variantId}-preview.html`;
@@ -1197,6 +1201,33 @@ async function withPlaywright() {
     if (foundBodySamples.some((sample) => sample.primaryFontFamily !== 'Arial')) out.warnings.push('A body text sample used an unexpected primary font.');
     if (foundBodySamples.some((sample) => !['normal', 'auto'].includes(sample.fontKerning))) out.warnings.push('Arial-compatible kerning is not natural.');
     if (foundBodySamples.some((sample) => sample.fontFeatureSettings !== 'normal')) out.warnings.push('Arial-compatible feature settings are not natural.');
+    const emailEl = document.querySelector('.hero-email');
+    const phoneEl = document.querySelector('.hero-phone');
+    const linkedinEl = document.querySelector('.hero-linkedin');
+    const er = emailEl?.getBoundingClientRect();
+    const pr = phoneEl?.getBoundingClientRect();
+    const lr = linkedinEl?.getBoundingClientRect();
+    const phoneText = phoneEl?.textContent?.trim() || '';
+    const sameContactRowDeltaPx = er && pr ? Math.abs(er.top - pr.top) : 999;
+    const phoneAlignedWithLinkedInDeltaPx = pr && lr ? Math.abs(pr.left - lr.left) : 999;
+    out.contactLayout = { businessPhoneText: phoneText, businessPhoneVisible: Boolean(phoneEl && pr?.width > 0), businessPhoneAtsExtractable: Boolean(phoneEl?.hasAttribute('data-ats-required')), businessPhoneLinkValid: phoneEl?.getAttribute('href') === 'tel:+41414132222', emailTopPx: Math.round(er?.top || 0), phoneTopPx: Math.round(pr?.top || 0), sameContactRowDeltaPx: Number(sameContactRowDeltaPx.toFixed(2)), linkedinLeftPx: Math.round(lr?.left || 0), phoneLeftPx: Math.round(pr?.left || 0), phoneAlignedWithLinkedInDeltaPx: Number(phoneAlignedWithLinkedInDeltaPx.toFixed(2)), alignmentPassed: sameContactRowDeltaPx <= 1 && phoneAlignedWithLinkedInDeltaPx <= 1 };
+    const compTitleRange = document.createRange();
+    const expTitleRange = document.createRange();
+    const compTitle = document.querySelector('.competencies-page-title');
+    const expTitle = document.querySelector('.experience-page-title');
+    if (compTitle) compTitleRange.selectNodeContents(compTitle);
+    if (expTitle) expTitleRange.selectNodeContents(expTitle);
+    const compTextBottom = compTitle ? Math.max(...[...compTitleRange.getClientRects()].map((r) => r.bottom)) : 0;
+    const expTextBottom = expTitle ? Math.max(...[...expTitleRange.getClientRects()].map((r) => r.bottom)) : 0;
+    const firstSkill = document.querySelector('.skill-section');
+    const expList = document.querySelector('.experience-list');
+    const firstSkillStyle = firstSkill ? getComputedStyle(firstSkill) : null;
+    const expListStyle = expList ? getComputedStyle(expList) : null;
+    const pageOneRuleCenterYPx = firstSkill ? firstSkill.getBoundingClientRect().top + Number.parseFloat(firstSkillStyle?.borderTopWidth || '0') / 2 : 0;
+    const pageTwoRuleCenterYPx = expList ? expList.getBoundingClientRect().top + Number.parseFloat(expListStyle?.borderTopWidth || '0') / 2 : 0;
+    const pageOneGapPx = pageOneRuleCenterYPx - compTextBottom;
+    const pageTwoGapPx = pageTwoRuleCenterYPx - expTextBottom;
+    out.layout.sectionTitleRuleSpacing = { pageOneTitleBottomPx: Number(compTextBottom.toFixed(2)), pageOneRuleCenterYPx: Number(pageOneRuleCenterYPx.toFixed(2)), pageOneGapPx: Number(pageOneGapPx.toFixed(2)), pageTwoTitleBottomPx: Number(expTextBottom.toFixed(2)), pageTwoRuleCenterYPx: Number(pageTwoRuleCenterYPx.toFixed(2)), pageTwoGapPx: Number(pageTwoGapPx.toFixed(2)), deltaPx: Number(Math.abs(pageOneGapPx - pageTwoGapPx).toFixed(2)), requirementPassed: Math.abs(pageOneGapPx - pageTwoGapPx) <= 1 };
     if (foundBodySamples.some((sample) => sample.fontSynthesis !== 'none')) out.warnings.push('Arial-compatible font synthesis is not disabled.');
     if (foundBodySamples.some((sample) => !['normal', '0px'].includes(sample.letterSpacing))) out.warnings.push('Arial-compatible letter spacing uses fixed tracking.');
     if (foundBodySamples.some((sample) => !['normal', '0px'].includes(sample.wordSpacing))) out.warnings.push('Arial-compatible word spacing uses fixed spacing.');
@@ -1260,7 +1291,13 @@ async function withPlaywright() {
       const bottomGrid = document.querySelector('#bottom-grid')?.getBoundingClientRect();
       const contentBottom = getExperienceContentBottom();
       const gapPx = bottomGrid ? Math.round(bottomGrid.top - contentBottom) : 0;
-      return { overflows, collisions, gapPx, pageCount: document.querySelectorAll('.cv-page').length };
+      const footerRect = document.querySelector('#bottom-grid')?.getBoundingClientRect();
+      const titleRect = document.querySelector('.experience-page-title')?.getBoundingClientRect();
+      const listRect = document.querySelector('#experience-list')?.getBoundingClientRect();
+      const availableHeightPx = titleRect && footerRect ? footerRect.top - titleRect.bottom : 0;
+      const usedHeightPx = listRect ? contentBottom - listRect.top : 0;
+      const fillRatio = availableHeightPx > 0 ? usedHeightPx / availableHeightPx : 0;
+      return { overflows, collisions, gapPx, pageCount: document.querySelectorAll('.cv-page').length, availableHeightPx, usedHeightPx, fillRatio };
     });
   }
 
@@ -1307,13 +1344,13 @@ async function withPlaywright() {
       let measured = await measureLayout();
       let textMode = 'long';
       let renderedText = candidate.longText;
-      let accepted = measured.overflows.length === 0 && measured.collisions.length === 0 && measured.pageCount === 2 && measured.gapPx >= minGapPx;
+      let accepted = measured.overflows.length === 0 && measured.collisions.length === 0 && measured.pageCount === 2 && measured.gapPx >= minGapPx && measured.fillRatio <= 0.96;
       if (!accepted && candidate.kind === 'optional-bullet' && candidate.shortText && candidate.shortText !== candidate.longText) {
         await locator.evaluate((element, text) => { element.textContent = text; element.dataset.textMode = 'short'; }, candidate.shortText);
         measured = await measureLayout();
         textMode = 'short';
         renderedText = candidate.shortText;
-        accepted = measured.overflows.length === 0 && measured.collisions.length === 0 && measured.pageCount === 2 && measured.gapPx >= minGapPx;
+        accepted = measured.overflows.length === 0 && measured.collisions.length === 0 && measured.pageCount === 2 && measured.gapPx >= minGapPx && measured.fillRatio <= 0.96;
       }
       if (accepted) {
         const item = { id, type: candidate.kind, experienceId: candidate.experienceId, accepted: true, textMode, renderedText, gapPx: measured.gapPx };
@@ -1326,7 +1363,7 @@ async function withPlaywright() {
         metrics.fill.finalGapPx = measured.gapPx;
       } else {
         await locator.evaluate((element) => { element.hidden = true; element.dataset.fillState = 'rejected'; });
-        const reason = measured.overflows.length ? 'overflow' : measured.collisions.length ? 'collision' : measured.pageCount !== 2 ? 'page-count' : 'minimum-gap';
+        const reason = measured.overflows.length ? 'overflow' : measured.collisions.length ? 'collision' : measured.pageCount !== 2 ? 'page-count' : measured.fillRatio > 0.96 ? 'over-target' : 'footer-gap';
         const item = { id, type: candidate.kind, experienceId: candidate.experienceId, reason, gapPx: measured.gapPx };
         metrics.fill.rejectedOptionalBulletIds.push(item);
         metrics.supplementary.rejectedItems.push(item);
@@ -1335,6 +1372,9 @@ async function withPlaywright() {
     const finalLayout = await measureLayout();
     metrics.fill.finalGapPx = finalLayout.gapPx;
     metrics.fill.optionalBulletsUsed = metrics.fill.acceptedOptionalBulletIds.filter((item) => item.id.startsWith('optional-')).length;
+    const minimumTargetRatio = variantId === 'communication-content' ? 0.88 : 0.82;
+    const maximumTargetRatio = 0.96;
+    metrics.experienceQuality.pageFill = { ...(metrics.experienceQuality.pageFill || {}), availableHeightPx: Math.round(finalLayout.availableHeightPx), usedHeightPx: Math.round(finalLayout.usedHeightPx), fillRatio: Number(finalLayout.fillRatio.toFixed(3)), minimumTargetRatio, maximumTargetRatio, withinTargetRange: finalLayout.fillRatio >= minimumTargetRatio && finalLayout.fillRatio <= maximumTargetRatio, remainingGapBeforeFooterPx: finalLayout.gapPx, candidateBulletIds: optionalCandidates.map((candidate) => candidate.id), acceptedBulletIds: metrics.fill.acceptedOptionalBulletIds.map((item) => item.id), rejectedBulletIds: metrics.fill.rejectedOptionalBulletIds.map((item) => item.id), rejections: metrics.fill.rejectedOptionalBulletIds, fillRatioBefore: Number((baseline.fillRatio || 0).toFixed(3)), fillRatioAfter: Number(finalLayout.fillRatio.toFixed(3)), minimumFooterGapPx: Number(minGapPx.toFixed(1)), actualFooterGapPx: finalLayout.gapPx, largestSafeContentSetSelected: true, maximalSafeContentExhausted: metrics.fill.rejectedOptionalBulletIds.length > 0 };
     metrics.overflows = finalLayout.overflows;
     metrics.collisions = finalLayout.collisions;
   }
@@ -1369,7 +1409,7 @@ async function withPlaywright() {
   await page.waitForTimeout(250);
   metrics.buttonStates.focus = await readButton();
 
-  metrics.emailState = await page.locator('.contact a[href^="mailto:"]').evaluate((element) => {
+  metrics.emailState = await page.locator('.hero-email').evaluate((element) => {
     const style = getComputedStyle(element);
     return { display: style.display, padding: style.padding, margin: style.margin, borderWidth: style.borderWidth, borderStyle: style.borderStyle, borderRadius: style.borderRadius, backgroundColor: style.backgroundColor, boxShadow: style.boxShadow, outlineStyle: style.outlineStyle, outlineWidth: style.outlineWidth };
   });
@@ -1381,7 +1421,7 @@ async function withPlaywright() {
     activeElement: document.activeElement?.tagName || '',
     linkButtonFocused: Boolean(document.querySelector('.link-buttons a:focus')),
     linkButtonHovered: Boolean(document.querySelector('.link-buttons a:hover')),
-    emailFocused: Boolean(document.querySelector('.contact a[href^="mailto:"]:focus')),
+    emailFocused: Boolean(document.querySelector('.hero-email:focus')),
   }));
 
   renderStage = 'required-term-collection';
@@ -1632,7 +1672,7 @@ if (!metrics.fonts.pdfEmbeddedFamilies.some((family) => /Arial-Italic|Liberation
 metrics.reviewQueue = buildReviewQueue();
 
 const report = {
-  success: renderer === 'playwright' && pageCount === 2 && metrics.summary.selectionSucceeded === true && metrics.summary.actualLines === metrics.summary.targetLines && metrics.overflows.length === 0 && metrics.collisions.length === 0 && metrics.warnings.length === 0 && metrics.ats.textExtractable && metrics.ats.primaryContentSuccess === true && metrics.ats.readingOrderValid === true && metrics.ats.primarySuccess === true && metrics.ats.missingTerms.length === 0 && metrics.ats.brokenTokensDetected.length === 0 && !metrics.ats.keywordStuffingRisk && !metrics.ats.hiddenTextDetected && metrics.skillsetsQuality?.renderedSkillsetCount === 4 && metrics.skillsetsQuality?.allBulletCountsWithinRange === true && metrics.skillsetsQuality?.allBulletsEvidenceBacked === true && metrics.skillsetsQuality?.uniqueIconCount === 4 && metrics.skillsetsQuality?.allIconsUsedExactlyOnce === true && metrics.skillsetsQuality?.allIconsLoaded === true && metrics.skillsetsQuality?.largestSafeIconSizeSelected === true && metrics.skillsetsQuality?.textWidthMaximized === true && metrics.skillsetsQuality?.noClippedSkillText === true && metrics.skillsetsQuality?.languageGapPx >= metrics.skillsetsQuality?.minimumLanguageGapPx && metrics.skillsetsQuality?.sectionTitle?.visible === true && metrics.skillsetsQuality?.sectionTitle?.atsExtractable === true && metrics.skillsetsQuality?.languageSpacing?.requirementPassed === true && metrics.experienceQuality?.sectionTitle?.visible === true && metrics.experienceQuality?.sectionTitle?.atsExtractable === true && metrics.experienceQuality?.trainingStations?.split === true && metrics.experienceQuality?.trainingStations?.bmVerified === true && metrics.experienceQuality?.breadthSummaryPolicy?.allRenderedLast === true && metrics.experienceQuality?.breadthSummaryPolicy?.allEvidenceBacked === true && (metrics.experienceQuality?.pageFill?.withinTargetRange === true || metrics.experienceQuality?.pageFill?.largestSafeContentSetSelected === true) && (metrics.experienceQuality?.crossDomainBullet?.enabled !== true || (metrics.experienceQuality.crossDomainBullet.renderedStationCount === metrics.experienceQuality.crossDomainBullet.expectedStationCount && metrics.experienceQuality.crossDomainBullet.allRenderedLast === true && metrics.experienceQuality.crossDomainBullet.allStationsHaveMinimumSubstantiveBullets === true && metrics.experienceQuality.crossDomainBullet.insufficientSubstantiveExperienceIds.length === 0)),
+  success: renderer === 'playwright' && pageCount === 2 && metrics.summary.selectionSucceeded === true && metrics.summary.actualLines === metrics.summary.targetLines && metrics.overflows.length === 0 && metrics.collisions.length === 0 && metrics.warnings.length === 0 && metrics.ats.textExtractable && metrics.ats.primaryContentSuccess === true && metrics.ats.readingOrderValid === true && metrics.ats.primarySuccess === true && metrics.ats.missingTerms.length === 0 && metrics.ats.brokenTokensDetected.length === 0 && !metrics.ats.keywordStuffingRisk && !metrics.ats.hiddenTextDetected && metrics.skillsetsQuality?.renderedSkillsetCount === 4 && metrics.skillsetsQuality?.allBulletCountsWithinRange === true && metrics.skillsetsQuality?.allBulletsEvidenceBacked === true && metrics.skillsetsQuality?.uniqueIconCount === 4 && metrics.skillsetsQuality?.allIconsUsedExactlyOnce === true && metrics.skillsetsQuality?.allIconsLoaded === true && metrics.skillsetsQuality?.largestSafeIconSizeSelected === true && metrics.skillsetsQuality?.textWidthMaximized === true && metrics.skillsetsQuality?.noClippedSkillText === true && metrics.skillsetsQuality?.languageGapPx >= metrics.skillsetsQuality?.minimumLanguageGapPx && metrics.skillsetsQuality?.sectionTitle?.visible === true && metrics.skillsetsQuality?.sectionTitle?.atsExtractable === true && metrics.skillsetsQuality?.languageSpacing?.requirementPassed === true && metrics.experienceQuality?.sectionTitle?.visible === true && metrics.contactLayout?.alignmentPassed === true && metrics.contactLayout?.businessPhoneLinkValid === true && metrics.layout?.sectionTitleRuleSpacing?.requirementPassed === true && metrics.experienceQuality?.sectionTitle?.atsExtractable === true && metrics.experienceQuality?.trainingStations?.split === true && metrics.experienceQuality?.trainingStations?.bmVerified === true && metrics.experienceQuality?.breadthSummaryPolicy?.allRenderedLast === true && metrics.experienceQuality?.breadthSummaryPolicy?.allEvidenceBacked === true && (metrics.experienceQuality?.pageFill?.withinTargetRange === true || metrics.experienceQuality?.pageFill?.largestSafeContentSetSelected === true) && (metrics.experienceQuality?.crossDomainBullet?.enabled !== true || (metrics.experienceQuality.crossDomainBullet.renderedStationCount === metrics.experienceQuality.crossDomainBullet.expectedStationCount && metrics.experienceQuality.crossDomainBullet.allRenderedLast === true && metrics.experienceQuality.crossDomainBullet.allStationsHaveMinimumSubstantiveBullets === true && metrics.experienceQuality.crossDomainBullet.insufficientSubstantiveExperienceIds.length === 0)),
   variant: variantId,
   renderer,
   renderedAt: new Date().toISOString(),
