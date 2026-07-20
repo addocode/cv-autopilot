@@ -1,214 +1,143 @@
-# ACTIVE CODEX TASK — Review Runde 50
+# ACTIVE CODEX TASK — Review Runde 52
 
 ## Arbeitskontext
 
-Arbeite ausschliesslich im privaten Repository `addocode/cv-autopilot` auf dem bereits ausgewählten Branch:
+Arbeite ausschliesslich auf dem bestehenden Branch:
 
 `codex/verifiziere-icon-hashes-und-svg-geometrie`
 
 und im bestehenden PR #6.
 
-- Erstelle keinen neuen Branch.
-- Erstelle keinen PR #11.
+- Erstelle keinen neuen Branch und keinen neuen Pull Request.
 - Rufe `make_pr` nicht auf.
 - Merge weder PR #6 noch PR #5.
-- Verändere PR #1–#4 nicht.
+- Verändere das finale CV-Design nicht.
 - Diese Datei ersetzt alle früheren aktiven Review-Aufträge.
 
 ## Pflichtprüfung
 
 1. Führe `git log -1 --format=%H` aus.
 2. Vergleiche die Ausgabe mit der im Startprompt genannten erwarteten SHA.
-3. Prüfe, dass diese Datei mit `# ACTIVE CODEX TASK — Review Runde 50` beginnt.
+3. Prüfe, dass diese Datei mit `# ACTIVE CODEX TASK — Review Runde 52` beginnt.
 4. Bei Abweichung nichts verändern und ausschliesslich `STALE SNAPSHOT` melden.
 
 ---
 
-# 1. Ausgangslage: Workflow Run 53
+# 1. Ausgangslage
 
-Workflow Run 53 auf PR #10 / Commit `1dd4e5ae54e4883caf85351b632e0919030fa3dd` hat die gesamte Produktionsfunktion erfolgreich ausgeführt:
+Workflow Run 60 für den neuen Bewerbungsarchiv-Workflow ist grün. Der kontrollierte Fixture-Test besteht. Vor einem echten Stelleninserat müssen aber der Datenvertrag zwischen `scripts/create-application.mjs` und `scripts/render.mjs`, die Produktionspersonalisierung und die dauerhafte Exportierbarkeit korrigiert werden.
 
-```text
-renderAllExitCode: 0
-allReportsSuccessful: true
-visualReviewOverallSuccess: true
-```
-
-Alle vier Varianten besitzen:
-
-- `report.success === true`
-- exakt zwei Seiten
-- keine Overflows
-- keine Collisions
-- keine Warnungen
-- vollständige ATS-Extraktion
-- drei sichtbare und verifizierte BM-Bullets
-- `bmExcludedFromAdaptivePruning === true`
-- echte DOM-Kandidaten und gemessene Experience-Auswahl
-- Füllgrad im Zielbereich
-- öffentliche Geschäftsnummer
-- identische Titel-zu-Trennlinien-Abstände
-
-Die realen Füllwerte sind:
-
-```text
-general:               0.910 -> 0.947
-communication-content: 0.798 -> 0.928
-administration-gever:  0.873 -> 0.947
-cms-web-process:       0.761 -> 0.928
-```
-
-Diese Funktion, alle sichtbaren Inhalte und das gesamte Layout sind eingefroren.
-
-Der einzige rote Wert ist:
-
-```text
-renderTestsExitCode: 1
-```
-
-Grund sind fünf veraltete beziehungsweise unvollständige Assertions in `tests/render.test.mjs`.
+Die sichtbaren neutralen CV-Artefakte, vier Varianten, Layout, Fonts, BM-Logik, adaptive Füllung, ATS- und PDF-Gates sind eingefroren.
 
 ---
 
-# 2. Keine Layout- oder Inhaltsänderungen
+# 2. Exakter Datenvertrag für `application-context.json`
 
-Verbindlich nicht verändern:
+Der aktuell erzeugte Kontext verwendet für `jobAd.workload` und `jobAd.start` einfache Strings und für `jobAd.contact` inkompatible Feldnamen. Der Renderer erwartet strukturierte Objekte.
 
-- CV-Texte und Reihenfolge
-- Experience-Auswahl und Kandidatenpriorität
-- BM-Inhalte
-- Schriftgrössen, Zeilenhöhen und Fonts
-- Icons
-- Hero- und White-Panel-Geometrie
-- Footer
-- Profilbild
-- Telefonnummerposition
-- Skillsets und Sprachen
-- Titelabstände
-- neutrale Produktionswerte
+Erzeuge in `01_application-context.json` verbindlich:
 
-Änderungen sind auf Tests und – nur falls für eine korrekte Messung zwingend – Diagnose-/Fixture-Infrastruktur begrenzt.
+```json
+{
+  "schemaVersion": 2,
+  "applicationId": "...",
+  "markdownFile": "00_stelleninserat.md",
+  "selectedVariant": "administration-gever",
+  "jobAd": {
+    "rawText": "vollständiger bereinigter Inseratstext",
+    "sourceId": "job-ad:<applicationId>",
+    "workload": {
+      "kind": "single|range|full-time|unknown",
+      "minPercent": 80,
+      "maxPercent": 80,
+      "sourceText": "Pensum 80 %",
+      "confidence": 0.99
+    },
+    "start": {
+      "kind": "date|immediately|negotiable|unknown",
+      "isoDate": "2026-09-01",
+      "sourceText": "Stellenantritt per 1. September 2026",
+      "confidence": 0.99
+    },
+    "contact": {
+      "fullName": "Anna Meier",
+      "firstName": "Anna",
+      "lastName": "Meier",
+      "explicitSalutation": "Frau",
+      "role": "HR-Leitung",
+      "addressMode": "formal|informal|neutral|unknown",
+      "sourceText": "Ansprechperson: Frau Anna Meier, HR-Leitung",
+      "confidence": 0.99,
+      "isApplicationContact": true
+    }
+  }
+}
+```
+
+Regeln:
+
+- Unbekannte Werte bleiben leer beziehungsweise `unknown`; nichts raten.
+- `confidence` ist immer numerisch zwischen 0 und 1.
+- `isApplicationContact` ist nur bei einer explizit als Bewerbungskontakt erkennbaren Person `true`.
+- `rawText` enthält den vollständigen Originalinhalt normalisiert auf LF, nicht eine Zusammenfassung.
+- Top-Level-Spiegelfelder dürfen für die Markdown-Erzeugung bestehen, aber der Renderer verwendet ausschliesslich `jobAd` im obigen Schema.
 
 ---
 
-# 3. Fünf fehlerhafte Render-Tests korrigieren
+# 3. Robuste Eingabe für echte Stelleninserate
 
-## 3.1 Unterer Seitenbereich
+Der aktuelle Parser erkennt nur Zeilen mit exakt `Arbeitgeber:`, `Stellenbezeichnung:` usw. Das reicht für Fixtures, aber nicht für beliebige echte Inserate.
 
-Der Test erwartet noch ungefähr 28 mm Footer-/Resthöhe. Die finale Spezifikation ist:
+Implementiere zwei Eingabemodi:
 
-```text
-pageTwoFooterHeightPx: ungefähr 42 px
-pageTwoBlueStripHeightMm: ungefähr 11 mm
-pageTwoWhiteExtensionMm: ungefähr 17 mm
-pageTwoHasBottomBackgroundStrip: true
-blueTouchesPageBottom: false
+## 3.1 Kontrollierter strukturierter Modus
+
+Neue optionale CLI-Option:
+
+```bash
+--extracted-context path/to/extracted-context.json
 ```
 
-Nutze sinnvolle Messtoleranzen:
+Diese Datei enthält die bereits aus dem echten Inserat extrahierten Eckdaten im Schema aus Abschnitt 2. Der vollständige Originaltext kommt weiterhin unverändert aus `--job-ad` und wird archiviert.
 
-- Footerhöhe etwa `38–46 px`
-- mm-Werte maximal ±0.3 mm
+Dieser Modus hat Vorrang vor Heuristiken und ist der verbindliche Modus für den ersten Live-Test.
 
-Keine Produktionsmetrik ändern, nur den veralteten Test.
+Validiere mit Zod oder einer gleichwertigen expliziten Prüfung:
 
-## 3.2 Fokuszustand der Link-Buttons korrekt messen
+- Arbeitgeber
+- Stellenbezeichnung
+- selectedVariant
+- jobAd.rawText
+- workload/start/contact-Struktur
+- tasks, requirements, systems, ATS terms
 
-Der CSS-Fokuszustand muss weiterhin wirklich geprüft werden:
+Bei ungültigen Daten: klarer Fehler, kein halbfertiges Dossier.
 
-- `:focus-visible` aktiv
-- blauer Hintergrund
-- weisser Text
-- weisser Rand
-- sichtbarer Fokus-Ring
+## 3.2 Heuristischer Fallback
 
-Run 53 meldet `isFocusVisible: false`, weil die bisherige programmgesteuerte Fokussierung Chromium nicht zuverlässig in den `:focus-visible`-Modus versetzt.
+Ohne `--extracted-context` darf weiterhin heuristisch extrahiert werden. Erweitere die Erkennung mindestens für:
 
-Schwäche den Test nicht ab. Korrigiere stattdessen die Diagnose in `scripts/render.mjs`:
+- Pensum `80%`, `80–100 %`, Vollzeit
+- Eintritt `per sofort`, `nach Vereinbarung`, ausgeschriebene oder numerische Daten
+- Ansprechperson mit Frau/Herr, Vor-/Nachname und Funktion
+- Arbeitsort
+- Arbeitgeber und Stellentitel aus üblichen ersten Überschriften
 
-1. vor der Fokusmessung Fokus entfernen;
-2. per echter Tastaturinteraktion (`page.keyboard.press('Tab')`, nötigenfalls wiederholt) den ersten `.link-buttons a` fokussieren;
-3. zwei Animation Frames abwarten;
-4. `element.matches(':focus-visible')` und Computed Styles erfassen;
-5. danach Fokus und Hover vollständig entfernen, bevor PDF/PNG erzeugt werden.
+Unsichere Werte nicht erfinden. Im Markdown unter `Offene Punkte und Unsicherheiten` ausweisen.
 
-Der Test muss weiter `focus.isFocusVisible === true` und die vorgesehenen Farben verlangen.
+---
 
-## 3.3 E-Mail im Grid ist korrekt blockifiziert
+# 4. Personalisierung muss im echten PDF funktionieren
 
-Durch das neue zweispaltige Grid ist der berechnete Display-Wert der E-Mail `block`. Das ist CSS-Grid-Blockification und kein Pill-Button.
+Der Renderer integriert das Greeting derzeit nur bei `previewOnly`. Korrigiere dies:
 
-Aktualisiere den Test so, dass `display` entweder `block` oder `inline` sein darf, aber weiterhin zwingend gilt:
+- Bei vorhandenem sicherem `applicationContext.jobAd.contact` wird die Anrede auch im echten anwendungsspezifischen PDF nahtlos in `#summary-text` integriert.
+- Ohne Anwendungskontext bleibt der neutrale Produktions-CV unverändert und ohne Greeting.
+- Bei unsicherer Person entfällt das Greeting vollständig.
+- Kurzprofil bleibt vier Zeilen.
+- Pensum und Eintritt verwenden die strukturierten Werte aus Abschnitt 2.
 
-```text
-padding: 0
-margin: 0
-borderWidth: 0
-borderRadius: 0
-background transparent
-boxShadow: none
-```
-
-Prüfe dieselben Nicht-Pill-Eigenschaften zusätzlich für den Telefonlink.
-
-## 3.4 ATS-Erwartungen auf finale neutrale Werte aktualisieren
-
-Entferne die alten Erwartungen:
-
-```text
-nach Vereinbarung oder sofort
-60–100 % flexibel nach Absprache
-```
-
-Verlange im neutralen Produktionsrender stattdessen:
-
-```text
-Per sofort oder nach Vereinbarung
-Flexibel nach Absprache
-+41 41 413 22 22
-```
-
-Die Telefonnummer muss in `requiredTermsPresent`, Poppler Raw und Poppler Default auffindbar sein. Der Link muss `tel:+41414132222` lauten.
-
-## 3.5 Produktions-Personalisierungstest trennen
-
-Der bisherige Test `round 45 job-ad footer and greeting personalization are reported` erwartet fälschlich Demo-Personalisierung in allen vier neutralen Produktionsreports.
-
-Ersetze ihn durch zwei getrennte Testgruppen.
-
-### A. Neutrale vier Produktionsvarianten
-
-Erwarte je Variante:
-
-```text
-workload.renderedText === "Flexibel nach Absprache"
-start.renderedText === "Per sofort oder nach Vereinbarung"
-workload.usedFallback === true
-start.usedFallback === true
-greeting.rendered === false
-greeting.visible === false
-greeting.omissionReason === "no-safe-application-contact"
-summaryActualLines === 4
-footerLayout.collisionFree === true
-```
-
-### B. Separate Fixture-Tests
-
-Teste die bestehenden Fixtures isoliert, ohne die neutralen Produktionsartefakte zu überschreiben:
-
-- `tests/fixtures/application-context-formal.json`
-- `tests/fixtures/application-context-informal.json`
-- `tests/fixtures/application-context-unsafe.json`
-
-Ergänze dafür bei Bedarf einen kleinen, nur für Preview-/Testausgaben verwendeten CLI-Parameter wie:
-
-```text
---output-suffix formal-fixture
-```
-
-oder eine gleichwertige sichere Ausgabepfad-Lösung.
-
-Formelle Fixture muss exakt ergeben:
+Verbindliche formelle Live-Fixture:
 
 ```text
 Guten Tag Frau Meier, ich bin ...
@@ -216,141 +145,190 @@ Guten Tag Frau Meier, ich bin ...
 Per 01.09.2026 gemäss Inserat, alternativ nach Vereinbarung
 ```
 
-Zusätzlich:
-
-- `Anna Meier`
-- Rolle `HR-Leitung`
-- genau ein `#summary-text`
-- keine `.summary-greeting`
-- Anrede nahtlos im Fliesstext
-- keine leere Zusatzzeile
-
-Informelle Fixture:
-
-```text
-Hallo Anna, ich bin ...
-```
-
-Unsichere Fixture:
-
-- keine Anrede
-- kein geratener Name
-
-Mindestens Preview-HTML deterministisch prüfen. Falls ohne Umbau möglich, zusätzlich einen isolierten Playwright-Layouttest für vier Kurzprofilzeilen ausführen.
+Teste nicht nur Preview-HTML, sondern mindestens ein echtes fixture-spezifisches PDF/Render-Report mit Playwright, Poppler Raw und Poppler Default.
 
 ---
 
-# 4. Kontakt- und Abstandsdiagnostik vervollständigen
+# 5. Bewerbungsakte dauerhaft exportierbar machen
 
-Die sichtbare Ausgabe ist korrekt. Stelle zusätzlich sicher, dass der Report einen expliziten Block enthält, beispielsweise:
+`applications/` bleibt aus Datenschutzgründen git-ignored. Ein Codex-/CI-Dateisystem kann jedoch temporär sein. Jeder echte Lauf muss deshalb ein transportables Exportpaket erzeugen.
+
+Erzeuge zusätzlich im Projektroot oder unter `exports/`:
+
+```text
+exports/<applicationId>.tar.gz
+```
+
+Das Paket enthält den vollständigen Bewerbungsordner inklusive:
+
+- `00_stelleninserat.md`
+- `01_application-context.json`
+- `02_cv_<variant>.pdf`
+- `03_cv_<variant>-preview.html`
+- `04_manifest.json`
+- Originaldatei des Inserats
+- `05_render-report.json`
+- optional später Motivationsschreiben-Dateien
+
+Verwende unter Linux deterministisch `tar` mit stabiler Dateireihenfolge und ohne absolute Pfade. Falls `tar` nicht verfügbar ist, brich mit verständlicher Fehlermeldung ab; kein stiller Erfolg ohne Export.
+
+Ignoriere auch `exports/` in Git. Die CLI-Ausgabe muss den genauen Ordner- und Archivpfad nennen.
+
+Das Manifest erhält zusätzlich:
 
 ```json
 {
-  "contactLayout": {
-    "businessPhoneText": "+41 41 413 22 22",
-    "businessPhoneHref": "tel:+41414132222",
-    "phoneVisible": true,
-    "phoneAtsExtractable": true,
-    "emailAndPhoneSameRow": true,
-    "phoneLinkedInDeltaPx": 0,
-    "phoneAlignedWithLinkedIn": true,
-    "collisionFree": true
+  "archive": {
+    "path": "exports/<applicationId>.tar.gz",
+    "sha256": "..."
+  },
+  "validation": {
+    "rendererSuccess": true,
+    "atsSuccess": true,
+    "pageCount": 2,
+    "applicationContextContractValid": true
   }
 }
 ```
 
-Die vorhandene reale Titelabstandsmessung bleibt:
+---
+
+# 6. Render-Report archivieren
+
+Kopiere den tatsächlich zum applicationId-spezifischen CV gehörenden Render-Report als:
 
 ```text
-pageOneGapPx: 13.06
-pageTwoGapPx: 13.06
-deltaPx: 0
-requirementPassed: true
+05_render-report.json
 ```
 
-Regressionstest:
+in die Bewerbungsakte.
 
-- `Math.abs(deltaPx) <= 1`
-- `requirementPassed === true`
+Prüfe darin mindestens:
 
-Keine sichtbare Position verändern.
+- `success === true`
+- `pageCount === 2`
+- `overflows: []`
+- `collisions: []`
+- `warnings: []`
+- ATS missing terms leer
+- jobAdPersonalization mit den erwarteten Werten
+- selectedVariant stimmt mit Kontext und Dateiname überein
 
----
-
-# 5. Finale Regressionen
-
-Ergänze beziehungsweise aktualisiere Tests für:
-
-1. alle vier Reports erfolgreich;
-2. drei BM-Bullets und BM-Schutz;
-3. Candidate-/Accepted-/Rejected-IDs vorhanden;
-4. Füllwerte im Zielbereich;
-5. Telefonnummer sichtbar, ATS-extrahierbar und korrekt verlinkt;
-6. E-Mail und Telefon in derselben Zeile;
-7. Telefon und LinkedIn höchstens 1 px X-Abweichung;
-8. beide Titelabstände höchstens 1 px Unterschied;
-9. neutrale Produktionswerte;
-10. formelle R49-Fixture mit Anna Meier, 80 % und 01.09.2026;
-11. informelle und unsichere Fixture;
-12. korrekter Tastatur-Fokuszustand;
-13. finale PDF-/PNG-Artefakte bleiben unfokussiert und ungehovert.
+Bei einem fehlgeschlagenen Report darf kein erfolgreiches Manifest und kein finaler Export erzeugt werden.
 
 ---
 
-# 6. Workflow
+# 7. Belegmatrix ehrlich und nutzbar
 
-Vollständig ausführen:
+Die aktuelle Belegmatrix schreibt pauschal `Profilabgleich erforderlich` und `defensible_inference`. Das ist für ein Gesprächsdossier zu schwach.
+
+Im strukturierten Modus muss `--extracted-context` pro Anforderung optional enthalten:
+
+```json
+{
+  "text": "Erfahrung mit GEVER",
+  "classification": "must",
+  "profileEvidence": "ACTA NOVA und digitale Geschäftsvorgangsbearbeitung in der Rekrutenschule",
+  "sourceIds": ["cv-2d-p2"],
+  "evidenceStatus": "verified",
+  "cvUsage": "Kurzprofil und Skillset Technik & Systeme"
+}
+```
+
+Erlaubte Werte:
+
+- `verified`
+- `defensible_inference`
+- `unsupported_rejected`
+
+Keine pauschale Behauptung. `unsupported_rejected` wird sichtbar dokumentiert und nicht in den CV übernommen.
+
+---
+
+# 8. CI muss den neuen Workflow wirklich ausführen
+
+Der bestehende GitHub-Workflow führt aktuell `test:data` und `test:render` aus, aber nicht zwingend `tests/application-workflow.test.mjs`.
+
+Ergänze einen expliziten CI-Schritt:
+
+```bash
+node --test tests/application-workflow.test.mjs
+```
+
+oder ein eigenes Script:
+
+```json
+"test:application": "node --test tests/application-workflow.test.mjs"
+```
+
+und führe es im Workflow aus.
+
+Zusätzlich ein echter Renderer-Integrationstest ohne `--skip-render-for-tests`, der:
+
+- eine vollständig fiktive strukturierte Fixture verwendet
+- PDF, Preview, Markdown, JSON, Report, Manifest und `.tar.gz` erzeugt
+- neutrale Produktionsartefakte unverändert lässt
+- alle Hashes prüft
+- idempotent wiederholbar ist
+
+Keine echten Stellen- oder Personendaten in öffentliche Fixtures aufnehmen.
+
+---
+
+# 9. Rückwärtskompatibilität und Schutzregeln
+
+- Das finale CV-Design bleibt unverändert.
+- Neutrale vier Produktionsvarianten bleiben unverändert und grün.
+- `npm run render:all` und `npm run test:render` bleiben grün.
+- Kein Anwendungslauf darf neutrale PDFs, PNGs, Previews oder Reports überschreiben.
+- Keine versteckten ATS-Texte.
+- Keine erfundenen Angaben.
+- Keine echte Bewerbungsakte committen.
+
+---
+
+# 10. Vollständiger Workflow
+
+Ausführen:
 
 ```bash
 npm install --no-audit --no-fund
 npm run build
 npm run validate
 npm run test:data
+npm run test:application
 npm run render:all
 npm run test:render
 ```
 
-Danach den Live-GitHub-Workflow vollständig abwarten.
-
 Erfolg erst bei:
 
-```text
-renderAllExitCode: 0
-renderTestsExitCode: 0
-allReportsSuccessful: true
-visualReviewOverallSuccess: true
-final guard: skipped
-```
-
-und weiterhin:
-
-- vier PDFs
-- acht PNGs
-- exakt zwei Seiten
-- keine Overflows
-- keine Collisions
-- keine Warnungen
-- `remainingDifferences: []`
+- alle Befehle Exit-Code 0
+- GitHub Actions vollständig grün
+- finaler Guard skipped
+- fiktiver End-to-End-Anwendungslauf erzeugt alle Dateien und Exportarchiv
+- echter PDF-Personalisierungstest grün
+- neutrale CV-Artefakte unverändert
 
 ---
 
-# 7. Abschlussbericht
+# 11. Abschlussbericht
 
-Berichte knapp:
+Berichte mindestens:
 
-1. lokaler Commit-SHA;
-2. Live-Head-SHA von PR #6;
-3. Workflow-Run-Link;
-4. beide Exit-Codes und finaler Guard;
-5. Status der fünf früher fehlerhaften Tests;
-6. Fokusmessung;
-7. neutrale Produktionswerte;
-8. formelle/informelle/unsichere Fixture-Ergebnisse;
-9. Telefon-/E-Mail-/LinkedIn-Ausrichtung;
-10. Titelabstandsdelta;
-11. BM- und Fill-Werte;
-12. `report.success` je Variante;
-13. `visual-review overallSuccess` und `remainingDifferences`;
-14. Bestätigung: kein neuer Branch, kein PR #11, nichts gemergt.
+1. lokaler Commit-SHA
+2. Live-Head-SHA von PR #6
+3. Workflow-Run und alle Schritte
+4. Anwendungskontext-Schema
+5. Ergebnis des strukturierten Fixture-Laufs
+6. Greeting/Pensum/Eintritt in echtem PDF und Poppler
+7. gewählte Variante
+8. Markdown-/JSON-Konsistenz
+9. Belegmatrix-Statuswerte
+10. Render-Report-Gates
+11. Exportpfad und SHA-256 des `.tar.gz`
+12. Idempotenz
+13. neutrale Artefakte unverändert
+14. kein neuer Branch/PR, nichts gemergt
 
 Beginne jetzt und fahre ohne weitere Rückfrage fort.
