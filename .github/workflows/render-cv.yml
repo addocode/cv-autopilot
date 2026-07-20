@@ -27,6 +27,7 @@ jobs:
       - run: npm run build
       - run: npm run validate
       - run: npm run test:data
+      - run: npm run test:application
       - name: Run render all with captured exit code
         id: render_all
         shell: bash

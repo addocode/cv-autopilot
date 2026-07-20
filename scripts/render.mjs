@@ -448,7 +448,7 @@ function composePersonalizedSummary(greeting, summaryText) {
 
 const cv = applyVariant();
 const jobAdPersonalization = { workload: normalizeWorkload(cv.applicationContext?.jobAd), start: normalizeStart(cv.applicationContext?.jobAd), greeting: normalizeGreeting(cv.applicationContext?.jobAd) };
-if (previewOnly && jobAdPersonalization.greeting.rendered) cv.summaryText = composePersonalizedSummary(jobAdPersonalization.greeting.text, cv.summaryText).text;
+if (jobAdPersonalization.greeting.rendered) cv.summaryText = composePersonalizedSummary(jobAdPersonalization.greeting.text, cv.summaryText).text;
 cv.workload = { ...cv.workload, text: jobAdPersonalization.workload.renderedText };
 cv.availability = { ...cv.availability, text: jobAdPersonalization.start.renderedText };
 cv.summaryMeta.targetLines = 4;
