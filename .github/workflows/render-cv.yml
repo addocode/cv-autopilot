@@ -28,16 +28,6 @@ jobs:
       - run: npm run validate
       - run: npm run test:data
       - run: npm run test:application
-      - name: Run controlled live application test
-        run: |
-          node scripts/create-application.mjs \
-            --job-ad live-tests/2026-07-21_parlamentsdienste_admin-sachbearbeiter-fk.txt \
-            --extracted-context live-tests/2026-07-21_parlamentsdienste_admin-sachbearbeiter-fk.context.json \
-            --source-url "https://jobs.admin.ch/offene-stellen/admin-sachbearbeiter-in-fk/3e61cd45-dc24-4854-b6c8-20aeed29a993" \
-            --source-type url \
-            --application-date 2026-07-21 \
-            --timestamp 2026-07-21T00:00:00+02:00 \
-            | tee live-application-command.log
       - name: Run render all with captured exit code
         id: render_all
         shell: bash
@@ -93,9 +83,6 @@ jobs:
             dist/render-tests-command.log
             dist/command-status.json
             dist/render-all-exit-diagnostic.json
-            applications/**
-            exports/**
-            live-application-command.log
       - name: Fail if render or render tests failed
         if: >-
           always() &&
