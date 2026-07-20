@@ -158,6 +158,23 @@ const skillsetSupplementalBullets = {
   ],
 };
 
+
+function jobAdTerms() {
+  const ctx = data.applicationContext || {};
+  const req = ctx.requirements || {};
+  return [...(ctx.atsTerms || []), ...(req.systems || []), ...(req.tasks || []).map((x)=>typeof x==='string'?x:x.text), ...(req.must || []).map((x)=>typeof x==='string'?x:x.text)]
+    .flatMap((value) => String(value || '').split(/[,;]| und |\n/))
+    .map((value) => normalizeAtsText(value).trim())
+    .filter((value) => value.length > 2);
+}
+const activeJobAdTerms = jobAdTerms();
+function scoreJobAdMatch(item) {
+  if (!activeJobAdTerms.length) return 0;
+  const haystack = normalizeAtsText(`${item.text || ''} ${(item.tags || []).join(' ')}`);
+  const hits = activeJobAdTerms.filter((term) => haystack.includes(term) || term.split(' ').some((part) => part.length > 4 && haystack.includes(part)));
+  return [...new Set(hits)].length;
+}
+
 function evidenceStatus(item) {
   return item.status === 'defensible_inference' ? 'defensible_inference' : 'verified';
 }
@@ -167,7 +184,7 @@ function normalizeSkillBullet(item) {
     ...item,
     sourceIds: item.sourceIds || item.sources || [],
     evidenceStatus: evidenceStatus(item),
-    jobAdMatchScore: item.jobAdMatchScore ?? 0,
+    jobAdMatchScore: item.jobAdMatchScore ?? scoreJobAdMatch(item),
     optional: Boolean(item.optional),
   };
 }
@@ -203,7 +220,7 @@ function buildSkillsets(rawSections) {
     const coreItems = [];
     for (const item of deduped) {
       if (coreItems.length >= 6) break;
-      if (!item.optional) coreItems.push({ ...item, skillOptional: false });
+      if (!item.optional) coreItems.push({ ...item, jobAdMatchScore: scoreJobAdMatch(item), skillOptional: false });
     }
     for (const item of deduped) {
       if (coreItems.length >= 6) break;
@@ -213,7 +230,7 @@ function buildSkillsets(rawSections) {
       .filter((item) => !coreItems.some((core) => core.id === item.id))
       .slice(0, 2)
       .map((item) => ({ ...item, skillOptional: true }));
-    const items = [...coreItems, ...optionalItems];
+    const items = [...coreItems, ...optionalItems].map((item) => ({ ...item, jobAdMatchScore: scoreJobAdMatch(item) })).sort((a, b) => b.jobAdMatchScore - a.jobAdMatchScore || a.id.localeCompare(b.id));
     return {
       ...section,
       title: variant.skillSectionTitles[section.id] || section.title,
@@ -297,11 +314,12 @@ function applyVariant() {
   const experiences = data.experiences.map((experience) => {
     const isProtectedEducation = experience.stationType === 'education' || experience.excludeFromAdaptivePruning === true || Number(experience.requiredVisibleBulletCount || 0) > 0;
     const included = isProtectedEducation
-      ? experience.bullets.map((bullet) => ({ ...bullet }))
+      ? experience.bullets.map((bullet) => ({ ...bullet, jobAdMatchScore: scoreJobAdMatch(bullet) }))
       : experience.bullets
         .filter((bullet) => selected.has(bullet.id) && !hidden.has(bullet.id))
         .sort((a, b) => (priority.get(a.id) ?? 99) - (priority.get(b.id) ?? 99))
-        .slice(0, variant.maxBulletsPerExperience);
+        .slice(0, variant.maxBulletsPerExperience)
+        .map((bullet) => ({ ...bullet, jobAdMatchScore: scoreJobAdMatch(bullet) }));
     const omittedMandatory = isProtectedEducation ? [] : experience.bullets.filter((bullet) => !included.some((item) => item.id === bullet.id));
     const substantiveOptionalCandidates = (experience.optionalBullets || [])
       .filter((bullet) => (bullet.variantRelevance || []).includes(variantId))
@@ -318,7 +336,7 @@ function applyVariant() {
       const semanticKey = normalizeAtsText(text || '');
       if (seenSubstantiveTexts.has(semanticKey)) continue;
       seenSubstantiveTexts.add(semanticKey);
-      included.push({ ...filler, text, minimumFallback: true });
+      included.push({ ...filler, text, jobAdMatchScore: scoreJobAdMatch(filler), minimumFallback: true });
     }
     const fillEligible = experience.stationType !== 'education' && experience.excludeFromBreadthSummary !== true && experience.excludeFromAdaptivePruning !== true;
     if (fillEligible && targetRoleFamily === 'non-mediamatik-core' && !included.some((item) => item.crossDomain)) included.push(createCrossDomainBullet(experience));
@@ -356,6 +374,11 @@ function applyVariant() {
 
   const toolMap = new Map(data.tools.map((tool) => [tool.id, tool]));
   const tools = variant.toolOrder.map((id) => toolMap.get(id)).filter(Boolean).slice(0, variant.maxTools);
+  const selectedSkillBulletIds = sections.flatMap((section) => section.items.map((item) => item.id));
+  const selectedExperienceBulletIds = experiences.flatMap((experience) => experience.bullets.map((bullet) => bullet.id));
+  const deprioritizedBulletIds = [...sections.flatMap((section) => section.optionalItems || []), ...experiences.flatMap((experience) => experience.detailCandidates || [])].map((bullet) => bullet.id);
+  const selectionReasonById = Object.fromEntries([...sections.flatMap((section) => section.items), ...experiences.flatMap((experience) => experience.bullets)].map((bullet) => [bullet.id, `jobAdMatchScore=${bullet.jobAdMatchScore || 0}`]));
+  const jobAdRelevance = { inputTerms: activeJobAdTerms, selectedSkillBulletIds, selectedExperienceBulletIds, deprioritizedBulletIds, unsupportedTermsRejected: [], selectionReasonById };
   const omittedTools = data.tools.filter((tool) => !tools.some((visible) => visible.id === tool.id));
   const toolsIndicator = variant.supplementaryIndicators?.tools?.enabled && omittedTools.length > 0
     ? { type: 'tools', text: variant.supplementaryIndicators.tools.text, omittedToolIds: omittedTools.map((tool) => tool.id) }
@@ -372,6 +395,7 @@ function applyVariant() {
     skillSections: sections,
     experiences,
     tools,
+    jobAdRelevance,
     supplementary: {
       candidateItems: supplementaryItems,
       renderedItems: [],
@@ -419,10 +443,11 @@ function normalizeStart(jobAd = {}) {
   let parsedValue = '';
   let confidence = Number(start.confidence || 0);
   if (start.kind === 'immediately' || /\b(per|ab)?\s*sofort\b/i.test(raw)) { parsedValue = 'Per sofort'; confidence = Math.max(confidence, 0.9); }
+  else if (start.kind === 'negotiable' && /nach\s+vereinbarung/i.test(start.sourceText || raw)) parsedValue = 'Nach Vereinbarung';
   else if (start.kind === 'date' && start.isoDate) parsedValue = `Per ${start.isoDate.split('-').reverse().join('.')}`;
   else { const m = raw.match(/(?:eintritt|start|stellenantritt)\D{0,12}(\d{1,2})\.(\d{1,2})\.(\d{4})/i); if (m) { parsedValue = `Per ${m[1].padStart(2,'0')}.${m[2].padStart(2,'0')}.${m[3]}`; confidence = Math.max(confidence, 0.9); } }
   const usedFallback = !parsedValue || confidence < 0.8;
-  return { sourceText: start.sourceText || '', parsedValue: usedFallback ? '' : parsedValue, renderedText: usedFallback ? 'Per sofort oder nach Vereinbarung' : `${parsedValue} gemäss Inserat, alternativ nach Vereinbarung`, usedFallback, confidence, visible: true, atsExtractable: true };
+  return { sourceText: start.sourceText || '', parsedValue: usedFallback ? '' : parsedValue, renderedText: usedFallback ? 'Per sofort oder nach Vereinbarung' : parsedValue, usedFallback, confidence, visible: true, atsExtractable: true };
 }
 function normalizeGreeting(jobAd = {}) {
   const c = jobAd.contact || {};
@@ -437,13 +462,15 @@ function normalizeGreeting(jobAd = {}) {
 function composePersonalizedSummary(greeting, summaryText) {
   const cleanGreeting = String(greeting || '').trim().replace(/,+$/, '') + ',';
   const text = String(summaryText || '').trim().replace(/^,+\s*/, '');
-  const safe = ['Ich bin', 'Als Mediamatiker', 'Mit meiner Erfahrung', 'Durch meine Erfahrung', 'Gerne'];
-  const matched = safe.find((prefix) => text.startsWith(prefix));
-  if (matched) {
-    const connectorText = matched.split(' ')[0].toLocaleLowerCase('de-CH');
-    return { text: `${cleanGreeting} ${connectorText}${text.slice(matched.split(' ')[0].length)}`, connectorMode: 'lowercase-continuation', connectorText };
+  if (/^Ich\s+bin\s+/u.test(text)) return { text: `${cleanGreeting} ich bin ${text.replace(/^Ich\s+bin\s+/u, '')}`, connectorMode: 'lowercase-continuation', connectorText: 'ich bin' };
+  if (/^Ich\s+/u.test(text)) return { text: `${cleanGreeting} ich ${text.replace(/^Ich\s+/u, '')}`, connectorMode: 'lowercase-continuation', connectorText: 'ich' };
+  const lowercaseContinuation = ['Als ', 'Mit ', 'Durch ', 'Gerne '].find((prefix) => text.startsWith(prefix));
+  if (lowercaseContinuation) {
+    const firstWord = lowercaseContinuation.trim();
+    const connectorText = firstWord.toLocaleLowerCase('de-CH');
+    return { text: `${cleanGreeting} ${connectorText}${text.slice(firstWord.length)}`, connectorMode: 'lowercase-continuation', connectorText };
   }
-  return { text: `${cleanGreeting} ich bin ${text.charAt(0).toLocaleLowerCase('de-CH')}${text.slice(1)}`, connectorMode: 'bridge', connectorText: 'ich bin' };
+  return { text: `${cleanGreeting} ich bin ${text}`, connectorMode: 'bridge', connectorText: 'ich bin' };
 }
 
 const cv = applyVariant();
@@ -1686,6 +1713,7 @@ metrics.reviewQueue = buildReviewQueue();
 const report = {
   success: renderer === 'playwright' && pageCount === 2 && metrics.summary.selectionSucceeded === true && metrics.summary.actualLines === metrics.summary.targetLines && metrics.overflows.length === 0 && metrics.collisions.length === 0 && metrics.warnings.length === 0 && metrics.ats.textExtractable && metrics.ats.primaryContentSuccess === true && metrics.ats.readingOrderValid === true && metrics.ats.primarySuccess === true && metrics.ats.missingTerms.length === 0 && metrics.ats.brokenTokensDetected.length === 0 && !metrics.ats.keywordStuffingRisk && !metrics.ats.hiddenTextDetected && metrics.skillsetsQuality?.renderedSkillsetCount === 4 && metrics.skillsetsQuality?.allBulletCountsWithinRange === true && metrics.skillsetsQuality?.allBulletsEvidenceBacked === true && metrics.skillsetsQuality?.uniqueIconCount === 4 && metrics.skillsetsQuality?.allIconsUsedExactlyOnce === true && metrics.skillsetsQuality?.allIconsLoaded === true && metrics.skillsetsQuality?.largestSafeIconSizeSelected === true && metrics.skillsetsQuality?.textWidthMaximized === true && metrics.skillsetsQuality?.noClippedSkillText === true && metrics.skillsetsQuality?.languageGapPx >= metrics.skillsetsQuality?.minimumLanguageGapPx && metrics.skillsetsQuality?.sectionTitle?.visible === true && metrics.skillsetsQuality?.sectionTitle?.atsExtractable === true && metrics.skillsetsQuality?.languageSpacing?.requirementPassed === true && metrics.experienceQuality?.sectionTitle?.visible === true && metrics.contactLayout?.alignmentPassed === true && metrics.contactLayout?.businessPhoneLinkValid === true && metrics.layout?.sectionTitleRuleSpacing?.requirementPassed === true && metrics.experienceQuality?.sectionTitle?.atsExtractable === true && metrics.experienceQuality?.trainingStations?.split === true && metrics.experienceQuality?.trainingStations?.bmVerified === true && metrics.experienceQuality?.breadthSummaryPolicy?.allRenderedLast === true && metrics.experienceQuality?.breadthSummaryPolicy?.allEvidenceBacked === true && (metrics.experienceQuality?.pageFill?.withinTargetRange === true || metrics.experienceQuality?.pageFill?.largestSafeContentSetSelected === true) && (metrics.experienceQuality?.crossDomainBullet?.enabled !== true || (metrics.experienceQuality.crossDomainBullet.renderedStationCount === metrics.experienceQuality.crossDomainBullet.expectedStationCount && metrics.experienceQuality.crossDomainBullet.allRenderedLast === true && metrics.experienceQuality.crossDomainBullet.allStationsHaveMinimumSubstantiveBullets === true && metrics.experienceQuality.crossDomainBullet.insufficientSubstantiveExperienceIds.length === 0)),
   variant: variantId,
+  selectedVariant: variantId,
   renderer,
   renderedAt: new Date().toISOString(),
   durationMs: Math.round(performance.now() - started),
@@ -1706,6 +1734,7 @@ const report = {
   summary: metrics.summary,
   targetRoleFamily: cv.targetRoleFamily,
   jobAdPersonalization: metrics.jobAdPersonalization,
+  jobAdRelevance: cv.jobAdRelevance,
   skillsetsQuality: metrics.skillsetsQuality,
   experienceQuality: metrics.experienceQuality,
   experienceLocationStyles: metrics.experienceLocationStyles,
