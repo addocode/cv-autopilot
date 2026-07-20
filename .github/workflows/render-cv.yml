@@ -56,6 +56,26 @@ jobs:
           echo "exit_code=${code}" >> "$GITHUB_OUTPUT"
           echo "test:render exit code: ${code}"
           exit 0
+      - name: Run controlled Parlamentsdienste live application
+        id: live_application
+        shell: bash
+        run: |
+          mkdir -p dist
+          set +e
+          set -o pipefail
+          node scripts/create-application.mjs \
+            --job-ad live-tests/2026-07-21_parlamentsdienste_admin-sachbearbeiter-fk.txt \
+            --extracted-context live-tests/2026-07-21_parlamentsdienste_admin-sachbearbeiter-fk.context.json \
+            --source-url "https://jobs.admin.ch/offene-stellen/admin-sachbearbeiter-in-fk/3e61cd45-dc24-4854-b6c8-20aeed29a993" \
+            --source-type url \
+            --application-date 2026-07-21 \
+            --timestamp 2026-07-21T00:00:00+02:00 \
+            2>&1 | tee dist/live-application-command.log
+          code=${PIPESTATUS[0]}
+          echo "${code}" > dist/live-application-exit-code.txt
+          echo "exit_code=${code}" >> "$GITHUB_OUTPUT"
+          echo "live application exit code: ${code}"
+          exit 0
       - name: Write command status
         if: always()
         env:
@@ -83,12 +103,17 @@ jobs:
             dist/render-tests-command.log
             dist/command-status.json
             dist/render-all-exit-diagnostic.json
-      - name: Fail if render or render tests failed
+            dist/live-application-command.log
+            dist/live-application-exit-code.txt
+            applications/**
+            exports/**
+      - name: Fail if render, render tests or live application failed
         if: >-
           always() &&
           (
             steps.render_all.outputs.exit_code != '0' ||
-            steps.render_tests.outputs.exit_code != '0'
+            steps.render_tests.outputs.exit_code != '0' ||
+            steps.live_application.outputs.exit_code != '0'
           )
         shell: bash
         run: |
@@ -96,8 +121,12 @@ jobs:
           echo "${{ steps.render_all.outputs.exit_code }}"
           echo "test:render exit code:"
           echo "${{ steps.render_tests.outputs.exit_code }}"
+          echo "live application exit code:"
+          echo "${{ steps.live_application.outputs.exit_code }}"
           echo "Last render-all output:"
           tail -n 100 dist/render-all-command.log || true
           echo "Last render-test output:"
           tail -n 200 dist/render-tests-command.log || true
+          echo "Last live-application output:"
+          tail -n 200 dist/live-application-command.log || true
           exit 1
