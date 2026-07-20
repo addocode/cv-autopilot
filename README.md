@@ -42,6 +42,20 @@ npm run render -- --variant administration-gever
 npm run render -- --variant cms-web-process
 ```
 
+
+## Bewerbungsakte pro Stelleninserat
+
+Für ein konkretes, lokal vorliegendes Stelleninserat erzeugt der deterministische Archivierungsworkflow einen privaten Bewerbungsordner unter `applications/YYYY-MM-DD_<arbeitgeber-slug>_<stellen-slug>/`. Der Ordner enthält die lesbare Stellenakte, den maschinenlesbaren Anwendungskontext, die gerenderte CV-PDF, die HTML-Vorschau, ein Integritätsmanifest und die unveränderte Quelldatei. `applications/` ist absichtlich git-ignoriert, weil dort reale Bewerbungs- und Kontaktdaten liegen können.
+
+```bash
+node scripts/create-application.mjs \
+  --job-ad fixtures/real-job-ad.txt \
+  --source-url "https://example.invalid/inserat" \
+  --application-date 2026-07-20
+```
+
+Der Workflow überschreibt keine neutralen Produktionsartefakte wie `dist/Lebenslauf_Adam-Dolinsky_general.pdf`; anwendungsspezifische Render-Zwischenergebnisse verwenden die Bewerbungs-ID als Suffix und werden danach in den privaten Bewerbungsordner kopiert.
+
 ## Varianten
 
 - `general`
