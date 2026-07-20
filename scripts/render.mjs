@@ -7,6 +7,7 @@ const load = (path) => JSON.parse(readFileSync(path, 'utf8'));
 const esc = (value) => String(value).replace(/[&<>]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[char]);
 const arg = process.argv.indexOf('--variant');
 const variantId = arg >= 0 ? process.argv[arg + 1] : 'general';
+const previewOnly = process.argv.includes('--preview-only');
 mkdirSync('dist', { recursive: true });
 const staleFiles = [
   `dist/render-failure-${variantId}.json`,
@@ -405,6 +406,16 @@ function html() {
 
 const htmlPath = `dist/cv-${variantId}-preview.html`;
 writeFileSync(htmlPath, html());
+
+if (previewOnly) {
+  console.log(JSON.stringify({
+    variant: variantId,
+    previewOnly: true,
+    previewPath: `dist/cv-${variantId}-preview.html`,
+  }));
+  process.exitCode = 0;
+  process.exit();
+}
 
 let renderStage = 'startup';
 let browser = null;
