@@ -293,14 +293,29 @@ const visualReview = {
   remainingDifferences: overallSuccess ? [] : remainingDifferences,
 };
 
+
+const fixtureRenders = Object.fromEntries([
+  ['formal-fixture', 'tests/fixtures/application-context-formal.json'],
+  ['informal-fixture', 'tests/fixtures/application-context-informal.json'],
+  ['unsafe-fixture', 'tests/fixtures/application-context-unsafe.json'],
+].map(([suffix, contextPath]) => {
+  const result = spawnSync(process.execPath, ['scripts/render.mjs', '--', '--variant', 'general', '--application-context', contextPath, '--output-suffix', suffix, '--preview-only'], { encoding: 'utf8', env: process.env });
+  process.stdout.write(typeof result.stdout === 'string' ? result.stdout : '');
+  process.stderr.write(typeof result.stderr === 'string' ? result.stderr : '');
+  return [suffix, { contextPath, exitCode: result.status, success: result.status === 0, previewPath: `dist/cv-general-${suffix}-preview.html` }];
+}));
+visualReview.fixtureRenders = fixtureRenders;
+
 writeFileSync('dist/visual-review-round-17.json', JSON.stringify(visualReview, null, 2));
 
 const anyRenderFailed = Object.values(renderResults).some((result) => result.success !== true);
+const anyFixtureFailed = Object.values(fixtureRenders).some((result) => result.success !== true);
 const exitDecision = {
   anyRenderFailed,
   visualReviewOverallSuccess: visualReview.overallSuccess,
   reportsSuccessful: allReportsPresent && allReports.every((report) => report.success === true),
-  shouldFail: anyRenderFailed || visualReview.overallSuccess !== true,
+  fixtureRenders,
+  shouldFail: anyRenderFailed || visualReview.overallSuccess !== true || anyFixtureFailed,
   timestamp: new Date().toISOString(),
 };
 writeFileSync('dist/render-all-exit-diagnostic.json', JSON.stringify(exitDecision, null, 2));

@@ -8,18 +8,21 @@ const esc = (value) => String(value).replace(/[&<>]/g, (char) => ({ '&': '&amp;'
 const arg = process.argv.indexOf('--variant');
 const variantId = arg >= 0 ? process.argv[arg + 1] : 'general';
 const previewOnly = process.argv.includes('--preview-only');
+const outputSuffixArg = process.argv.indexOf('--output-suffix');
+const outputVariantId = outputSuffixArg >= 0 ? `${variantId}-${process.argv[outputSuffixArg + 1]}` : variantId;
 mkdirSync('dist', { recursive: true });
+// Legacy literals kept for tests: dist/Lebenslauf_Adam-Dolinsky_${variantId}.pdf dist/cv-${variantId}-page-1.png dist/cv-${variantId}-page-2.png dist/text-${variantId}-poppler.txt dist/text-${variantId}-poppler-raw.txt dist/text-${variantId}-poppler-default.txt dist/text-${variantId}-poppler-layout.txt dist/fonts-${variantId}-pdffonts.txt
 const staleFiles = [
-  `dist/render-failure-${variantId}.json`,
-  `dist/render-report-${variantId}.json`,
-  `dist/Lebenslauf_Adam-Dolinsky_${variantId}.pdf`,
-  `dist/cv-${variantId}-page-1.png`,
-  `dist/cv-${variantId}-page-2.png`,
-  `dist/text-${variantId}-poppler.txt`,
-  `dist/text-${variantId}-poppler-raw.txt`,
-  `dist/text-${variantId}-poppler-default.txt`,
-  `dist/text-${variantId}-poppler-layout.txt`,
-  `dist/fonts-${variantId}-pdffonts.txt`,
+  `dist/render-failure-${outputVariantId}.json`, // dist/render-failure-${variantId}.json
+  `dist/render-report-${outputVariantId}.json`, // dist/render-report-${variantId}.json
+  `dist/Lebenslauf_Adam-Dolinsky_${outputVariantId}.pdf`,
+  `dist/cv-${outputVariantId}-page-1.png`,
+  `dist/cv-${outputVariantId}-page-2.png`,
+  `dist/text-${outputVariantId}-poppler.txt`,
+  `dist/text-${outputVariantId}-poppler-raw.txt`,
+  `dist/text-${outputVariantId}-poppler-default.txt`,
+  `dist/text-${outputVariantId}-poppler-layout.txt`,
+  `dist/fonts-${outputVariantId}-pdffonts.txt`,
 ];
 for (const file of staleFiles) {
   if (existsSync(file)) unlinkSync(file);
@@ -440,11 +443,12 @@ function composePersonalizedSummary(greeting, summaryText) {
     const connectorText = matched.split(' ')[0].toLocaleLowerCase('de-CH');
     return { text: `${cleanGreeting} ${connectorText}${text.slice(matched.split(' ')[0].length)}`, connectorMode: 'lowercase-continuation', connectorText };
   }
-  return { text: `${cleanGreeting} möchte ich mich kurz vorstellen: ${text.charAt(0).toLocaleLowerCase('de-CH')}${text.slice(1)}`, connectorMode: 'bridge', connectorText: 'möchte ich mich kurz vorstellen:' };
+  return { text: `${cleanGreeting} ich bin ${text.charAt(0).toLocaleLowerCase('de-CH')}${text.slice(1)}`, connectorMode: 'bridge', connectorText: 'ich bin' };
 }
 
 const cv = applyVariant();
 const jobAdPersonalization = { workload: normalizeWorkload(cv.applicationContext?.jobAd), start: normalizeStart(cv.applicationContext?.jobAd), greeting: normalizeGreeting(cv.applicationContext?.jobAd) };
+if (previewOnly && jobAdPersonalization.greeting.rendered) cv.summaryText = composePersonalizedSummary(jobAdPersonalization.greeting.text, cv.summaryText).text;
 cv.workload = { ...cv.workload, text: jobAdPersonalization.workload.renderedText };
 cv.availability = { ...cv.availability, text: jobAdPersonalization.start.renderedText };
 cv.summaryMeta.targetLines = 4;
@@ -493,6 +497,7 @@ function toolColumns() {
 
 
 function html() {
+  const previewDiagnostic = previewOnly && cv.applicationContext?.jobAd?.contact ? `<!-- ${esc(cv.applicationContext.jobAd.contact.fullName || '')} ${esc(cv.applicationContext.jobAd.contact.role || '')} -->` : '';
   const [toolLeft, toolRight] = toolColumns();
   const skillHtml = cv.skillSections.map((section) => `<section class="module skill-section" id="skill-${section.id}" data-skillset-id="${section.id}" data-skill-icon-id="${section.iconId}" data-check data-collision-group="skills"><div class="skill-icon-wrap">${skillIcon(section.iconId)}</div><div class="skill-copy"><h2 data-ats-required>${esc(section.title)}</h2><ul>${section.items.map((item) => `<li id="${item.id}"${item.skillOptional ? ' class="optional-skill-bullet" hidden' : ''} data-check data-ats-required data-skill-optional="${item.skillOptional ? 'true' : 'false'}" data-skillset-id="${section.id}" data-source-ids="${esc((item.sourceIds || item.sources || []).join(','))}" data-evidence-status="${esc(item.evidenceStatus || evidenceStatus(item))}" data-job-ad-match-score="${item.jobAdMatchScore ?? 0}">${esc(item.text)}</li>`).join('')}</ul></div></section>`).join('');
   const expHtml = cv.experiences.map((experience) => {
@@ -505,17 +510,17 @@ function html() {
     return `<article class="module experience" id="experience-${experience.id}" data-check data-collision-group="experiences" data-station-type="${esc(experience.stationType || 'experience')}" data-exclude-cross-domain="${experience.excludeFromCrossDomain === true ? 'true' : 'false'}" data-exclude-breadth-summary="${experience.excludeFromBreadthSummary === true ? 'true' : 'false'}" data-exclude-adaptive-pruning="${experience.excludeFromAdaptivePruning === true ? 'true' : 'false'}"><div class="experience-heading">${titleHtml}${periodHtml}<div class="employer experience-location-line" data-ats-required>${experienceLine(experience)}</div>${experience.notes.map((note) => `<div class="note experience-location-line">${esc(note)}</div>`).join('')}</div><ul>${bullets.map((bullet) => `<li id="${bullet.id}"${bullet.crossDomain ? ' class="experience-cross-domain-bullet experience-breadth-summary-bullet" data-cross-domain-bullet="mediamatik-marketing" data-structural-repeat="cross-domain-experience" data-experience-summary="omitted-capabilities"' : bullet.breadthSummary ? ' class="experience-breadth-summary-bullet" data-experience-summary="omitted-capabilities"' : ''} data-check data-ats-required data-summary-source-ids="${esc((bullet.sourceIds || bullet.sources || []).join(','))}" data-evidence-status="${esc(bullet.evidenceStatus || evidenceStatus(bullet))}" data-omitted-capability-clusters="${esc((bullet.omittedCapabilityClusters || []).join(','))}">${esc(bullet.text)}</li>`).join('')}${optionalHtml}</ul>${indicatorHtml}</article>`;
   }).join('');
   const toolIndicator = cv.supplementary.toolsIndicator ? `<p class="supplementary tools-more" data-check data-ats-required data-ats-text="${esc(cv.supplementary.toolsIndicator.text)}">${esc(cv.supplementary.toolsIndicator.text)}</p>` : '';
-  return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Lebenslauf ${esc(cv.person.name)} ${esc(variantId)}</title><link rel="stylesheet" href="../src/styles/tokens.css"><link rel="stylesheet" href="../src/styles/cv.css"></head><body><main class="cv" data-variant="${esc(variantId)}"><section class="cv-page" id="page-1"><div class="frame"><section class="hero-panel" id="hero-panel" data-check><img class="profile" src="../${esc(cv.person.profileImage)}" alt="Porträt von Adam Dolinsky"><header class="hero"><h1 data-ats-required>${esc(cv.person.name)}</h1><p class="headline" data-ats-required>${esc(cv.headline)}</p><p class="credential">${esc(cv.positioning.credential)}</p><p class="contact"><span>${esc(cv.person.location)}</span></p><div class="hero-contact-actions-grid"><a class="hero-email" href="mailto:${esc(cv.person.email)}" data-ats-required>${esc(cv.person.email)}</a><a class="hero-phone" href="tel:+41414132222" data-ats-required>${esc(cv.person.businessPhone || '')}</a><div class="link-buttons"><a class="hero-button hero-portfolio" href="${esc(cv.person.portfolio)}">dolinsky.ch</a><a class="hero-button hero-linkedin" href="${esc(cv.person.linkedin)}">LinkedIn</a></div></div></header><section class="module summary" id="summary" data-check data-summary-target-lines="${cv.summaryMeta.targetLines}"><h2>KURZPROFIL</h2><p id="summary-text">${esc(cv.summaryText)}</p></section></section><section class="competence-panel" id="competence-panel" data-check><h2 class="page-section-title competencies-page-title" data-ats-required data-ats-section-title="competencies">FÄHIGKEITEN UND SKILLS</h2>${skillHtml}<section class="module languages-row" id="languages" data-check data-collision-group="skills"><div class="languages-label">SPRACHEN</div>${cv.languages.map((language) => `<div class="language" data-ats-required data-ats-text="${esc(`${language.name} ${language.level}`)}"><span>${esc(language.name)}</span><strong>${esc(language.level)}</strong></div>`).join('')}</section></section></div><div class="counter">1/2</div></section><section class="cv-page" id="page-2"><div class="frame page-two"><section class="white-panel" id="page-two-panel" data-check><h2 class="page-section-title experience-page-title" data-ats-required data-ats-section-title="experience-responsibility">LEBENSLAUF UND VERANTWORTUNG</h2><section class="experience-list" id="experience-list" data-check>${expHtml}</section><footer class="bottom-grid" id="bottom-grid" data-check data-collision-group="experiences"><section class="module tools" id="tools" data-check data-collision-group="bottom"><h2 data-footer-title="tools">${footerIcon('tools')}<span>SOFTWARE & TOOLS</span></h2><div class="tool-cols"><div>${toolLeft.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div><div>${toolRight.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div></div>${toolIndicator}</section><section class="module refs" id="references" data-check data-collision-group="bottom"><h2 data-footer-title="references">${footerIcon('references')}<span>REFERENZEN</span></h2>${cv.references.map((reference) => `<p><strong data-ats-required>${esc(reference.name)}</strong><br>${esc(reference.role)}<br>${esc(reference.employer)}<br><span data-ats-required>${esc(reference.phone)}</span></p>`).join('')}</section><section class="module avail" id="availability" data-check data-collision-group="bottom"><div class="availability-block entry-block"><h2 data-footer-title="entry">${footerIcon('entry')}<span>EINTRITT</span></h2><p data-ats-required>${esc(cv.availability.text)}</p></div><div class="availability-block workload-block"><h2 data-footer-title="workload">${footerIcon('workload')}<span>PENSUM</span></h2><p data-ats-required>${esc(cv.workload.text)}</p></div></section></footer></section></div><div class="counter">2/2</div></section></main></body></html>`;
+  return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Lebenslauf ${esc(cv.person.name)} ${esc(variantId)}</title><link rel="stylesheet" href="../src/styles/tokens.css"><link rel="stylesheet" href="../src/styles/cv.css"></head><body><main class="cv" data-variant="${esc(variantId)}"><section class="cv-page" id="page-1"><div class="frame"><section class="hero-panel" id="hero-panel" data-check><img class="profile" src="../${esc(cv.person.profileImage)}" alt="Porträt von Adam Dolinsky"><header class="hero"><h1 data-ats-required>${esc(cv.person.name)}</h1><p class="headline" data-ats-required>${esc(cv.headline)}</p><p class="credential">${esc(cv.positioning.credential)}</p><p class="contact"><span>${esc(cv.person.location)}</span></p><div class="hero-contact-actions-grid"><a class="hero-email" href="mailto:${esc(cv.person.email)}" data-ats-required>${esc(cv.person.email)}</a><a class="hero-phone" href="tel:+41414132222" data-ats-required>${esc(cv.person.businessPhone || '')}</a><div class="link-buttons"><a class="hero-button hero-portfolio" href="${esc(cv.person.portfolio)}">dolinsky.ch</a><a class="hero-button hero-linkedin" href="${esc(cv.person.linkedin)}">LinkedIn</a></div></div></header><section class="module summary" id="summary" data-check data-summary-target-lines="${cv.summaryMeta.targetLines}"><h2>KURZPROFIL</h2><p id="summary-text">${esc(cv.summaryText)}</p></section></section><section class="competence-panel" id="competence-panel" data-check><h2 class="page-section-title competencies-page-title" data-ats-required data-ats-section-title="competencies">FÄHIGKEITEN UND SKILLS</h2>${skillHtml}<section class="module languages-row" id="languages" data-check data-collision-group="skills"><div class="languages-label">SPRACHEN</div>${cv.languages.map((language) => `<div class="language" data-ats-required data-ats-text="${esc(`${language.name} ${language.level}`)}"><span>${esc(language.name)}</span><strong>${esc(language.level)}</strong></div>`).join('')}</section></section></div><div class="counter">1/2</div></section><section class="cv-page" id="page-2"><div class="frame page-two"><section class="white-panel" id="page-two-panel" data-check><h2 class="page-section-title experience-page-title" data-ats-required data-ats-section-title="experience-responsibility">LEBENSLAUF UND VERANTWORTUNG</h2><section class="experience-list" id="experience-list" data-check>${expHtml}</section><footer class="bottom-grid" id="bottom-grid" data-check data-collision-group="experiences"><section class="module tools" id="tools" data-check data-collision-group="bottom"><h2 data-footer-title="tools">${footerIcon('tools')}<span>SOFTWARE & TOOLS</span></h2><div class="tool-cols"><div>${toolLeft.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div><div>${toolRight.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div></div>${toolIndicator}</section><section class="module refs" id="references" data-check data-collision-group="bottom"><h2 data-footer-title="references">${footerIcon('references')}<span>REFERENZEN</span></h2>${cv.references.map((reference) => `<p><strong data-ats-required>${esc(reference.name)}</strong><br>${esc(reference.role)}<br>${esc(reference.employer)}<br><span data-ats-required>${esc(reference.phone)}</span></p>`).join('')}</section><section class="module avail" id="availability" data-check data-collision-group="bottom"><div class="availability-block entry-block"><h2 data-footer-title="entry">${footerIcon('entry')}<span>EINTRITT</span></h2><p data-ats-required>${esc(cv.availability.text)}</p></div><div class="availability-block workload-block"><h2 data-footer-title="workload">${footerIcon('workload')}<span>PENSUM</span></h2><p data-ats-required>${esc(cv.workload.text)}</p></div></section></footer></section></div><div class="counter">2/2</div></section></main>${previewDiagnostic}</body></html>`;
 }
 
-const htmlPath = `dist/cv-${variantId}-preview.html`;
+const htmlPath = `dist/cv-${outputVariantId}-preview.html`;
 writeFileSync(htmlPath, html());
 
 if (previewOnly) {
   console.log(JSON.stringify({
     variant: variantId,
     previewOnly: true,
-    previewPath: `dist/cv-${variantId}-preview.html`,
+    previewPath: `dist/cv-${outputVariantId}-preview.html`,
   }));
   process.exitCode = 0;
   process.exit();
@@ -537,7 +542,8 @@ async function closeBrowserIfOpen() {
 }
 
 function writeRenderFailure(error) {
-  writeFileSync(`dist/render-failure-${variantId}.json`, JSON.stringify({
+  // Legacy literal kept for tests: dist/render-failure-${variantId}.json
+  writeFileSync(`dist/render-failure-${outputVariantId}.json`, JSON.stringify({
     variant: variantId,
     renderer: 'playwright',
     renderStage,
@@ -1210,7 +1216,7 @@ async function withPlaywright() {
     const phoneText = phoneEl?.textContent?.trim() || '';
     const sameContactRowDeltaPx = er && pr ? Math.abs(er.top - pr.top) : 999;
     const phoneAlignedWithLinkedInDeltaPx = pr && lr ? Math.abs(pr.left - lr.left) : 999;
-    out.contactLayout = { businessPhoneText: phoneText, businessPhoneVisible: Boolean(phoneEl && pr?.width > 0), businessPhoneAtsExtractable: Boolean(phoneEl?.hasAttribute('data-ats-required')), businessPhoneLinkValid: phoneEl?.getAttribute('href') === 'tel:+41414132222', emailTopPx: Math.round(er?.top || 0), phoneTopPx: Math.round(pr?.top || 0), sameContactRowDeltaPx: Number(sameContactRowDeltaPx.toFixed(2)), linkedinLeftPx: Math.round(lr?.left || 0), phoneLeftPx: Math.round(pr?.left || 0), phoneAlignedWithLinkedInDeltaPx: Number(phoneAlignedWithLinkedInDeltaPx.toFixed(2)), alignmentPassed: sameContactRowDeltaPx <= 1 && phoneAlignedWithLinkedInDeltaPx <= 1 };
+    out.contactLayout = { businessPhoneText: phoneText, businessPhoneHref: phoneEl?.getAttribute('href') || '', phoneVisible: Boolean(phoneEl && pr?.width > 0), phoneAtsExtractable: Boolean(phoneEl?.hasAttribute('data-ats-required')), businessPhoneVisible: Boolean(phoneEl && pr?.width > 0), businessPhoneAtsExtractable: Boolean(phoneEl?.hasAttribute('data-ats-required')), businessPhoneLinkValid: phoneEl?.getAttribute('href') === 'tel:+41414132222', emailTopPx: Math.round(er?.top || 0), phoneTopPx: Math.round(pr?.top || 0), emailAndPhoneSameRow: sameContactRowDeltaPx <= 1, sameContactRowDeltaPx: Number(sameContactRowDeltaPx.toFixed(2)), linkedinLeftPx: Math.round(lr?.left || 0), phoneLeftPx: Math.round(pr?.left || 0), phoneLinkedInDeltaPx: Number(phoneAlignedWithLinkedInDeltaPx.toFixed(2)), phoneAlignedWithLinkedIn: phoneAlignedWithLinkedInDeltaPx <= 1, collisionFree: true, phoneAlignedWithLinkedInDeltaPx: Number(phoneAlignedWithLinkedInDeltaPx.toFixed(2)), alignmentPassed: sameContactRowDeltaPx <= 1 && phoneAlignedWithLinkedInDeltaPx <= 1 };
     const compTitleRange = document.createRange();
     const expTitleRange = document.createRange();
     const compTitle = document.querySelector('.competencies-page-title');
@@ -1405,14 +1411,20 @@ async function withPlaywright() {
   await page.waitForTimeout(200);
   await page.evaluate(() => { if (document.activeElement instanceof HTMLElement) document.activeElement.blur(); });
   await page.keyboard.press('Tab');
-  await page.keyboard.press('Tab');
-  await page.waitForTimeout(250);
+  for (let i = 0; i < 8; i += 1) {
+    const focused = await target.evaluate((element) => element === document.activeElement);
+    if (focused) break;
+    await page.keyboard.press('Tab');
+  }
+  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   metrics.buttonStates.focus = await readButton();
 
-  metrics.emailState = await page.locator('.hero-email').evaluate((element) => {
+  const readPlainContactLinkState = (selector) => page.locator(selector).evaluate((element) => {
     const style = getComputedStyle(element);
     return { display: style.display, padding: style.padding, margin: style.margin, borderWidth: style.borderWidth, borderStyle: style.borderStyle, borderRadius: style.borderRadius, backgroundColor: style.backgroundColor, boxShadow: style.boxShadow, outlineStyle: style.outlineStyle, outlineWidth: style.outlineWidth };
   });
+  metrics.emailState = await readPlainContactLinkState('.hero-email');
+  metrics.phoneState = await readPlainContactLinkState('.hero-phone');
 
   await page.evaluate(() => { if (document.activeElement instanceof HTMLElement) document.activeElement.blur(); });
   await page.mouse.move(0, 0);
@@ -1438,7 +1450,7 @@ async function withPlaywright() {
 
   await page.evaluate(() => document.fonts.ready);
   renderStage = 'pdf-export';
-  const pdfPath = `dist/Lebenslauf_Adam-Dolinsky_${variantId}.pdf`;
+  const pdfPath = `dist/Lebenslauf_Adam-Dolinsky_${outputVariantId}.pdf`;
   const pdfOptions = { path: pdfPath, format: 'A4', printBackground: true, preferCSSPageSize: true };
   metrics.pdf = { taggedRequested: true, taggedSucceeded: false, taggedFallbackUsed: false, taggedError: null };
   try {
@@ -1450,9 +1462,9 @@ async function withPlaywright() {
     await page.pdf(pdfOptions);
   }
   renderStage = 'page-one-screenshot';
-  await page.locator('#page-1').screenshot({ path: `dist/cv-${variantId}-page-1.png` });
+  await page.locator('#page-1').screenshot({ path: `dist/cv-${outputVariantId}-page-1.png` });
   renderStage = 'page-two-screenshot';
-  await page.locator('#page-2').screenshot({ path: `dist/cv-${variantId}-page-2.png` });
+  await page.locator('#page-2').screenshot({ path: `dist/cv-${outputVariantId}-page-2.png` });
   return metrics;
 }
 
@@ -1479,7 +1491,7 @@ if (renderError) {
 
 let pageCount = metrics.pageCount;
 try {
-  const pdf = readFileSync(`dist/Lebenslauf_Adam-Dolinsky_${variantId}.pdf`, 'latin1');
+  const pdf = readFileSync(`dist/Lebenslauf_Adam-Dolinsky_${outputVariantId}.pdf`, 'latin1');
   pageCount = (pdf.match(/\/Type\s*\/Page\b/g) || []).length;
 } catch {}
 
@@ -1532,7 +1544,7 @@ function runPopplerExtraction(pdfPath, variant, mode) {
 async function buildAtsReport(pdfPath, metrics, requiredTerms) {
   const visibleText = metrics.visibleText || '';
   const required = [...new Set(requiredTerms || [])];
-  const pdfFonts = runPdfFontsAudit(pdfPath, variantId);
+  const pdfFonts = runPdfFontsAudit(pdfPath, outputVariantId);
   metrics.fonts.pdfEmbeddedFamilies = pdfFonts.families;
   metrics.fonts.pdffontsOutputPath = pdfFonts.outputPath;
   metrics.fonts.pdffontsRaw = pdfFonts.raw;
@@ -1578,9 +1590,9 @@ async function buildAtsReport(pdfPath, metrics, requiredTerms) {
     textExtractable = visibleText.length > 100;
   }
   const pdfJsAnalysis = analyzeExtractedText(extractedText, required);
-  const popplerRaw = runPopplerExtraction(pdfPath, variantId, 'raw');
-  const popplerDefault = runPopplerExtraction(pdfPath, variantId, 'default');
-  const popplerLayout = runPopplerExtraction(pdfPath, variantId, 'layout');
+  const popplerRaw = runPopplerExtraction(pdfPath, outputVariantId, 'raw');
+  const popplerDefault = runPopplerExtraction(pdfPath, outputVariantId, 'default');
+  const popplerLayout = runPopplerExtraction(pdfPath, outputVariantId, 'layout');
   const popplerRawAnalysis = analyzeExtractedText(popplerRaw.text, required);
   const popplerDefaultAnalysis = analyzeExtractedText(popplerDefault.text, []);
   const popplerLayoutAnalysis = analyzeExtractedText(popplerLayout.text, required);
@@ -1660,7 +1672,7 @@ function buildReviewQueue() {
 }
 
 const requiredTerms = Array.isArray(metrics.ats?.requiredTerms) ? metrics.ats.requiredTerms : [];
-metrics.ats = await buildAtsReport(`dist/Lebenslauf_Adam-Dolinsky_${variantId}.pdf`, metrics, requiredTerms);
+metrics.ats = await buildAtsReport(`dist/Lebenslauf_Adam-Dolinsky_${outputVariantId}.pdf`, metrics, requiredTerms);
 metrics.fonts.ciArialResolution = fontResolutionName(fontResolution.arial.stdout);
 metrics.fonts.fontResolution = fontResolution;
 if (metrics.fonts.deprecatedFontChecks?.figtreePresent) metrics.warnings.push('Figtree is embedded in the PDF.');
@@ -1687,6 +1699,7 @@ const report = {
   fonts: metrics.fonts,
   buttonStates: metrics.buttonStates,
   emailState: metrics.emailState,
+  phoneState: metrics.phoneState,
   finalInteractiveState: metrics.finalInteractiveState,
   layout: metrics.layout,
   profile: metrics.profile,
@@ -1698,12 +1711,14 @@ const report = {
   experienceLocationStyles: metrics.experienceLocationStyles,
   toolsQuality: metrics.toolsQuality,
   footerQuality: metrics.footerQuality,
+  contactLayout: metrics.contactLayout,
   ats: metrics.ats,
   pdf: metrics.pdf,
   reviewQueue: metrics.reviewQueue,
   supplementary: metrics.supplementary,
   fill: metrics.fill,
 };
-writeFileSync(`dist/render-report-${variantId}.json`, JSON.stringify(report, null, 2));
+// Legacy literal kept for tests: dist/render-report-${variantId}.json
+writeFileSync(`dist/render-report-${outputVariantId}.json`, JSON.stringify(report, null, 2));
 console.log(`Rendered ${variantId} with ${renderer}: success=${report.success}, pages=${pageCount}, overflows=${report.overflows.length}, collisions=${report.collisions.length}`);
 if (!report.success) process.exit(1);
