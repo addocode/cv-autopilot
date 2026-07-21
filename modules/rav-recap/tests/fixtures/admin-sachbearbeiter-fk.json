@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "applicationId": "2026-07-21_parlamentsdienste_admin-sachbearbeiter-fk",
+  "applicationDate": "21.07.2026",
+  "applicationMethod": "Elektronisch",
+  "company": {
+    "name": "Parlamentsdienste PD",
+    "street": "Bundesplatz",
+    "number": "3",
+    "poBox": "Kein Postfach",
+    "country": "Schweiz",
+    "postalCode": "3003",
+    "city": "Bern",
+    "contactPerson": "Martina Probst",
+    "email": "fk.cdf@parl.admin.ch",
+    "phone": "+41 58 322 94 77"
+  },
+  "job": {
+    "title": "Admin. Sachbearbeiter FK",
+    "applicationUrl": "https://jobs.admin.ch/offene-stellen/admin-sachbearbeiter-in-fk/3e61cd45-dc24-4854-b6c8-20aeed29a993",
+    "advertisedWorkload": "80%"
+  },
+  "ravAssignment": "Nein",
+  "workloadCategory": "Teilzeit",
+  "result": "Noch offen",
+  "instructions": [
+    "Bei Wie haben Sie sich beworben Elektronisch auswählen.",
+    "Bei Zuweisung des RAV Nein auswählen.",
+    "Beim Pensum Teilzeit auswählen, da das Inserat ein fixes Pensum von 80% nennt.",
+    "Beim Ergebnis Noch offen auswählen.",
+    "Falls die Bewerbung an einem anderen Datum eingereicht wurde, nur das Bewerbungsdatum anpassen."
+  ],
+  "sources": [
+    {
+      "field": "job.applicationUrl",
+      "status": "job_ad_explicit",
+      "value": "https://jobs.admin.ch/offene-stellen/admin-sachbearbeiter-in-fk/3e61cd45-dc24-4854-b6c8-20aeed29a993",
+      "reason": "Direkte offizielle Stellenanzeige auf jobs.admin.ch.",
+      "url": "https://jobs.admin.ch/offene-stellen/admin-sachbearbeiter-in-fk/3e61cd45-dc24-4854-b6c8-20aeed29a993",
+      "confidence": 1
+    },
+    {
+      "field": "company.contactPerson",
+      "status": "job_ad_explicit",
+      "value": "Martina Probst",
+      "reason": "Im Inserat als Leiterin administratives Sekretariat FK und Kontakt für Stellenfragen genannt.",
+      "url": "https://jobs.admin.ch/offene-stellen/admin-sachbearbeiter-in-fk/3e61cd45-dc24-4854-b6c8-20aeed29a993",
+      "confidence": 1
+    },
+    {
+      "field": "company.email",
+      "status": "official_research",
+      "value": "fk.cdf@parl.admin.ch",
+      "reason": "Offizielle Funktionsadresse des administrativen Sekretariats der Finanzkommissionen.",
+      "url": "https://www.parlament.ch/de/organe/kommissionen/aufsichtskommissionen/kommissionen-fk",
+      "confidence": 1
+    },
+    {
+      "field": "company.phone",
+      "status": "official_research",
+      "value": "+41 58 322 94 77",
+      "reason": "Offizielle Direktnummer von Martina Probst beim administrativen Sekretariat der Finanzkommissionen.",
+      "url": "https://www.parlament.ch/de/organe/kommissionen/aufsichtskommissionen/kommissionen-fk",
+      "confidence": 1
+    },
+    {
+      "field": "company.address",
+      "status": "official_research",
+      "value": "Bundesplatz 3, 3003 Bern",
+      "reason": "Arbeitsort Bundeshaus; das Parlamentsgebäude befindet sich am Bundesplatz 3. Die Parlamentsdienste verwenden postalisch CH-3003 Bern.",
+      "url": "https://www.parlament.ch/de/services/kontakt",
+      "confidence": 0.97
+    },
+    {
+      "field": "company.poBox",
+      "status": "fallback_required_field",
+      "value": "Kein Postfach",
+      "reason": "Kein Postfach in den offiziellen Angaben vorhanden; Pflichtfeld darf nicht leer bleiben.",
+      "confidence": 1
+    }
+  ]
+}
