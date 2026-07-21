@@ -1,0 +1,27 @@
+{
+  "success": true,
+  "pageCount": 1,
+  "fixtureId": "admin-sachbearbeiter-fk-golden",
+  "jobTitleRendered": "Admin. Sachbearbeiter FK",
+  "generationDate": "2026-07-21",
+  "referenceVisible": true,
+  "referenceValue": "JRQ$540-19713",
+  "referenceFontSizePt": 8,
+  "dateFontSizePt": 8,
+  "brandBlue": "#15519F",
+  "dateAlignedWithSalutation": true,
+  "bodyStartWithinGuides": true,
+  "uniformTopBar": true,
+  "uniformSideRails": true,
+  "maxFrameDeviationPx": 1,
+  "overflows": [],
+  "collisions": [],
+  "unsupportedClaims": [],
+  "content": {
+    "quereinstiegHonest": true,
+    "actaNovaPresent": true,
+    "longTermSignalUsed": true,
+    "genericPhraseRisk": false
+  },
+  "manualApprovalRequired": true
+}
