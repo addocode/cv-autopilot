@@ -1,0 +1,26 @@
+{
+  "success": true,
+  "ravRecapStandard": "approved-mobile-v1",
+  "schemaVersion": 1,
+  "fixtureId": "admin-sachbearbeiter-fk",
+  "applicationId": "2026-07-21_parlamentsdienste_admin-sachbearbeiter-fk",
+  "requiredFieldsComplete": true,
+  "htmlJsonTxtConsistent": true,
+  "mobileWidths": [320, 390, 620, 760],
+  "horizontalOverflow": false,
+  "copyButtonsPresent": true,
+  "copyAllPresent": true,
+  "offlineCapable": true,
+  "printable": true,
+  "applicationMethod": "Elektronisch",
+  "workloadCategory": "Teilzeit",
+  "ravAssignment": "Nein",
+  "result": "Noch offen",
+  "bestEffortFields": [],
+  "fallbackFields": ["company.poBox"],
+  "officialResearchFields": ["company.address", "company.email", "company.phone"],
+  "reviewNotes": [
+    "Bewerbungsdatum auf das tatsächliche Versanddatum anpassen, falls abweichend.",
+    "Kein Postfach ist ein technischer Pflichtfeld-Ersatzwert."
+  ]
+}
