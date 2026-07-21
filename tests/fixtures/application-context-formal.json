@@ -1,0 +1,30 @@
+{
+  "jobAd": {
+    "rawText": "Pensum 80 %. Stellenantritt per 1. September 2026. Ansprechperson: Frau Anna Meier, HR-Leitung.",
+    "sourceId": "job-ad-fixture-formal-r49",
+    "workload": {
+      "kind": "single",
+      "minPercent": 80,
+      "maxPercent": 80,
+      "sourceText": "Pensum 80 %",
+      "confidence": 0.99
+    },
+    "start": {
+      "kind": "date",
+      "isoDate": "2026-09-01",
+      "sourceText": "Stellenantritt per 1. September 2026",
+      "confidence": 0.99
+    },
+    "contact": {
+      "fullName": "Anna Meier",
+      "firstName": "Anna",
+      "lastName": "Meier",
+      "explicitSalutation": "Frau",
+      "role": "HR-Leitung",
+      "addressMode": "formal",
+      "sourceText": "Ansprechperson: Frau Anna Meier, HR-Leitung",
+      "confidence": 0.99,
+      "isApplicationContact": true
+    }
+  }
+}

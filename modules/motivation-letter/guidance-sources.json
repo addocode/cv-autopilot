@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "guidanceVersion": "2026-07-21.1",
+  "purpose": "Versioned Swiss guidance used for internal quality checks. Sources are not printed in the motivation letter.",
+  "sourcePolicy": {
+    "preferSwissContext": true,
+    "preferOfficialOrEstablishedSources": true,
+    "companyClaimsRequireOfficialSource": true,
+    "doNotCopyExamplesVerbatim": true,
+    "storeRetrievedAtAndContentHashInProduction": true,
+    "liveWebResearchRequiredForCurrentCompanyFacts": true
+  },
+  "sources": [
+    {
+      "id": "berufsberatung-bewerbungsbrief",
+      "publisher": "berufsberatung.ch",
+      "url": "https://www.berufsberatung.ch/de/bewerbungsbrief-schreiben",
+      "authority": "official-swiss-career-guidance",
+      "retrievedAt": "2026-07-21",
+      "rules": [
+        "Write an individual letter for each role and employer.",
+        "Use the contact person when known.",
+        "Match strengths to the role and job advertisement.",
+        "Explain why this specific employer is relevant.",
+        "End with a clear interest in a response or interview.",
+        "Keep a human review before PDF submission."
+      ]
+    },
+    {
+      "id": "jobs-ch-bewerbungsschreiben-tipps",
+      "publisher": "jobs.ch Job Coach",
+      "url": "https://www.jobs.ch/de/job-coach/ratgeber-checklisten/bewerbungsschreiben-tipps/",
+      "authority": "established-swiss-job-platform",
+      "retrievedAt": "2026-07-21",
+      "rules": [
+        "Do not copy the CV; show how the employer benefits.",
+        "Make the letter future-oriented.",
+        "Use a clear structure and keep it to one page.",
+        "Use relevant job-ad keywords naturally.",
+        "Be self-confident without exaggeration.",
+        "Avoid unnecessary conditional and negative wording.",
+        "Prefer short sentences and concrete wording."
+      ]
+    },
+    {
+      "id": "jobs-ch-aufbau-beispiele",
+      "publisher": "jobs.ch Job Coach",
+      "url": "https://www.jobs.ch/de/job-coach/ratgeber-checklisten/bewerbungsschreiben-aufbau-und-beispiele/",
+      "authority": "established-swiss-job-platform",
+      "retrievedAt": "2026-07-21",
+      "rules": [
+        "Use a subject containing Bewerbung and the concrete role.",
+        "Open with specific role and employer motivation.",
+        "Select relevant competences and experience instead of listing everything.",
+        "Explain the intended contribution to the employer.",
+        "Use a concise, direct closing."
+      ]
+    },
+    {
+      "id": "jobs-ch-floskeln-fehler",
+      "publisher": "jobs.ch Job Coach",
+      "url": "https://www.jobs.ch/de/job-coach/ratgeber-checklisten/unnoetige-floskeln-und-fehler-im-bewerbungsschreiben/",
+      "authority": "established-swiss-job-platform",
+      "retrievedAt": "2026-07-21",
+      "rules": [
+        "Reject generic openings such as Hiermit bewerbe ich mich.",
+        "Support strengths with concrete evidence.",
+        "Do not repeat job-ad phrases without adding proof or interpretation.",
+        "Use a confident call-to-action rather than a weak conditional close."
+      ]
+    },
+    {
+      "id": "jobs-ch-ki-motivationsschreiben",
+      "publisher": "jobs.ch Job Coach",
+      "url": "https://www.jobs.ch/de/job-coach/ki-motivationsschreiben/",
+      "authority": "established-swiss-job-platform",
+      "retrievedAt": "2026-07-21",
+      "rules": [
+        "Build an authentic Hin-zu-Motivation.",
+        "Research the employer and refer to a concrete statement or activity.",
+        "Avoid generic praise of values or innovation.",
+        "Treat generated copy as a draft requiring personal and factual review."
+      ]
+    }
+  ],
+  "qualityRules": [
+    {
+      "id": "individuality",
+      "severity": "error",
+      "check": "The opening and employer motivation contain concrete role- or employer-specific information."
+    },
+    {
+      "id": "employer-benefit",
+      "severity": "error",
+      "check": "The letter states a plausible contribution or value proposition for the employer."
+    },
+    {
+      "id": "evidence",
+      "severity": "error",
+      "check": "At least two central claims map to verified or defensible profile evidence."
+    },
+    {
+      "id": "future-orientation",
+      "severity": "warning",
+      "check": "The letter explains how the candidate intends to contribute or develop in the role."
+    },
+    {
+      "id": "one-page",
+      "severity": "error",
+      "check": "The rendered output is exactly one A4 page."
+    },
+    {
+      "id": "no-cv-copy",
+      "severity": "error",
+      "check": "The letter does not reproduce long CV passages or list every skill."
+    },
+    {
+      "id": "no-generic-opening",
+      "severity": "error",
+      "check": "The opening does not use blocked serial-letter phrases."
+    },
+    {
+      "id": "concrete-language",
+      "severity": "warning",
+      "check": "Concrete verbs and examples outweigh unsupported adjectives and nominalisations."
+    },
+    {
+      "id": "confident-close",
+      "severity": "warning",
+      "check": "The closing is direct and professional without exaggerated pressure."
+    },
+    {
+      "id": "manual-review",
+      "severity": "error",
+      "check": "The package remains in draft status until Adam explicitly approves it."
+    }
+  ],
+  "blockedPhrasePatterns": [
+    "Hiermit bewerbe ich mich",
+    "Mit grossem Interesse habe ich Ihre Stellenanzeige gelesen",
+    "Ich bin überzeugt, dass ich der perfekte Kandidat bin",
+    "Schon immer war es mein Traum",
+    "dynamisches und innovatives Unternehmen",
+    "spannende Herausforderung",
+    "meine Fähigkeiten optimal einbringen"
+  ]
+}

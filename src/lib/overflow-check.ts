@@ -1,0 +1,2 @@
+import type{CvData,Variant}from'../types/cv.js';
+export function overflowWarnings(data:CvData&{summaryText?:string},variant?:Variant){const warnings:string[]=[];const summary=data.summaryText??data.summary.default;if(variant&&summary.length>variant.budgets.summaryMaxChars)warnings.push(`Summary exceeds ${variant.budgets.summaryMaxChars} characters.`);if(variant&&data.tools.length>variant.maxTools)warnings.push(`Tool list exceeds ${variant.maxTools} entries.`);return warnings}

@@ -1,0 +1,18 @@
+{
+  "employer": "Beispiel Amt für Digitale Dienste",
+  "jobTitle": "Sachbearbeitung GEVER",
+  "selectedVariant": "administration-gever",
+  "jobAd": {
+    "rawText": "placeholder replaced by --job-ad archive",
+    "workload": { "kind": "single", "minPercent": 80, "maxPercent": 80, "sourceText": "Pensum 80 %", "confidence": 0.99 },
+    "start": { "kind": "date", "isoDate": "2026-09-01", "sourceText": "Stellenantritt per 1. September 2026", "confidence": 0.99 },
+    "contact": { "fullName": "Anna Meier", "firstName": "Anna", "lastName": "Meier", "explicitSalutation": "Frau", "role": "HR-Leitung", "addressMode": "formal", "sourceText": "Ansprechperson: Frau Anna Meier, HR-Leitung", "confidence": 0.99, "isApplicationContact": true }
+  },
+  "requirements": {
+    "tasks": ["Digitale Dossiers im GEVER-System bewirtschaften"],
+    "must": [{ "text": "Erfahrung mit GEVER", "classification": "must", "profileEvidence": "ACTA NOVA und digitale Geschäftsvorgangsbearbeitung in der Rekrutenschule", "sourceIds": ["cv-2d-p2"], "evidenceStatus": "verified", "cvUsage": "Kurzprofil und Skillset Technik & Systeme" }],
+    "nice": ["Affinität zu digitalen Prozessen"],
+    "systems": ["GEVER", "Microsoft 365"]
+  },
+  "atsTerms": ["GEVER", "Microsoft 365", "administrative Sachbearbeitung"]
+}

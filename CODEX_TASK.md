@@ -1,707 +1,426 @@
-# Codex-Auftrag – CV Autopilot v1
+# ACTIVE CODEX TASK — Review Runde 43
 
-## Repository
+## Verbindlicher Arbeitskontext
 
-`addocode/cv-autopilot`
+Arbeite ausschliesslich im bestehenden privaten Repository `addocode/cv-autopilot` auf dem bereits ausgewählten Branch `codex/verifiziere-icon-hashes-und-svg-geometrie` und im bestehenden PR #6.
 
-## Ziel
+- Erstelle keinen neuen Branch.
+- Erstelle keinen PR #7.
+- Merge weder PR #6 noch PR #5.
+- Verändere PR #1–#4 nicht.
+- Suche nicht nach PR-Kommentaren und verwende keine GitHub CLI. Diese Datei enthält den vollständigen Auftrag.
+- Wo ältere Anweisungen im Repository widersprechen, gilt diese Datei.
 
-Erstelle ein modular befüllbares, lokal ausführbares und Adobe-unabhängiges CV-Framework auf Basis des bestehenden 2-Seiten-CVs von Adam Dolinsky.
+## Ausgangslage
 
-Das System soll später durch ChatGPT/Codex anhand eines Stelleninserats automatisch angepasst werden können. In Phase 1 geht es jedoch zuerst um:
+Der letzte Workflow war technisch grün, aber Review Runde 42 wurde inhaltlich nur teilweise und teilweise falsch umgesetzt:
 
-1. visuell präzisen Nachbau,
-2. sauberes Datenmodell,
-3. Variantenlogik,
-4. PDF-Export,
-5. Überlauf-/Qualitätskontrollen,
-6. Datenschutz im öffentlichen Repository.
+- Die Berufsmaturität ist weiterhin mit der Ausbildung kombiniert.
+- Der sichtbare Titel lautet fälschlich `Berufsmaturität Wirtschaft und Dienstleistungen, Typ Wirtschaft`.
+- Korrekt ist `Berufsmaturität Wirtschaft und Dienstleistungen, Typ Dienstleistungen`.
+- Die gewünschten Abschnittstitel wurden nicht umgesetzt.
+- Die 7-mm-Erweiterung auf Seite 1 und 15–17-mm-Erweiterung auf Seite 2 wurden nicht umgesetzt.
+- Die adaptive Experience-Füllung ist weiterhin ein False Positive.
 
-Kein generisches CV-Template bauen. Die bestehende Gestaltung ist die visuelle Source of Truth.
-
----
-
-# 1. Bereitgestellte Referenzen
-
-## Primäre Layoutreferenz
-
-`2d_Lebenslauf_Adam-Dolinsky.pdf`
-
-Diese Datei definiert:
-
-- A4-Hochformat
-- exakt zwei Seiten
-- blaues Rahmensystem
-- Holz-Hintergrund
-- asymmetrische Editorial-Struktur
-- kreisförmiges Profilbild
-- Typografie, Grössenverhältnisse und Abstände
-- Kompetenzblöcke auf Seite 1
-- Berufserfahrung plus Tools/Referenzen/Eintritt/Pensum auf Seite 2
-
-Der 2-Seiten-CV ist die primäre visuelle und strukturelle Referenz. Er wurde auf Empfehlung der RAV-Beraterin gekürzt und soll im Normalfall das finale Format bleiben.
-
-## Inhaltsarchiv
-
-`2b_Lebenslauf_Adam-Dolinsky_alt.pdf`
-
-Diese Datei ist **keine Layoutvorlage**. Sie enthält ausführlichere Inhalte, ältere Formulierungen und zusätzliche Detailinformationen.
-
-Verwendung:
-
-- Reservepool für Tätigkeitsbausteine
-- zusätzliche Erfahrungstexte
-- historische Detailquelle
-- Quelle für spätere Spezialvarianten
-
-Nicht automatisch alle Inhalte übernehmen. Das Ziel bleibt ein fokussierter 2-Seiten-CV.
-
-## LinkedIn-Datenquelle
-
-`Linkedin_Profil_Extrakt.pdf`
-
-Diese Datei liefert:
-
-- Berufsstationen
-- Zeiträume
-- Skills
-- Skill-Zuordnungen zu Stationen
-- Projekte
-- Tool-Erfahrung
-- Portfolio-Projekte
-- zusätzliche technische Kenntnisse
-
-Wichtig:
-
-LinkedIn-Skills sind nicht automatisch gleichwertige Berufserfahrung. Jeder Skill muss in der Datenbank klassifiziert werden:
-
-- `professional_core`
-- `professional_supporting`
-- `project_experience`
-- `training_exposure`
-- `basic`
-- `historical`
-- `do_not_surface_automatically`
-
-Beispiele:
-
-- Adobe InDesign: `professional_core`
-- ACTA NOVA: `professional_supporting`
-- Windows Server: `training_exposure`
-- MySQL/phpMyAdmin: `basic` oder `training_exposure`
-- Skype: `historical`
-- Assistenz der Geschäftsleitung: nur als kontextgebundene Erfahrung, nicht als formaler Jobtitel
-
-## Motivationsschreiben als Designreferenzen
-
-- `1_Motivationsschreiben_Adam-Dolinsky_hep.pdf`
-- `1_Motivationsschreiben_Adam-Dolinsky_KeystoneSDA.pdf`
-- `1_Motivationsschreiben_Adam-Dolinsky_SPE.pdf`
-- `1_Motivationsschreiben_Adam-Dolinsky_ZIVI.pdf`
-
-Diese vier Dateien dienen als zusätzliche Referenz für ein gemeinsames Bewerbungsdesignsystem:
-
-- gleiche blaue Markenfarbe
-- gleicher Hintergrund
-- gleiche Rand-/Rahmenlogik
-- gleiche Typografierichtung
-- grosse Stellenbezeichnung unten links
-- Signatur-/Abschlussbereich
-- reduzierte, moderne einseitige Gestaltung
-- konsistente visuelle Sprache zwischen CV und Motivationsschreiben
-
-In Phase 1 muss noch kein kompletter Motivationsschreiben-Autopilot gebaut werden. Aber:
-
-- Design Tokens sollen CV und spätere Motivationsschreiben gemeinsam nutzen können.
-- Architektur soll einen zukünftigen `cover-letter` Renderer ermöglichen.
-- Optional darf ein statisches `cover-letter-demo.html` als Proof of Concept erstellt werden.
-
-## Bilder
-
-- `bg_img.jpeg`
-- `profile_img.png`
-
-`bg_img.jpeg` ist das vollflächige Holz-Hintergrundbild.
-
-`profile_img.png` ist das Profilbild:
-
-- kreisförmig zuschneiden
-- Gesicht korrekt zentrieren
-- nicht verzerren
-- optional feiner weisser/blauer Rand
-- Alt-Text: `Porträt von Adam Dolinsky`
+Diese Runde muss die tatsächliche Gestaltung und Logik umsetzen, nicht nur Tests oder Report-Erwartungen anpassen.
 
 ---
 
-# 2. Technologiestack
+## 1. Ausbildung und Berufsmaturität als zwei getrennte Stationen
 
-Verwende vorzugsweise:
+Entferne die kombinierte `.combined-training-title`-Darstellung vollständig.
 
-- Node.js LTS
-- TypeScript
-- HTML5
-- CSS
-- Playwright/Chromium
-- Zod oder JSON Schema
-- Vitest oder Node Test Runner
-- `pdfjs-dist` oder ein anderes lokales Tool zur PDF-Textprüfung
-
-Kein React notwendig, sofern Vanilla TypeScript einfacher und stabiler ist.
-
-Keine Adobe-Abhängigkeit im Normalbetrieb.
-
----
-
-# 3. Zielstruktur
+Erzeuge zwei eigenständige, unmittelbar aufeinanderfolgende Stationen:
 
 ```text
-cv-autopilot/
-├── assets/
-│   ├── bg_img.jpeg
-│   ├── profile_img.png
-│   └── icons/
-├── reference/
-│   ├── cv/
-│   │   ├── 2d_Lebenslauf_Adam-Dolinsky.pdf
-│   │   └── 2b_Lebenslauf_Adam-Dolinsky_alt.pdf
-│   ├── cover-letters/
-│   │   ├── hep.pdf
-│   │   ├── keystone-sda.pdf
-│   │   ├── spe.pdf
-│   │   └── zivi.pdf
-│   └── linkedin/
-│       └── Linkedin_Profil_Extrakt.pdf
-├── data/
-│   ├── public/
-│   │   ├── cv.master.example.json
-│   │   └── variants/
-│   ├── private/
-│   │   └── cv.master.json
-│   ├── schema/
-│   │   └── cv.schema.json
-│   └── sources/
-│       └── source-map.json
-├── src/
-│   ├── styles/
-│   │   ├── tokens.css
-│   │   ├── reset.css
-│   │   ├── components.css
-│   │   ├── cv.css
-│   │   └── print.css
-│   ├── templates/
-│   │   ├── cv.ts
-│   │   ├── page-one.ts
-│   │   ├── page-two.ts
-│   │   └── components/
-│   ├── lib/
-│   │   ├── load-data.ts
-│   │   ├── merge-variant.ts
-│   │   ├── validate-data.ts
-│   │   ├── validate-facts.ts
-│   │   ├── overflow-check.ts
-│   │   ├── extract-pdf-text.ts
-│   │   └── render-report.ts
-│   └── types/
-│       └── cv.ts
-├── scripts/
-│   ├── render.ts
-│   ├── preview.ts
-│   ├── validate.ts
-│   └── compare-reference.ts
-├── tests/
-├── dist/
-├── CODEX_TASK.md
-├── README.md
-├── .gitignore
-├── package.json
-└── tsconfig.json
+08/2017 – 08/2021 | Mediamatiker EFZ in Ausbildung
+<bereits verifizierte Ausbildungsinstitution und Ort unverändert aus den Daten übernehmen>
 ```
 
-Abweichungen sind erlaubt, wenn sie begründet und einfacher wartbar sind.
+Direkt darunter:
+
+```text
+08/2017 – 08/2021 | Berufsmaturität Wirtschaft und Dienstleistungen, Typ Dienstleistungen
+Berufsbildungszentrum BBZ-CFP, Biel
+```
+
+Die Berufsmaturität ist eine eigene Ausbildungsstation und keine berufliche Tätigkeit. Sie steht direkt unter der Mediamatiker-Ausbildung.
+
+Keine ATS-Dublette und kein künstlich zusammengefügter Parent-Term.
+
+### Verbindliche BM-Bullets
+
+Die BM-Station erhält exakt diese drei sichtbaren Bullets:
+
+```text
+Bürokommunikation, Deutsch, Englisch, Französisch, Präsentationstechnik und Projektmanagement: strukturierte Korrespondenz, adressatengerechte Dokumentation und professionelle Präsentationen.
+```
+
+```text
+Wirtschaft und Recht, Rechnungswesen, Marketing sowie Geschichts- und Politikkunde: kaufmännische Abläufe, betriebswirtschaftliche Zusammenhänge, rechtliche Grundlagen und gesellschaftspolitischer Kontext.
+```
+
+```text
+Informatik, Web Technologies, Multimedia-Techniken, Multimedia Design, Multimedia Konzept und Grundlagen der Applikationsentwicklung: sichere Anwendung digitaler Arbeitsmittel und strukturierte Informationsaufbereitung.
+```
+
+Diese Bullets sind `verified` und erhalten Source-IDs aus den vorhandenen Ausbildungs-, Zeugnis- und LinkedIn-Quellen.
+
+Die BM-Station besitzt genau diese drei Bullets und keinen Breadth-Summary- oder GEVER-Cross-Domain-Bullet.
 
 ---
 
-# 4. Datenmodell: Single Source of Truth
+## 2. Einheitliches Titellayout aller Stationen
 
-Alle sichtbaren Inhalte müssen datengetrieben sein. Keine Tätigkeitsbeschreibungen hart im HTML codieren.
+Jede berufliche oder Ausbildungsstation auf Seite 2 verwendet verbindlich:
 
-## Stammdaten
+```text
+MM/YYYY – MM/YYYY | Bezeichnung der Position
+Name Institution, Ort
+```
+
+Bei laufenden Stationen ist `MM/YYYY – heute` zulässig.
+
+- Erste Zeile: Zeitraum und Position, Roboto Slab 700, bestehende Experience-Farbe und -Grösse.
+- Zweite Zeile: verifizierte Institution/Arbeitgeber und Ort, Arial/Liberation Sans 700.
+- Keine Sondertypografie für Ausbildung oder BM.
+- Keine Institution und keinen Ort erfinden.
+
+---
+
+## 3. Abschnittstitel Seite 1
+
+Ersetze den sichtbaren Titel vollständig durch:
+
+```text
+FÄHIGKEITEN UND SKILLS
+```
+
+Gestaltung:
+
+- Roboto Slab 700.
+- Farbe exakt dieselbe graue Farbe wie die horizontalen Trennlinien (`var(--rule)`).
+- Exakt 2 px grösser als die bisherige Abschnittstitelgrösse von 9.9 pt, bevorzugt `calc(9.9pt + 2px)`.
+- Grossschreibung.
+- Natürliche Laufweite, keine Kompression.
+- Links bündig mit Profilbild und `KURZPROFIL`, also an der linken Innenkante des Competence-Panels.
+- Kein bisheriges Padding auf Höhe der Skill-Textspalte.
+
+Die horizontale Linie oberhalb des ersten Skillsets muss immer sichtbar sein. Da der Titel vor dem ersten Skillset steht, verwende einen robusten Selektor wie:
+
+```css
+.competencies-page-title + .skill-section {
+  border-top: var(--rule-width) solid var(--rule);
+}
+```
+
+oder eine gleichwertige Lösung.
+
+---
+
+## 4. Abschnittstitel Seite 2
+
+Ersetze den sichtbaren Titel vollständig durch:
+
+```text
+LEBENSLAUF UND VERANTWORTUNG
+```
+
+Gestaltung identisch zum Seite-1-Titel:
+
+- Roboto Slab 700.
+- dieselbe graue Rule-Farbe.
+- dieselbe um 2 px erhöhte Schriftgrösse.
+- Grossschreibung.
+- sichtbar und ATS-extrahierbar.
+
+---
+
+## 5. Seite 1: weisse Fläche 7 mm nach oben erweitern
+
+Erweitere die weisse Kompetenzfläche um 7 mm nach oben.
+
+Bevorzugte Umsetzung:
+
+- Hero-/Blauflächenhöhe von 108 mm auf 101 mm reduzieren.
+- Competence-Panel entsprechend um 7 mm vergrössern.
+- Inhalte des weissen Panels rücken nach oben.
+- Der Bereich `SPRACHEN` bleibt durch seine untere Verankerung an derselben absoluten Y-Position wie zuvor, maximal ±1 px.
+
+Verbindlich:
+
+- Profilbild, Name, Kontakt, Buttons und Kurzprofil vollständig sichtbar.
+- Keine Kollision zwischen Kurzprofil und Kompetenzbereich.
+- Genau vier Skillsets.
+- 6–8 Bullets je Skillset.
+- Bestehende Sprachabstandsregel bleibt erfüllt.
+- Keine Schriftgrösse reduzieren.
+
+Report:
 
 ```json
 {
-  "person": {
-    "name": "Adam Dolinsky",
-    "location": "3007 Bern",
-    "email": "adam@dolinsky.ch",
-    "portfolio": "https://dolinsky.ch",
-    "linkedin": "https://linkedin.com/in/adam-dolinsky",
-    "profileImage": "assets/profile_img.png"
+  "layout": {
+    "pageOneWhiteExtensionUpMm": 7,
+    "heroPanelHeightMm": 101,
+    "languageAbsoluteShiftPx": 0,
+    "pageOneExtensionPassed": true
   }
 }
 ```
 
-## Stabile IDs
+---
 
-Jede Erfahrung, Kompetenz, Tätigkeit und jedes Projekt erhält eine stabile ID.
+## 6. Seite 2: weisse Fläche 15–17 mm nach unten erweitern
+
+Erweitere die weisse Fläche auf Seite 2 nach unten und verschiebe den gesamten Footerbereich ab der horizontalen Trennlinie oberhalb `SOFTWARE & TOOLS` nach unten.
+
+Betroffen:
+
+- Footer-Trennlinie.
+- SOFTWARE & TOOLS.
+- REFERENZEN.
+- EINTRITT.
+- PENSUM.
+- alle Footer-Icons.
+
+Ziel: 17 mm. Falls 17 mm echte Kollisionen erzeugen, verwende die grösste sichere Erweiterung zwischen 15 und 17 mm und dokumentiere sie.
+
+Bevorzugte Umsetzung:
+
+- den bestehenden White-Panel-Bottom-Offset beziehungsweise `--page-two-footer-height` entsprechend reduzieren.
+- Bottom-Grid unverändert am unteren Rand des White Panels verankern.
+
+Verbindlich:
+
+- Der blaue untere Balken bleibt sichtbar, mindestens 8 mm.
+- Seitenzähler `2/2` vollständig sichtbar.
+- Footer-Inhalte vollständig innerhalb des Rahmens.
+- Footer-Typografie, Icons, Spalten und Abstände nicht verkleinern.
+- Exakt zwei Seiten.
+
+Report:
 
 ```json
 {
-  "id": "fors-magazine-production",
-  "text": "Eigenständige Produktion des Firmenmagazins «Gügg Grüggüü» mit drei Ausgaben pro Jahr",
-  "shortText": "Eigenständige Produktion des Firmenmagazins «Gügg Grüggüü»",
-  "tags": [
-    "communication",
-    "editorial",
-    "print",
-    "project-coordination"
-  ],
-  "evidenceLevel": "professional_core",
-  "sources": [
-    "cv-2d",
-    "cv-2b",
-    "linkedin-project-guegg"
-  ],
-  "priority": 95,
-  "enabled": true
-}
-```
-
-## Quellenbezug
-
-Erstelle `source-map.json`, damit jeder wichtige Baustein auf mindestens eine Quelle zurückgeführt werden kann.
-
-Beispiel:
-
-```json
-{
-  "fors-magazine-production": {
-    "sources": [
-      {
-        "document": "2d_Lebenslauf_Adam-Dolinsky.pdf",
-        "location": "page 2"
-      },
-      {
-        "document": "Linkedin_Profil_Extrakt.pdf",
-        "location": "project: Gügg Grüggüü Magazine"
-      }
-    ]
+  "layout": {
+    "pageTwoWhiteExtensionMm": 17,
+    "pageTwoBlueStripHeightMm": 0,
+    "pageTwoFooterShiftPx": 0,
+    "pageTwoFooterShiftPassed": true
   }
 }
 ```
 
-Der spätere AI-Agent darf nur verifizierte Bausteine verwenden.
+Die tatsächlichen Messwerte sind einzutragen, nicht hart zu codieren.
 
 ---
 
-# 5. Vier CV-Varianten
+## 7. Echte adaptive Experience-Füllung
 
-Implementiere folgende Override-Varianten:
+Implementiere beziehungsweise vervollständige eine echte Renderstufe:
 
-## `general`
-
-Für:
-
-- vielseitige Mediamatiker-Stellen
-- KMU-Allrounderrollen
-- gemischte Marketing/Web/Content-Funktionen
-
-## `communication-content`
-
-Priorisieren:
-
-- Magazin
-- Newsletter
-- Social Media
-- Foto/Video
-- Storytelling
-- redaktionelle Arbeit
-- Kampagnen
-- CI/CD
-- Livestreaming
-
-## `administration-gever`
-
-Priorisieren:
-
-- ACTA NOVA
-- Dokumentenmanagement
-- Geschäftsvorgänge
-- Qualitätssicherung
-- Koordination
-- MS Office
-- OneNote
-- Bundesverwaltung
-- strukturierte Prozesse
-- Projektassistenz/Sachbearbeitung
-
-Marketing nur als Zusatznutzen darstellen.
-
-## `cms-web-process`
-
-Priorisieren:
-
-- TYPO3
-- WordPress
-- Grav
-- Magento
-- HTML/CSS
-- Webpflege
-- Onlineshop
-- Daten-/Contentpflege
-- Zahlungsprozesse
-- Webhoster
-- Prozessdokumentation
-- GitHub
-- Wissensmanagement
-- KI-gestützte Workflows
-
-CLI:
-
-```bash
-npm run render -- --variant general
-npm run render -- --variant administration-gever
+```text
+experience-layout-selection
 ```
 
----
+Der bisherige grüne Zustand ist ein False Positive, weil `breadthBulletExists` einen zu niedrigen Fill-Ratio akzeptiert.
 
-# 6. Visueller Nachbau
+### Kandidatenpool
 
-## Seitenformat
+Berücksichtige:
 
-```css
-@page {
-  size: A4;
-  margin: 0;
-}
-```
+1. ausgelassene reguläre source-backed Experience-Bullets;
+2. ausgelassene optionale Experience-Bullets;
+3. erst danach evidence-backed Breadth-Summary-Bullets;
+4. als letzte Möglichkeit source-backed `defensible_inference`-Neuformulierungen aus belegten Tätigkeitsatomen.
 
-```css
-.cv-page {
-  width: 210mm;
-  height: 297mm;
-  overflow: hidden;
-  break-after: page;
-}
-```
+Keine `inferred_review_required`-Inhalte rendern.
 
-## Referenzmerkmale
+### Deduplizierung
 
-- vollflächiger Holz-Hintergrund
-- kräftiges Dunkel-/Mittelblau als Markenkern
-- breiter blauer Innenrahmen
-- weisse Inhaltsflächen
-- grosse, markante Namenszeile
-- Profilbild im Kreis
-- klare Hierarchie
-- kompakte, aber gut lesbare Bulletpoints
-- Seitenzähler
-- sehr ähnliche Raster-/Abstandslogik wie im 2d-PDF
-- zweite Seite mit grosszügiger Berufserfahrung und kompaktem Bottom-Grid
+Vor dem DOM-Rendern semantisch deduplizieren:
 
-## Schrift
+- keine doppelten IDs;
+- keine wortgleichen Aussagen;
+- keine nahezu identischen Kurz-/Langvarianten gleichzeitig;
+- bereits als Kernbullet sichtbare Inhalte nicht erneut als optionalen Kandidaten anbieten.
 
-Keine proprietären Fontdateien committen.
+### Auswahl
 
-Nutze metrisch ähnliche, frei verfügbare oder System-Fallbacks:
+- Detailbullets vor allgemeinen Breitenhinweisen.
+- Kandidaten einzeln sichtbar machen, Layout messen, behalten oder zurücksetzen.
+- Keine dritte Seite.
+- Keine Overflows oder Kollisionen.
+- Mindestens 5 mm Abstand zur Footer-Trennlinie.
+- Keine Schriftverkleinerung oder horizontale Kompression.
 
-- `Roboto Slab` für markante Überschriften
-- `Montserrat`, `Arial`, sans-serif für Fliesstext/Labels
-- optional `Avenir Next` als lokaler System-Fallback
+### Zielwerte
 
-Alle Typografieparameter in `tokens.css`.
+- `communication-content`: Fill-Ratio 0.88–0.96.
+- übrige Varianten: 0.82–0.96.
 
-## Design Tokens
-
-Definiere zentral:
-
-```css
-:root {
-  --brand-blue: ...;
-  --brand-blue-dark: ...;
-  --paper-white: ...;
-  --text-primary: ...;
-  --font-heading: ...;
-  --font-body: ...;
-  --page-width: 210mm;
-  --page-height: 297mm;
-}
-```
-
-Diese Tokens sollen später auch für Motivationsschreiben verwendet werden.
-
----
-
-# 7. Modulare Komponenten
-
-Mindestens:
-
-- `CvPage`
-- `ProfileHeader`
-- `ContactBlock`
-- `SummaryBlock`
-- `SkillSection`
-- `LanguageRow`
-- `ExperienceItem`
-- `ToolGrid`
-- `ReferenceCard`
-- `AvailabilityCard`
-- `WorkloadCard`
-- `PageCounter`
-- `ExternalLink`
-- `PreviewWarning`
-
-Kein wichtiger Text darf als Bild gerendert werden.
-
----
-
-# 8. Layout- und Überlaufregeln
-
-Das System muss variable Inhalte robust verarbeiten.
-
-Implementiere:
-
-- maximale Bullet-Anzahl pro Erfahrung
-- Textlängenbudgets
-- Overflow-Erkennung
-- Zwei-Seiten-Prüfung
-- Warnungen bei zu langen Kurzprofilen
-- Warnungen bei zu vielen Tools
-- keine automatische starke Schriftverkleinerung
-- keine dritte Seite
-
-Beispiel `render-report.json`:
+Wenn der Zielwert trotz aller sicheren belegten Kandidaten nicht erreicht wird, darf der Report nur erfolgreich sein, wenn:
 
 ```json
 {
-  "success": false,
-  "variant": "administration-gever",
-  "pageCount": 2,
-  "warnings": [
-    "Summary exceeds 430 characters."
-  ],
-  "overflows": [
+  "maximalSafeContentExhausted": true,
+  "allCandidatesConsidered": true,
+  "rejectedCandidates": [
     {
-      "elementId": "experience-kunz-kunath",
-      "overflowPixels": 24,
-      "suggestion": "Remove or shorten one bullet."
+      "id": "...",
+      "reason": "duplicate|overflow|footer-gap|third-page|unsupported"
     }
   ]
 }
 ```
 
-Bei Overflow:
+Entferne jede Erfolgslogik der Form:
 
-- Preview trotzdem erzeugen
-- PDF optional als Debug-Ausgabe erzeugen
-- Prozess mit Fehlercode beenden
-- klare Meldung in Konsole und Report
-
----
-
-# 9. ATS- und PDF-Anforderungen
-
-- exakt zwei A4-Seiten
-- Text markierbar
-- Text suchbar
-- klickbare Links
-- keine Browser-Kopf-/Fusszeilen
-- `printBackground: true`
-- logische DOM-Reihenfolge
-- semantische HTML-Struktur
-- sinnvolle Überschriftenhierarchie
-- Alt-Texte
-- keine versteckten Keywordlisten
-- keine wichtigen Inhalte als Bild
-
-Automatischer Test:
-
-1. fertiges PDF rendern,
-2. Text extrahieren,
-3. prüfen, ob Name, Kurzprofil, Erfahrungen und Tools vorkommen,
-4. Reihenfolge grob validieren,
-5. Seitenzahl prüfen.
-
----
-
-# 10. Datenschutz
-
-Das Repository ist öffentlich.
-
-Darum:
-
-- keine privaten Telefonnummern committen
-- keine nicht öffentlichen Referenzdaten committen
-- keine API-Schlüssel
-- keine vollständigen privaten Bewerbungsunterlagen öffentlich ablegen, falls dies nicht bewusst gewünscht ist
-- `data/private/` in `.gitignore`
-- `.env` in `.gitignore`
-- öffentlich nur `cv.master.example.json`
-- echte Daten lokal in `data/private/cv.master.json`
-
-Bei Referenzen in öffentlichen Beispieldaten:
-
-```json
-{
-  "name": "Peter Stadelmann",
-  "role": "ehem. CEO & Marketingleiter",
-  "contact": "auf Anfrage"
-}
+```js
+fillRatio >= minimumTargetRatio || breadthBullets.length > 0
 ```
 
-Die realen Telefonnummern dürfen nur lokal liegen.
-
-Wichtig: Die vorhandenen PDFs enthalten private Kontaktdaten. Vor einem Commit prüfen, ob das öffentliche Repository diese enthalten soll. Standardannahme: **nicht committen**.
+Ein Breadth-Summary-Bullet allein erfüllt das Füllziel nicht.
 
 ---
 
-# 11. Befehle
+## 8. ATS und sichtbare Reihenfolge
 
-```bash
-npm install
-npm run dev
-npm run validate
-npm run test
-npm run render -- --variant general
-npm run render -- --variant communication-content
-npm run render -- --variant administration-gever
-npm run render -- --variant cms-web-process
-```
-
-Ausgabe:
+Die sichtbare und extrahierbare Reihenfolge lautet:
 
 ```text
-dist/
-  cv-general-preview.html
-  Lebenslauf_Adam-Dolinsky_general.pdf
-  render-report-general.json
+Name
+Kontakt
+Kurzprofil
+Fähigkeiten und Skills
+vier Skillsets
+Sprachen
+Lebenslauf und Verantwortung
+Berufserfahrung
+Mediamatiker EFZ in Ausbildung
+Berufsmaturität Wirtschaft und Dienstleistungen, Typ Dienstleistungen
+Software & Tools
+Referenzen
+Eintritt
+Pensum
 ```
 
----
+Beide neuen Abschnittstitel und beide separaten Ausbildungsstationen müssen in Poppler Raw, Poppler Default und PDF.js sichtbar sein.
 
-# 12. README
-
-Dokumentiere:
-
-- Installation
-- benötigte Node-Version
-- lokaler Start
-- Render-Befehle
-- Aufbau der Masterdaten
-- Erstellen einer Variante
-- Hinzufügen eines neuen Bulletpoints
-- private vs. öffentliche Daten
-- Umgang mit Overflow
-- bekannte visuelle Abweichungen zur InDesign-Referenz
-- geplante Phase 2: AI-gestützte Inseratanalyse
+Keine versteckten Überschriften oder unsichtbaren ATS-Aliase.
 
 ---
 
-# 13. Entwicklungsphasen
+## 9. Eingefrorene Bereiche
 
-## Phase 1 – Foundation
+Keine Änderungen an:
 
-- Repo initialisieren
-- TypeScript/Playwright
-- Datenmodell
-- Schema
-- Assets
-- A4-Rendering
+- Profilbild und dessen Grösse.
+- Hintergrundbild.
+- Seitenformat.
+- Farben ausser den beiden ausdrücklich geänderten Abschnittstiteln.
+- Arial/Liberation Sans.
+- Roboto Slab.
+- Skill-Icon-SVGs und deren Hashes.
+- Footer-Icons.
+- Footer-Inhalt und Typografie.
+- Referenzen, Eintritt, Pensum.
+- Toolauswahl und Toolschrift.
+- Poppler-/PDF.js-/ATS-Architektur.
+- Workflow-Exit-Code-Logik.
 
-## Phase 2 – Visual reproduction
+Nicht erlaubt:
 
-- 2d-CV möglichst genau nachbauen
-- Referenz-Screenshots erstellen
-- Raster, Abstände, Farben und Typografie abstimmen
-
-## Phase 3 – Data extraction
-
-- Inhalte aus 2d übernehmen
-- alte 2b-Inhalte als Reservepool erfassen
-- LinkedIn-Skills normalisieren
-- Quellenmapping erstellen
-
-## Phase 4 – Variants
-
-- vier Varianten
-- Priorisierung
-- Sichtbarkeit
-- Textvarianten
-
-## Phase 5 – Quality
-
-- Overflow
-- Page count
-- PDF-Text
-- Tests
-- Render Report
-
-## Phase 6 – Shared design system
-
-- Design Tokens für spätere Motivationsschreiben
-- optionales Cover-Letter-Demo
-- Architektur dokumentieren
+- kleinere Schrift.
+- `scaleX`.
+- `font-stretch`.
+- negatives `letter-spacing`.
+- abgeschnittene Inhalte.
+- unbelegte Tatsachen.
 
 ---
 
-# 14. Akzeptanzkriterien
+## 10. Regressionstests
 
-Der Task gilt als fertig, wenn:
+Ergänze Tests für:
 
-1. `npm install` funktioniert.
-2. `npm run render -- --variant general` ein PDF erzeugt.
-3. PDF exakt zwei Seiten hat.
-4. Design klar als Nachbau des 2d-CVs erkennbar ist.
-5. Hintergrund und Profilbild korrekt sind.
-6. Inhalte aus JSON geladen werden.
-7. vier Varianten funktionieren.
-8. Varianten Reihenfolge/Sichtbarkeit ändern können.
-9. keine belegbaren Fakten erfunden werden.
-10. Overflow erkannt wird.
-11. PDF-Text extrahierbar ist.
-12. keine Adobe-Software benötigt wird.
-13. keine privaten Telefonnummern öffentlich committed werden.
-14. Tests erfolgreich sind.
-15. README vollständig ist.
-16. Codex am Ende verbleibende Abweichungen dokumentiert.
-
----
-
-# 15. Arbeitsweise für Codex
-
-- Nicht direkt auf `main` entwickeln.
-- Branch erstellen: `feature/modular-cv-framework`
-- Zuerst Repo und Referenzdateien prüfen.
-- Dann kurzen Plan erstellen.
-- In kleinen Schritten implementieren.
-- Nach jeder grösseren Änderung rendern und testen.
-- Ausgabe visuell mit 2d vergleichen.
-- Keine CV-Fakten ohne Quelle verändern.
-- Keine LinkedIn-Skills automatisch überhöhen.
-- Keine unnötige Framework-Komplexität.
-- Logische Commits.
-- Pull Request gegen `main`.
-
-Am Ende liefern:
-
-- PR-Link
-- Architekturübersicht
-- Screenshot/PNG beider CV-Seiten
-- Beispiel-PDF
-- Testresultate
-- Render Report
-- Liste visueller Abweichungen
-- Vorschlag für Phase 2: automatische Stellenanalyse und CV-Anpassung
+1. Ausbildung und BM sind zwei getrennte Stationen.
+2. BM steht direkt unter der Ausbildung.
+3. Beide haben `08/2017 – 08/2021`.
+4. BM-Titel exakt `Berufsmaturität Wirtschaft und Dienstleistungen, Typ Dienstleistungen`.
+5. BM-Institution exakt `Berufsbildungszentrum BBZ-CFP, Biel`.
+6. BM besitzt exakt drei Fachbullets.
+7. BM besitzt keinen Breadth-Summary- oder GEVER-Cross-Domain-Bullet.
+8. Alle Stationen folgen `Zeitraum | Position` plus `Institution, Ort`.
+9. Seite 1 ist 7 mm nach oben erweitert.
+10. Sprachenposition bleibt ±1 px.
+11. Seite 2 ist 15–17 mm nach unten erweitert.
+12. Blauer Balken bleibt mindestens 8 mm sichtbar.
+13. `FÄHIGKEITEN UND SKILLS` erscheint genau einmal sichtbar.
+14. `LEBENSLAUF UND VERANTWORTUNG` erscheint genau einmal sichtbar.
+15. Beide Titel sind Roboto Slab 700, Rule-Grau und +2 px.
+16. Seite-1-Titel ist linksbündig mit Kurzprofil/Profilbild.
+17. obere Linie des ersten Skillsets sichtbar.
+18. Experience-Kandidaten werden wirklich getestet und berichtet.
+19. Kein False-Positive-Fill-Gate.
+20. keine Schriftverkleinerung oder Textkompression.
+21. exakt zwei Seiten, keine Overflows, Kollisionen oder Warnungen.
 
 ---
 
-# 16. Nicht Teil von Phase 1
+## 11. Workflow
 
-Noch nicht implementieren:
+Führe vollständig aus:
 
-- automatisches Auslesen eines Stelleninserats mit OpenAI API
-- automatisches Versenden von Bewerbungen
-- automatische Generierung unbelegter CV-Texte
-- Arbeitgeber-spezifische Anschreiben
-- vollständige Web-App mit Benutzerkonten
+```bash
+npm install --no-audit --no-fund
+npm run build
+npm run validate
+npm run test:data
+npm run render:all
+npm run test:render
+```
 
-Phase 1 ist ein robustes, lokales, modulares Dokument-Framework.
+Warte den Live-GitHub-Workflow vollständig ab, sofern Zugriff besteht. Falls die lokale Codex-Umgebung keinen Remote besitzt, committe trotzdem auf den bestehenden Arbeitsstand und rufe `make_pr` mit dem unveränderten bestehenden PR-Titel auf. Erstelle keinen neuen PR.
+
+Erfolgskriterien:
+
+- `renderAllExitCode: 0`.
+- `renderTestsExitCode: 0`.
+- finaler Guard `skipped`.
+- alle vier Reports `success: true`.
+- Visual Review `overallSuccess: true`.
+- `remainingDifferences: []`.
+- exakt zwei Seiten.
+- `overflows: []`, `collisions: []`, `warnings: []`.
+- keine Schriftverkleinerung.
+- keine unbelegten Inhalte.
+
+---
+
+## 12. Abschlussbericht
+
+Berichte mindestens:
+
+1. lokalen Commit-SHA;
+2. tatsächlich verwendete Seite-1-Erweiterung in mm;
+3. tatsächlich verwendete Seite-2-Erweiterung in mm;
+4. verbleibende blaue Balkenhöhe in mm;
+5. Footer-Verschiebung in px/mm;
+6. Sprachbereich-Verschiebung in px;
+7. beide finalen Abschnittstitel mit Font, Farbe und Grösse;
+8. Nachweis der oberen Skillset-Trennlinie;
+9. Titeldarstellung aller Stationen;
+10. BM-Station mit Zeitraum, Institution und drei Bullets;
+11. Source-IDs und Evidence-Status der BM-Bullets;
+12. Fill-Ratio vor/nach je Variante;
+13. akzeptierte und abgelehnte Experience-Kandidaten;
+14. PageCount, Overflows, Collisions und Warnungen je Variante;
+15. ATS-/Poppler-/PDF.js-Ergebnisse;
+16. `report.success` je Variante;
+17. `visual-review overallSuccess` und `remainingDifferences`;
+18. Pfad zur achtseitigen Kontaktübersicht;
+19. Bestätigung: kein PR #7 und nichts gemergt.
+
+Beginne jetzt mit der Umsetzung dieser Datei und fahre ohne weitere Rückfrage fort.

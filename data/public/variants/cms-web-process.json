@@ -1,0 +1,77 @@
+{
+  "id": "cms-web-process",
+  "headline": "CMS · Webpflege · Onlineshop · Prozessdokumentation",
+  "summaryKey": "cms-web-process",
+  "skillSectionOrder": [
+    "technik-systeme",
+    "digital-marketing-web",
+    "arbeitsweise"
+  ],
+  "skillSectionTitles": {
+    "technik-systeme": "CMS, SHOP & SYSTEME",
+    "digital-marketing-web": "WEB, TRACKING & ONLINE-KANÄLE",
+    "content-media": "CONTENT & DOKUMENTATION",
+    "arbeitsweise": "ARBEITSWEISE & SUPPORT"
+  },
+  "hiddenSkillSections": [
+    "content-media"
+  ],
+  "selectedBulletIds": [
+    "bullet-kunz-websites-landing",
+    "bullet-kunz-online-campaigns-monitoring",
+    "bullet-kunz-process-handover",
+    "bullet-kunz-external-partners",
+    "bullet-freelance-content-print-web",
+    "bullet-freelance-remote-stakeholders",
+    "bullet-rs-acta-nova",
+    "bullet-rs-digital-information-summary"
+  ],
+  "bulletPriority": [
+    "bullet-kunz-websites-landing",
+    "bullet-kunz-process-handover",
+    "bullet-kunz-external-partners",
+    "bullet-rs-acta-nova"
+  ],
+  "hiddenBulletIds": [
+    "bullet-kunz-guegg"
+  ],
+  "toolOrder": [
+    "tool-typo3",
+    "tool-wordpress",
+    "tool-grav",
+    "tool-magento",
+    "tool-html-css",
+    "tool-phpmyadmin",
+    "tool-mysql",
+    "tool-github",
+    "tool-google-analytics",
+    "tool-chatgpt",
+    "tool-ms-office",
+    "tool-adobe-photoshop",
+    "tool-adobe-indesign",
+    "tool-crealogix-stage"
+  ],
+  "maxBulletsPerExperience": 4,
+  "maxTools": 14,
+  "budgets": {
+    "summaryMaxChars": 430,
+    "pageOneMaxSkillItems": 15,
+    "pageTwoMaxExperienceBullets": 10
+  },
+  "supplementaryIndicators": {
+    "tools": {
+      "enabled": true,
+      "text": "+ weitere mediamatikbezogene Tools und Systeme"
+    },
+    "experience": {
+      "enabled": true,
+      "maxPerVariant": 3
+    }
+  },
+  "fill": {
+    "enabled": true,
+    "minRemainingSpaceMm": 5,
+    "preferredOptionalBulletCount": 2,
+    "maxOptionalBullets": 5
+  }
+}

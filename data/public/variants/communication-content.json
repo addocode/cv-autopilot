@@ -1,0 +1,78 @@
+{
+  "id": "communication-content",
+  "headline": "Content · Medienproduktion · Kampagnen · Corporate Identity",
+  "summaryKey": "communication-content",
+  "skillSectionOrder": [
+    "content-media",
+    "digital-marketing-web",
+    "arbeitsweise",
+    "technik-systeme"
+  ],
+  "skillSectionTitles": {
+    "digital-marketing-web": "DIGITALE KAMPAGNEN & KANÄLE",
+    "arbeitsweise": "KOORDINATION & ZUSAMMENARBEIT",
+    "technik-systeme": "TOOLS, SYSTEME & PROZESSE"
+  },
+  "hiddenSkillSections": [],
+  "selectedBulletIds": [
+    "bullet-freelance-content-print-web",
+    "bullet-freelance-project-marketing-media",
+    "bullet-freelance-remote-stakeholders",
+    "bullet-kunz-guegg",
+    "bullet-kunz-campaigns",
+    "bullet-kunz-photo-video-social-ci",
+    "bullet-kunz-external-partners",
+    "bullet-kunz-websites-landing",
+    "bullet-kunz-online-campaigns-monitoring",
+    "bullet-rs-admin-support-summary",
+    "bullet-rs-digital-information-summary"
+  ],
+  "bulletPriority": [
+    "bullet-kunz-guegg",
+    "bullet-kunz-campaigns",
+    "bullet-kunz-photo-video-social-ci",
+    "bullet-freelance-content-print-web"
+  ],
+  "hiddenBulletIds": [
+    "bullet-rs-doc-management"
+  ],
+  "toolOrder": [
+    "tool-adobe-cc",
+    "tool-adobe-indesign",
+    "tool-adobe-photoshop",
+    "tool-adobe-illustrator",
+    "tool-adobe-premiere-pro",
+    "tool-adobe-audition",
+    "tool-adobe-after-effects",
+    "tool-canva",
+    "tool-wordpress",
+    "tool-typo3",
+    "tool-google-analytics",
+    "tool-chatgpt",
+    "tool-ms-office",
+    "tool-wirecast-pro"
+  ],
+  "maxBulletsPerExperience": 5,
+  "maxTools": 14,
+  "budgets": {
+    "summaryMaxChars": 430,
+    "pageOneMaxSkillItems": 18,
+    "pageTwoMaxExperienceBullets": 12
+  },
+  "supplementaryIndicators": {
+    "tools": {
+      "enabled": true,
+      "text": "+ weitere mediamatikbezogene Tools und Systeme"
+    },
+    "experience": {
+      "enabled": true,
+      "maxPerVariant": 3
+    }
+  },
+  "fill": {
+    "enabled": true,
+    "minRemainingSpaceMm": 5,
+    "preferredOptionalBulletCount": 2,
+    "maxOptionalBullets": 5
+  }
+}
