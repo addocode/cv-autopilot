@@ -1,0 +1,56 @@
+{
+  "pageSizePt": {
+    "width": 595.276,
+    "height": 841.89
+  },
+  "title": {
+    "line1": "Bewerbung als",
+    "line2": "Admin. Sachbearbeiter FK",
+    "rightPt": 518.785,
+    "font": "Roboto Slab Bold",
+    "sizePt": 18
+  },
+  "reference": {
+    "text": "Referenz: JRQ$540-19713",
+    "font": "Roboto Slab Bold",
+    "sizePt": 8,
+    "background": "transparent"
+  },
+  "salutation": {
+    "text": "Sehr geehrte Frau Probst",
+    "leftPt": 76.5,
+    "visibleTopPt": 201.967
+  },
+  "date": {
+    "text": "Bern, 21.07.2026",
+    "visibleTopPt": 201.988,
+    "alignmentDeltaPt": 0.021,
+    "font": "Roboto Slab Bold",
+    "sizePt": 8,
+    "background": "transparent"
+  },
+  "body": {
+    "leftPt": 76.5,
+    "widthPt": 432,
+    "font": "Arimo",
+    "sizePt": 11,
+    "leadingPt": 14,
+    "bottomAnchorPt": 46.52
+  },
+  "frame": {
+    "blue": "#15519F",
+    "outerRectTopPt": 44.008,
+    "outerRectLeftPt": 28.346,
+    "outerRectRightPt": 566.929,
+    "whitePanelTopPt": 66.614,
+    "whitePanelLeftPt": 56.126,
+    "whitePanelRightPt": 539.15,
+    "localBlueRectanglesAllowed": false
+  },
+  "logoBBoxPt": {
+    "left": 28.857,
+    "top": 53.731,
+    "right": 100.063,
+    "bottom": 109.998
+  }
+}
