@@ -1,404 +1,320 @@
-# ACTIVE CODEX TASK — Review Runde 55
+# ACTIVE CODEX TASK — Bewerbungspaket v1: Motivationsschreiben, Mail und Feedback
 
 ## Arbeitskontext
 
-Arbeite ausschliesslich im privaten Repository `addocode/cv-autopilot` auf dem bestehenden Branch:
+Arbeite ausschliesslich im Repository `addocode/cv-autopilot` auf dem bestehenden Branch:
 
-`codex/verifiziere-icon-hashes-und-svg-geometrie`
+`codex/motivationsschreiben-generator-v1`
 
-und im bestehenden PR #6.
+Dieser Branch basiert auf dem bereits veröffentlichten CV-Autopilot-v1.0-Stand auf `main`.
 
-- Erstelle keinen neuen Branch und keinen neuen Pull Request.
-- Rufe `make_pr` nicht auf.
-- Merge weder PR #6 noch PR #5.
-- Verändere das finale CV-Design, die Schriftgrössen, Icons, Seitenzahl und eingefrorene Geometrie nicht.
-- Diese Datei ersetzt alle früheren aktiven Review-Aufträge.
+- Erstelle keinen weiteren Branch.
+- Erstelle keinen verschachtelten Pull Request.
+- Merge nichts nach `main`.
+- Verändere das bestehende CV-Layout, die vier Varianten, die Masterfakten oder die bestehenden CV-Gates nicht, ausser eine klar belegte gemeinsame Schnittstelle erfordert eine rückwärtskompatible Erweiterung.
+- Automatischer Versand von Bewerbungen bleibt ausgeschlossen.
+- Reale Bewerbungsdaten bleiben in git-ignorierten Pfaden.
 
 ## Pflichtprüfung
 
 1. Führe `git log -1 --format=%H` aus.
 2. Vergleiche die Ausgabe mit der im Startprompt genannten erwarteten SHA.
-3. Prüfe, dass diese Datei mit `# ACTIVE CODEX TASK — Review Runde 55` beginnt.
+3. Prüfe, dass diese Datei mit `# ACTIVE CODEX TASK — Bewerbungspaket v1` beginnt.
 4. Bei Abweichung nichts verändern und ausschliesslich `STALE SNAPSHOT` melden.
 
 ---
 
-# 1. Verifizierte Ausgangslage nach PR #15 und Live-Run 91
+## Verbindliche Spezifikationen
 
-PR #15 wurde in PR #6 integriert. Workflow Run 87 war vollständig grün:
+Lies vor der Implementierung vollständig:
 
-- Installation und Chromium
-- Build und Validierung
-- Datentests
-- Application-Unit-Test
-- vier neutrale Produktionsrenders
-- alle Render-Tests
-- echter fiktiver Playwright-Application-E2E-Lauf
-- finaler Guard übersprungen
+- `NEXT_CODEX_TASK_APPLICATION_PACKAGE.md`
+- `modules/motivation-letter/README.md`
+- `modules/motivation-letter/layout-reference.json`
+- `modules/motivation-letter/guidance-sources.json`
+- `modules/application-email/README.md`
+- `README.md`
+- `scripts/create-application.mjs`
+- bestehende Application-/Render-Fixtures und Tests
 
-Der erneute echte Parlamentsdienste-Live-Lauf 91 war ebenfalls vollständig grün:
-
-- reale Application-CLI Exitcode `0`
-- Variante `administration-gever`
-- exakt zwei Seiten
-- keine Overflows
-- keine Collisions
-- keine Warnings
-- ATS erfolgreich
-- `80 % gemäss Inserat, flexibel nach Absprache`
-- `Nach Vereinbarung`
-- `Guten Tag Loïc Chatton, ich bin Mediamatiker EFZ ...`
-- Manifest vollständig
-- Archiv entpackbar
-- Manifest innerhalb und ausserhalb des Archivs byte-identisch
-- Sidecar-SHA entspricht exakt der finalen `.tar.gz`
-- `unsupported_rejected` wird im Manifest und Report ausgewiesen
-- beide Kontakte und zusätzliche Eckdaten werden in der realen Markdown-Akte gespeichert
-
-Diese erfolgreiche Infrastruktur ist eingefroren. Es verbleiben ausschliesslich die nachfolgend objektiv bestätigten Qualitätsprobleme.
+Diese Dateien sind die fachliche Source of Truth. Bei Widersprüchen gilt diese aktive Aufgabe für Branch-, Release- und Feedbackregeln; die detaillierten Inhalts- und Layoutregeln kommen aus den Modulspezifikationen.
 
 ---
 
-# 2. Scoring-Fehlmatches beseitigen
+# 1. Ziel für diese Umsetzung
 
-Der Live-Report 91 erzeugt weiterhin sachlich falsche Treffer durch generische Einzelwörter.
+Ein einzelner Stelleninserat-Workflow erzeugt in einem Durchlauf ein vollständiges, manuell freizugebendes Bewerbungspaket:
 
-Beispiele:
+1. bestehende Stellenakte und `01_application-context.json`
+2. individuell angepassten CV
+3. `06_application-strategy.json`
+4. `07_motivationsschreiben.pdf`
+5. `08_motivationsschreiben-preview.html`
+6. `09_motivationsschreiben-report.json`
+7. `10_mailanschreiben.md`
+8. `11_application-package-report.json`
+9. `12_application-feedback.json`
+10. aktualisiertes Manifest, Exportarchiv und SHA-256-Sidecar
 
-- `skill-online-campaigns` erhält Punkte für `Produkte` und `pflegen`.
-- `skill-social-performance` erhält Punkte für `betreuen`.
-- `skill-photo-video` erhält Punkte für `Produkte`.
-- `skill-websites-cms-landing` erhält Punkte für `betreuen`.
-- `skill-webhosters` erhält Punkte für `leisten` und generische externe Kontakte.
-- `bullet-kunz-websites-landing` erhält Punkte für `betreuen`.
-- `bullet-kunz-guegg` erhält dagegen keine redaktionelle Priorität, obwohl das Inserat redaktionelle Aufgaben und Medienmitteilungen nennt.
-- `skill-responsibility-quality` erhält `0`, obwohl das Inserat Präzision und Qualitätssicherung verlangt.
-- `skill-de-fr-context` erkennt Französisch nicht zuverlässig.
+CV, Motivationsschreiben und Mail verwenden dieselbe:
 
-Verbindliche Korrektur:
+- `applicationId`
+- Arbeitgeberbezeichnung
+- Stellenbezeichnung
+- Kontaktperson und Ansprache
+- Referenznummer
+- Belegbasis
+- Gap-Logik
+- Rollen- und Arbeitgebermotivation
 
-1. Verwende eine einzige kanonische Normalisierung für Inseratsterms, Synonyme, Tags und Kandidatentexte.
-2. Behandle deutsche Umlaute konsistent. `Qualität`, `qualitaet`, `Französisch`, `franzoesisch`, `Geschäftsvorgang` und `geschaeftsvorgang` müssen jeweils dieselbe kanonische Form erhalten.
-3. Entferne beziehungsweise entwerte generische Einzelwörter als eigenständige Treffer, mindestens:
-   - `betreuen`
-   - `pflegen`
-   - `produkte`
-   - `leisten`
-   - `weitere`
-   - `sicher`
-   - `arbeiten`
-   - `stellen`
-   - `intern`
-   - `extern`
-   - `anwendungen`
-4. Solche Wörter dürfen nur innerhalb einer fachlich kontrollierten Phrase beziehungsweise eines kontrollierten Tag-/Synonymtreffers wirken, beispielsweise `IT-Anwendungen`, `interne und externe Stellen` oder `Dokumentenpflege`.
-5. Fachliche Phrase-/Tag-Treffer müssen deutlich stärker zählen als freie Token:
-   - Dokumentenmanagement / Dokumentenablage
-   - GEVER / ACTA NOVA / Geschäftsvorgangsbearbeitung
-   - administrative Sachbearbeitung / administrative Unterstützung
-   - Qualitätssicherung / formale Kontrolle / präzise Arbeitsweise
-   - Koordination / Sitzungsorganisation
-   - Redaktion / redaktionell / editorial / Medienmitteilungen
-   - Deutsch / Französisch / Amtssprachen
-   - Selbstorganisation / Prioritäten / Eigenverantwortung
-   - Informatiksysteme / rasche Einarbeitung
-6. Keine semantische Fähigkeit erfinden. Scoring priorisiert nur vorhandene source-backed Inhalte.
-7. Gleiche Eingaben erzeugen deterministisch dieselben Scores.
-
-`selectionReasonById` muss die tatsächlich gewichteten kanonischen Phrasen und Tags ausweisen; generische Stoppwörter dürfen dort nicht als Begründung erscheinen.
+Kein Dokument darf eine neue unbelegte Tatsache einführen.
 
 ---
 
-# 3. Erwartete Skill-Auswahl für Administrations-/GEVER-Stellen
+# 2. Gemeinsame Strategie statt paralleler Textgeneratoren
 
-Für den realen Parlamentsdienste-Kontext wurden unter anderem folgende Fehlprioritäten gemessen:
+Implementiere `06_application-strategy.json` als verbindlichen Vertrag vor Motivationsschreiben und Mail.
 
-- `skill-gever-document-work` wurde verdrängt, während `skill-cms-admin` und `skill-webhosters` sichtbar blieben.
-- `skill-responsibility-quality` und `skill-structured-projects` wurden verdrängt.
-- Onlineshop und Social Media erhielten durch generische Fehlmatches künstliche Relevanz.
+Mindestens enthalten:
 
-Verbindlich:
+- `schemaVersion`
+- `applicationId`
+- `roleFamily`
+- `fitType`: `direct | adjacent | career-change | initiative`
+- `positioning`
+- `roleMotivation`
+- `employerMotivation`
+- `motivationAngle`
+- `valueProposition`
+- `firstMonthsContribution`
+- `selectedEvidenceIds`
+- `gapHandling`
+- `longTermSignal`
+- `portfolioUse`
+- `aiTrainingUse`
+- `allowedEmphasisTerms`
+- `companySources`
+- `unsupportedClaimsRejected`
+- `reviewQueue`
 
-## `ADMINISTRATION, GEVER & SYSTEME`
+Die Strategie muss aktiv mitdenken und darf nicht bloss Anforderungen paraphrasieren. Sie soll insbesondere erkennen:
 
-Vor CMS/Webhoster-Füllern priorisieren:
-
-- `skill-system-support-office`
-- `skill-data-care-quality`
-- `skill-ms-office-docs`
-- `skill-acta-nova`
-- `skill-gever-document-work`
-
-CMS-Administration oder Webhoster dürfen erst danach als Füller erscheinen, wenn die Mindestzahl von sechs Bullets sonst nicht erreicht wird.
-
-## `ARBEITSWEISE & ZUSAMMENARBEIT`
-
-Für das reale Inserat insbesondere priorisieren:
-
-- `skill-structured-projects`
-- `skill-responsibility-quality`
-- `skill-fast-onboarding`
-- `skill-coordination-partners`
-- `skill-process-documentation`
-- `skill-knowledge-documentation`
-- `skill-de-fr-context`
-- `skill-service-quality`
-
-Die finale Auswahl bleibt layoutabhängig bei sechs bis acht evidence-backed Bullets.
-
-## Weniger relevante Sektionen
-
-Die vier bestehenden Skillset-Sektionen bleiben erhalten. Weniger relevante Mediamatik-/Marketing-Inhalte dürfen als sichere Füller sichtbar bleiben, aber sie erhalten keinen künstlichen Job-Ad-Score durch Wörter wie `betreuen`, `Produkte` oder `pflegen`.
-
-Tests müssen nicht nur Reihenfolge, sondern die tatsächlich sichtbaren IDs prüfen.
+- worin Adams belegbarer Mehrwert liegt;
+- weshalb die Stelle ehrlich motiviert;
+- wie ein fachfremderer Quereinstieg glaubwürdig erklärt wird;
+- ob ein langfristiges Signal sinnvoll und belegbar ist;
+- welche CV-Inhalte im Schreiben nicht nochmals wiederholt werden sollen;
+- welche Lücken offen und ehrlich überbrückt werden müssen.
 
 ---
 
-# 4. Experience-Auswahl aus vollständigem Kandidatenpool
+# 3. Motivationsschreiben-Komposition
 
-PR #15 sortiert Experience-Bullets weiterhin erst nach:
-
-```js
-.filter((bullet) => selected.has(bullet.id) && !hidden.has(bullet.id))
-```
-
-Damit bleibt die bisherige Varianten-Vorauswahl weitgehend eingefroren. Höher relevante, aber vorher nicht ausgewählte Bullets können nicht verdrängen.
-
-Der Live-Run bestätigt:
-
-- `bullet-kunz-guegg` mit eigenständiger redaktioneller Magazinproduktion wird depriorisiert.
-- `bullet-kunz-websites-landing` bleibt sichtbar.
-- `bullet-freelance-french` wird trotz geforderter zweiter Amtssprache depriorisiert.
-- `bullet-freelance-self-organization` wird trotz Selbstorganisation/Prioritätensetzung depriorisiert.
-
-Verbindliche Korrektur:
-
-1. Erzeuge pro nicht geschützter Experience-Station einen vollständigen source-backed Kandidatenpool aus:
-   - regulären Bullets
-   - optionalen Bullets mit passender beziehungsweise defensibel übertragbarer Variant-Relevanz
-   - bestehenden sicheren längeren/kurzen Formulierungen, sofern datengetrieben vorhanden
-2. Entferne `inferred_review_required` und unbelegte Kandidaten vor der Auswahl.
-3. Berechne den Job-Ad-Score vor der finalen Auswahl.
-4. Wähle daraus die in der Varianten-/Layoutlogik zulässige Zahl sichtbarer Bullets.
-5. Erst danach adaptive Füllung und Breadth-/Cross-Domain-Regeln anwenden.
-6. Cross-Domain-Bullet bleibt der letzte sichtbare Bullet der Station.
-7. BM und geschützte Education-Stationen bleiben unverändert.
-
-Für den realen Administrationskontext sollen bei Kunz Kunath insbesondere redaktionelle Magazinpraxis, Prozessübergaben, externe Koordination und dokumentationsnahe Arbeiten vor Website-/Onlineshop-Füllern stehen.
-
-Für Freelance sollen Französisch, Selbstorganisation und Stakeholder-Koordination vor generischer Marketingunterstützung priorisiert werden, sofern Layout und Evidence-Gates dies zulassen.
-
----
-
-# 5. `jobAdRelevance` muss den final sichtbaren DOM-Zustand abbilden
-
-Verbindlich:
-
-- `selectedSkillBulletIds`: alle und nur final sichtbaren Skill-Bullets, einschliesslich tatsächlich sichtbarer adaptiver Füller.
-- `selectedExperienceBulletIds`: alle und nur final sichtbaren Experience-Bullets.
-- `deprioritizedBulletIds`: geprüfte, aber final nicht sichtbare Kandidaten.
-- Keine Überschneidung zwischen selected und deprioritized.
-- `unsupportedTermsRejected`: konkrete IDs und Texte aller `unsupported_rejected`-Anforderungen.
-- `selectionReasonById`: ausgewählte und abgelehnte Kandidaten mit Score, kanonischen matchedTerms, matchedTags und tatsächlicher Selection-Stage.
-- Report erst nach Abschluss der adaptiven DOM-Auswahl finalisieren.
-
-Ergänze echte Assertions, die sichtbare DOM-IDs gegen den Report vergleichen.
-
----
-
-# 6. Markdown-Kontaktwege korrekt darstellen
-
-Die reale Stellenakte enthält beide Kontakte korrekt, aber die Spalte `Kontaktwege` ist leer, obwohl im Inserat jeweils ein Nachrichtenformular vorhanden ist.
-
-Ursache: Die Ausgabe prüft `addressMode === "portal"`, während `portal` kein zulässiger Ansprachemodus ist und fachlich auch kein Ansprachemodus sein soll.
-
-Verbindlich:
-
-- Trenne Ansprachemodus und Kontaktkanal.
-- Ergänze ein optionales Feld wie `contactChannels`, `contactMethod` oder `hasMessageForm`.
-- Für den Live-Fall muss die Kontaktspalte ausgeben:
+Implementiere die Modulstruktur gemäss Spezifikation, mindestens:
 
 ```text
-Nachrichtenformular; keine direkte E-Mail im Inserat
+modules/motivation-letter/src/
+├── strategy.mjs
+├── compose.mjs
+├── emphasize.mjs
+├── template.mjs
+├── render.mjs
+└── quality-report.mjs
 ```
 
-- `addressMode` bleibt `formal|informal|neutral|unknown`.
-- Keine E-Mail oder Telefonnummer erfinden.
-- Nur der Bewerbungskontakt bleibt Greeting-Kandidat.
+Inhaltliche Anforderungen:
+
+- Schweizer Hochdeutsch, kein `ß`.
+- Natürlich, persönlich und professionell.
+- Kein Standardbrief und keine generischen KI-Floskeln.
+- Konkrete Arbeitgeber- und Rollenmotivation.
+- Zwei bis vier belegte Kernbelege.
+- Klare Mehrwertthese für die ersten Monate.
+- Ehrliche Quereinstiegsbrücke bei Administration, Bund, Kanton oder GEVER.
+- Marketing bei fachfremderen Rollen als Zusatznutzen, nicht als eigentliches Berufsziel.
+- Langfristigkeit nur verwenden, wenn Strategie und Rolle sie plausibel machen.
+- Portfolio, KI-Weiterbildung und AI Business Specialist nur bei echter Relevanz.
+- Keine erfundenen Kennzahlen, Verantwortungen, Systeme oder Arbeitgeberaussagen.
+- Jede substanzielle Aussage muss im Report auf `sourceIds` oder gespeicherte Arbeitgeberquellen zurückgeführt werden.
+- `unsupported_rejected` darf nicht in den Text gelangen.
+- `inferred_review_required` bleibt ausserhalb des finalen automatischen Texts.
+
+Das Schreiben muss sich vom CV ergänzend abheben und darf dessen Bulletpoints nicht bloss in Fliesstext umwandeln.
 
 ---
 
-# 7. Generische Belegmatrix-Zeile vollständig entfernen
+# 4. Titel, Kontakt und Referenz
 
-Die fiktive E2E-Markdown-Akte enthält weiterhin die erfundene Zeile:
+- Titel beginnt immer mit `Bewerbung als`.
+- Stellenbezeichnung gemäss Spezifikation bereinigen und Transformation reporten.
+- Pensum aus dem Titel entfernen.
+- Genderformen für Adam korrekt und konservativ normalisieren.
+- Referenz nur bei explizitem, sicherem Label sichtbar.
+- Zahlen aus Telefonnummern, URLs, Postleitzahlen oder Pensum nie als Referenz interpretieren.
+- Sichere formelle, informelle oder neutrale Anrede aus dem gemeinsamen Anwendungskontext.
+- Keine Anrede aus einer blossen Fachkontaktperson übernehmen, wenn ein separater Bewerbungskontakt existiert.
+- Keine E-Mail-Adresse aus einem Namen ableiten.
 
-```text
-Nicht belegte Zusatzanforderung
-```
+---
 
-und zusätzlich ein sichtbares literales `\n`.
+# 5. Renderer und Layout
+
+Motivationsschreiben als eigenständiges A4-PDF mit exakt einer Seite.
 
 Verbindlich:
 
-- Entferne diese generische Zeile vollständig.
-- Jede Tabellenzeile muss einer konkreten Inseratsanforderung entsprechen.
-- Konkrete `unsupported_rejected`-Anforderungen werden regulär als eigene Anforderungszeile dargestellt.
-- Kein literales `\n` im Markdown.
-- Keine künstliche Ablehnung erzeugen, wenn keine konkrete unbelegte Anforderung vorliegt.
+- Geometrie aus `layout-reference.json`.
+- Bestehende sichere Assets und Markenlogik wiederverwenden.
+- Roboto Slab für Titel, Referenz und Datum.
+- Arial 11 pt für Body, keine Schriftverkleinerung zur Fehlerkaschierung.
+- Textblock unten stabil verankern und bei längerem Text nach oben wachsen lassen.
+- Datum dynamisch mit erster Anredezeile ausrichten.
+- Referenz vollständig aus DOM entfernen, wenn nicht sicher vorhanden.
+- Rote/grüne Guides nur im Diagnosemodus, nie im finalen PDF.
+- Zwei bis vier sparsame blau/fette Hervorhebungsgruppen.
+- Keine ganzen Sätze hervorheben.
+- Links klickbar und ATS-lesbar.
+- Keine Overflows oder Kollisionen.
+
+Renderbasierte Längenoptimierung:
+
+1. Text komponieren.
+2. Rendern und `bodyStartMm` messen.
+3. Bei zu kurzem Schreiben semantisch sinnvollen Beleg oder Mehrwert ergänzen.
+4. Bei zu langem Schreiben schwächere Wiederholung oder allgemeinen Satz entfernen.
+5. Feste maximale Revisionszahl.
+6. Bei Nichterfolg Review Queue und fehlgeschlagenes Gate statt Schriftkompression oder blindem Abschneiden.
 
 ---
 
-# 8. Fiktive E2E-Fixture muss alle neuen Archivfelder prüfen
+# 6. Mailanschreiben
 
-Der echte Live-Kontext erzeugt die erweiterten Felder korrekt. Die öffentliche fiktive E2E-Fixture enthält diese Felder jedoch nicht, obwohl ihr Originaltext Werte für Abteilung, Homeoffice, Befristung, Frist, Referenz und Benefits enthält. Dadurch bleibt die CI-Prüfung für diese Funktion unvollständig.
+Erzeuge `10_mailanschreiben.md` nach `modules/application-email/README.md`.
 
-Erweitere die vollständig fiktive strukturierte Fixture um:
-
-- `employmentType`
-- `referenceNumber`
-- `applicationDeadline`
-- `organisationUnit`
-- `homeOffice`
-- getrennten `jobContact`
-- getrennten `applicationContact`
-- `contactMethod` beziehungsweise Nachrichtenformular
-- `benefits`
-- `employerDescription`
-- `applicationProcess`
-- `additionalNotes`
-- mindestens eine konkrete `unsupported_rejected`-Anforderung
-
-E2E-/Unit-Assertions müssen prüfen:
-
-- alle Werte in JSON und Markdown vorhanden
-- beide Kontakte mit Zweck
-- nur Bewerbungskontakt als Greeting
-- Nachrichtenformular ohne erfundene E-Mail
-- konkrete Ablehnung genau einmal
-- keine generische Ablehnungszeile
-- keine literalen Escape-Sequenzen
-- Benefits-/Arbeitgeberabschnitt nicht leer
-- offene Punkte nur für wirklich fehlende Werte
-
-Der Default `Onlineportal und komplettes Dossier` darf nicht erfunden werden, wenn kein strukturierter oder explizit extrahierter Bewerbungsweg vorliegt. Ohne Quelle lautet die Ausgabe `nicht genannt`.
+- Status immer `draft`.
+- Zwei bis vier kurze Absätze.
+- In der Regel 55–110 Wörter.
+- Kein zweites Motivationsschreiben.
+- Höchstens ein zentraler Profilbeleg.
+- Betreff und bereinigte Stellenbezeichnung identisch zum Motivationsschreiben.
+- Referenz nur bei sicherer Erkennung.
+- Portal-, E-Mail-, Easy-Apply- und Initiativmodus unterscheiden.
+- Keine Empfängeradresse erraten.
+- Kein Versand ausführen.
 
 ---
 
-# 9. Application-E2E-Status vollständig protokollieren
+# 7. Sichere Lern- und Feedbackschicht
 
-Der Workflow prüft den Application-E2E-Exitcode korrekt im finalen Guard, aber `dist/command-status.json` enthält weiterhin nur:
+Das System soll aus echten Bewerbungen lernen, ohne Masterfakten oder Texte unkontrolliert selbst umzuschreiben.
 
-- `renderAllExitCode`
-- `renderTestsExitCode`
+Erzeuge pro Bewerbung `12_application-feedback.json` mit mindestens:
 
-Verbindlich:
-
-- Übergib `APPLICATION_E2E_EXIT_CODE` an `scripts/write-command-status.mjs`.
-- Schreibe `applicationE2EExitCode` in `command-status.json`.
-- Ergänze `applicationE2ESuccess`.
-- `allReportsSuccessful` bleibt auf die vier neutralen Reports bezogen.
-- Ergänze einen separaten Gesamtwert, beispielsweise `allProductionAndApplicationChecksSuccessful`.
-- Ein fehlender oder nicht numerischer E2E-Exitcode darf nicht als Erfolg gelten.
-
----
-
-# 10. Verhaltens- und Integrationsprüfungen
-
-Reine `src.includes(...)`-Assertions reichen nicht als Nachweis.
-
-Ergänze echte Tests für:
-
-1. Umlaut-/ASCII-Normalisierung:
-   - Qualität / qualitaet
-   - Französisch / franzoesisch
-   - Geschäftsvorgang / geschaeftsvorgang
-2. Stoppwörter erzeugen allein keinen Score.
-3. Dokumenten-/GEVER-/Qualitäts-/Sprach-Bullets verdrängen Onlineshop, Analytics und Social Media im fiktiven Administrationskontext.
-4. Experience-Auswahl kann einen zuvor nicht im Variant-Set sichtbaren redaktionellen oder sprachlichen Bullet auswählen.
-5. Finaler DOM und `jobAdRelevance` enthalten exakt dieselben sichtbaren IDs.
-6. Datum, sofort, nach Vereinbarung und unknown bleiben ohne Regression korrekt.
-7. Application-E2E erzeugt PDF, Report, Manifest, Archiv und Sidecar.
-8. Manifest innen/aussen byte-identisch; Sidecar korrekt.
-9. Fiktive Markdown-Akte enthält alle optionalen Felder und keine generische Ablehnung.
-10. Neutrale vier PDFs und acht PNGs bleiben unverändert isoliert.
-
----
-
-# 11. Eingefrorene erfolgreiche Eigenschaften
-
-Nicht zurückbauen:
-
-- vier CV-Varianten
-- exakt zwei Seiten
-- aktuelles Design und Geometrie
-- vier Skillsets mit sechs bis acht evidence-backed Bullets
-- drei BM-Pflichtbullets und BM-Ausschlüsse
-- adaptive Experience-Füllung
-- Cross-Domain-Bullet jeweils zuletzt
-- Geschäftsnummer und Kontaktlayout
-- ATS-/Poppler-/PDF.js-Gates
-- neutrale Fallbackwerte
-- korrekte vierstufige Eintrittslogik
-- grammatisch integrierte Anrede
-- `selectedVariant` und kompatibles `variant`
-- vollständige Bewerbungsakte
-- Manifest und externe Sidecar-SHA
-- echter fiktiver Application-E2E-Lauf nach neutralen Tests
-- `applications/` und `exports/` git-ignored
-- vollständiger Originaltext
-
----
-
-# 12. Vollständige Abschlussprüfung
-
-Ausführen:
-
-```bash
-npm install --no-audit --no-fund
-npm run build
-npm run validate
-npm run test:data
-npm run test:application
-npm run render:all
-npm run test:render
+```json
+{
+  "schemaVersion": 1,
+  "applicationId": "...",
+  "status": "awaiting-review",
+  "manualEdits": [],
+  "approvedArguments": [],
+  "rejectedArguments": [],
+  "approvedEvidenceIds": [],
+  "rejectedEvidenceIds": [],
+  "toneFeedback": "",
+  "interviewInvite": null,
+  "applicationOutcome": "unknown",
+  "employerFeedback": "",
+  "lessons": [],
+  "eligibleForFutureReuse": false
+}
 ```
 
-Der CI-Workflow muss zusätzlich den echten fiktiven Application-E2E-Lauf erfolgreich ausführen.
+Regeln:
 
-Erfolg erst bei:
+- Feedbackdatei liegt nur in `applications/<applicationId>/` und bleibt git-ignoriert.
+- Zukünftige Wiederverwendung erfolgt nur für explizit freigegebene Muster mit `eligibleForFutureReuse: true`.
+- Kein Outcome darf automatisch als Beweis für eine Fähigkeit interpretiert werden.
+- Keine automatische Änderung von `cv.master.json`.
+- Keine automatische Übernahme personenbezogener Arbeitgeber- oder Kontaktdaten in andere Bewerbungen.
+- Ein optionaler CLI-Parameter darf freigegebene Feedbackdateien einlesen und nur Ton-, Struktur- oder Argumentationspräferenzen beeinflussen.
+- Der Report muss nennen, welche Feedbacksignale verwendet oder bewusst ignoriert wurden.
 
-- alle neutralen Reports grün
-- alle Render-Tests grün
-- Application-E2E Exitcode `0`
-- `applicationE2ESuccess === true`
-- exakt zwei Seiten
-- keine Overflows, Collisions oder Warnings
-- ATS erfolgreich
-- keine selected/deprioritized-Überschneidung
-- DOM-/Report-ID-Konsistenz
-- keine generischen Fehlmatches
-- redaktionelle und sprachliche Experience-Punkte werden real auswählbar
-- Kontaktweg Nachrichtenformular korrekt dokumentiert
-- keine generische Belegmatrix-Zeile und kein literales `\n`
-- Archiv-/Sidecar-Integrität grün
-- finaler Guard übersprungen
+Damit startet das System mit einer kontrollierten Lernhistorie, nicht mit unüberwachtem Selbsttraining.
 
-## Abschlussbericht
+---
 
-Berichte mindestens:
+# 8. Paketreport und Archiv
 
-1. lokaler Commit-SHA
-2. Live-Head-SHA von PR #6
-3. Workflow Run und Status aller Schritte
-4. neutrale Render-/Test-Exitcodes
-5. Application-E2E-Exitcode und Gesamtstatus
-6. finale sichtbare Skill- und Experience-IDs des Administrations-Fixtures
-7. depriorisierte IDs und Nichtüberschneidung
-8. konkrete Selection-Reasons für Dokumentenmanagement, Qualität, Französisch, Redaktion sowie abgewählte Marketingpunkte
-9. Markdown-Kontakte und Kontaktwege
-10. Belegmatrix-Prüfung
-11. Manifest-, Archiv- und Sidecar-Status
-12. PageCount, ATS, Overflows, Collisions, Warnings
-13. Bestätigung: kein neuer Branch, kein neuer PR, PR #6/PR #5 nicht gemergt
+`11_application-package-report.json` prüft mindestens:
 
-Beginne jetzt und fahre ohne weitere Rückfrage fort.
+- Arbeitgeber, Titel, Kontakt, Referenz und `applicationId` konsistent;
+- CV zwei Seiten;
+- Motivationsschreiben eine Seite;
+- keine Overflows oder Kollisionen;
+- ATS-Auslesbarkeit;
+- Datum-/Anrede-Ausrichtung;
+- Body-Start innerhalb der Guides;
+- Hervorhebungsbudget;
+- keine unbelegten Claims;
+- CV und Motivationsschreiben ergänzen sich;
+- Mail dupliziert das Motivationsschreiben nicht;
+- korrekte Pensum-/Eintrittswerte;
+- keine Altlasten aus anderen Bewerbungen;
+- Feedbackdatei vorhanden;
+- manuelle Schlussfreigabe erforderlich;
+- automatischer Versand deaktiviert.
+
+Aktualisiere `04_manifest.json` erst nach Erzeugung aller Dateien. Archiv und `.sha256`-Sidecar bleiben deterministisch und vollständig.
+
+---
+
+# 9. Tests und Fixtures
+
+Nutze ausschliesslich fiktive Arbeitgeber- und Kontaktdaten in versionierten Tests.
+
+Mindestens automatisieren:
+
+1. direkte Mediamatiker-/Kommunikationsstelle;
+2. Bundes-Sachbearbeitung als ehrlicher Quereinstieg mit Referenz;
+3. Administration ohne Referenz;
+4. informelle Du-Ansprache;
+5. kein Kontaktname;
+6. lange Stellenbezeichnung mit Genderzeichen und Pensum;
+7. mehrere Zahlen ohne echte Referenz;
+8. Portfolio relevant und irrelevant;
+9. AI Business Specialist relevant und irrelevant;
+10. Initiativbewerbung mit Kompetenz-Gap;
+11. minimale und maximale Textlänge;
+12. Datumsausrichtung an beiden Grenzen;
+13. generische Floskel abgelehnt;
+14. unsupported claim abgelehnt;
+15. CV-/MS-Widerspruch lässt Paketguard scheitern;
+16. Mailduplikation wird erkannt;
+17. Feedback mit und ohne Freigabe;
+18. identischer Input und Timestamp erzeugen deterministische Inhalte und Hashes.
+
+Alle bestehenden CV-Tests müssen grün bleiben.
+
+---
+
+# 10. Definition of Done
+
+Die Umsetzung ist fertig, wenn:
+
+- ein einzelner CLI-Aufruf das vollständige Bewerbungspaket erzeugt;
+- CV, Motivationsschreiben und Mail dieselbe Strategie und Belegbasis verwenden;
+- das Motivationsschreiben exakt eine Seite umfasst;
+- Layout-, ATS-, Wahrheits- und Konsistenzgates grün sind;
+- Mail und Feedbackdatei erzeugt werden;
+- Manifest, Archiv und Sidecar vollständig und korrekt sind;
+- alle bestehenden und neuen Tests grün sind;
+- eine reale Bewerbung weiterhin `draft` bleibt;
+- kein automatischer Versand erfolgt;
+- README den kombinierten Workflow dokumentiert.
+
+## Abschluss
+
+- Committe und pushe alle Änderungen ausschliesslich auf `codex/motivationsschreiben-generator-v1`.
+- Erstelle keinen weiteren Branch und keinen verschachtelten PR.
+- Berichte Commit-SHA, alle Test-/Render-Exitcodes, erzeugte Dateien, offene Review-Queue und bekannte Einschränkungen.
+- Fahre ohne weitere Rückfrage fort.
