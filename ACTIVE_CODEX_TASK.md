@@ -1,4 +1,4 @@
-# ACTIVE CODEX TASK — Review Runde 54
+# ACTIVE CODEX TASK — Review Runde 55
 
 ## Arbeitskontext
 
@@ -18,293 +18,338 @@ und im bestehenden PR #6.
 
 1. Führe `git log -1 --format=%H` aus.
 2. Vergleiche die Ausgabe mit der im Startprompt genannten erwarteten SHA.
-3. Prüfe, dass diese Datei mit `# ACTIVE CODEX TASK — Review Runde 54` beginnt.
+3. Prüfe, dass diese Datei mit `# ACTIVE CODEX TASK — Review Runde 55` beginnt.
 4. Bei Abweichung nichts verändern und ausschliesslich `STALE SNAPSHOT` melden.
 
 ---
 
-# 1. Verifizierte Ausgangslage nach PR #14 und Live-Run 76
+# 1. Verifizierte Ausgangslage nach PR #15 und Live-Run 91
 
-PR #14 hat erfolgreich korrigiert:
+PR #15 wurde in PR #6 integriert. Workflow Run 87 war vollständig grün:
 
-- `selectedVariant` zusätzlich zum kompatiblen `variant`
-- robuster Variant-Gate im Application-Workflow
-- `Nach Vereinbarung` für `start.kind === "negotiable"`
-- grammatisch korrektes `..., ich bin Mediamatiker EFZ ...`
-- erste `jobAdRelevance`-Diagnostik
-- keine doppelte generische `unsupported_rejected`-Zeile
+- Installation und Chromium
+- Build und Validierung
+- Datentests
+- Application-Unit-Test
+- vier neutrale Produktionsrenders
+- alle Render-Tests
+- echter fiktiver Playwright-Application-E2E-Lauf
+- finaler Guard übersprungen
 
-Der zweite echte Parlamentsdienste-Live-Lauf erzeugte erfolgreich:
+Der erneute echte Parlamentsdienste-Live-Lauf 91 war ebenfalls vollständig grün:
 
-- Application-Exitcode `0`
+- reale Application-CLI Exitcode `0`
 - Variante `administration-gever`
-- PDF und Preview
-- `04_manifest.json`
-- `05_render-report.json`
-- Exportarchiv `.tar.gz`
-- zwei Seiten
-- keine Overflows, Collisions oder Warnings
+- exakt zwei Seiten
+- keine Overflows
+- keine Collisions
+- keine Warnings
 - ATS erfolgreich
-- korrektes Pensum
+- `80 % gemäss Inserat, flexibel nach Absprache`
 - `Nach Vereinbarung`
-- korrekt integriertes Greeting
+- `Guten Tag Loïc Chatton, ich bin Mediamatiker EFZ ...`
+- Manifest vollständig
+- Archiv entpackbar
+- Manifest innerhalb und ausserhalb des Archivs byte-identisch
+- Sidecar-SHA entspricht exakt der finalen `.tar.gz`
+- `unsupported_rejected` wird im Manifest und Report ausgewiesen
+- beide Kontakte und zusätzliche Eckdaten werden in der realen Markdown-Akte gespeichert
 
-PR #14 ist trotzdem nicht abschlussbereit. Workflow Run 72 und der isolierte Live-Run haben die folgenden verbleibenden Fehler objektiv bestätigt.
-
----
-
-# 2. Eintrittsformat ohne Regression
-
-PR #14 änderte für alle sicheren Eintrittsarten den sichtbaren Text auf bloss `parsedValue`. Dadurch scheitert der bestehende formelle Datums-Fixture-Test.
-
-Verbindliche Ausgabe:
-
-- `kind: "date"`:
-  `Per DD.MM.YYYY gemäss Inserat, alternativ nach Vereinbarung`
-- `kind: "immediately"`:
-  `Per sofort gemäss Inserat, alternativ nach Vereinbarung`
-- `kind: "negotiable"`:
-  `Nach Vereinbarung`
-- `kind: "unknown"` oder unsichere Extraktion:
-  `Per sofort oder nach Vereinbarung`
-
-Für alle vier Fälle müssen `parsedValue`, `renderedText`, `usedFallback`, `confidence`, sichtbarer DOM-Text und ATS-Text konsistent sein.
-
-Aktualisiere echte Verhaltens-/Render-Tests; keine reinen `src.includes(...)`-Assertions als alleiniger Nachweis.
+Diese erfolgreiche Infrastruktur ist eingefroren. Es verbleiben ausschliesslich die nachfolgend objektiv bestätigten Qualitätsprobleme.
 
 ---
 
-# 3. Exportintegrität ohne unmöglichen Selbst-Hash
+# 2. Scoring-Fehlmatches beseitigen
 
-Im Live-Run stimmte der im ausserhalb des Archivs liegenden Manifest gespeicherte Archiv-Hash mit der finalen `.tar.gz`-Datei überein. Das im Archiv enthaltene `04_manifest.json` war jedoch älter und enthielt einen anderen Hash.
+Der Live-Report 91 erzeugt weiterhin sachlich falsche Treffer durch generische Einzelwörter.
 
-Eine Datei kann ihren eigenen finalen Archiv-Hash nicht selbstkonsistent im selben Archiv speichern. Implementiere deshalb ein widerspruchsfreies Modell:
+Beispiele:
 
-Bevorzugte Lösung:
+- `skill-online-campaigns` erhält Punkte für `Produkte` und `pflegen`.
+- `skill-social-performance` erhält Punkte für `betreuen`.
+- `skill-photo-video` erhält Punkte für `Produkte`.
+- `skill-websites-cms-landing` erhält Punkte für `betreuen`.
+- `skill-webhosters` erhält Punkte für `leisten` und generische externe Kontakte.
+- `bullet-kunz-websites-landing` erhält Punkte für `betreuen`.
+- `bullet-kunz-guegg` erhält dagegen keine redaktionelle Priorität, obwohl das Inserat redaktionelle Aufgaben und Medienmitteilungen nennt.
+- `skill-responsibility-quality` erhält `0`, obwohl das Inserat Präzision und Qualitätssicherung verlangt.
+- `skill-de-fr-context` erkennt Französisch nicht zuverlässig.
 
-1. `04_manifest.json` enthält die Hashes aller Dossierdateien, aber keinen behaupteten finalen Selbst-Hash des umschliessenden Archivs.
-2. Das Manifest innerhalb des Dossierordners und innerhalb des Archivs ist byte-identisch.
-3. Nach Erstellung des finalen Archivs wird ausserhalb des Archivs eine Sidecar-Datei erzeugt, beispielsweise:
-   - `exports/<applicationId>.tar.gz.sha256`
-   oder
-   - `exports/<applicationId>.export.json`
-4. Die Sidecar-Datei enthält den tatsächlichen SHA-256 des finalen Archivs und wird nicht in dasselbe Archiv aufgenommen.
+Verbindliche Korrektur:
 
-Verbindliche Tests:
+1. Verwende eine einzige kanonische Normalisierung für Inseratsterms, Synonyme, Tags und Kandidatentexte.
+2. Behandle deutsche Umlaute konsistent. `Qualität`, `qualitaet`, `Französisch`, `franzoesisch`, `Geschäftsvorgang` und `geschaeftsvorgang` müssen jeweils dieselbe kanonische Form erhalten.
+3. Entferne beziehungsweise entwerte generische Einzelwörter als eigenständige Treffer, mindestens:
+   - `betreuen`
+   - `pflegen`
+   - `produkte`
+   - `leisten`
+   - `weitere`
+   - `sicher`
+   - `arbeiten`
+   - `stellen`
+   - `intern`
+   - `extern`
+   - `anwendungen`
+4. Solche Wörter dürfen nur innerhalb einer fachlich kontrollierten Phrase beziehungsweise eines kontrollierten Tag-/Synonymtreffers wirken, beispielsweise `IT-Anwendungen`, `interne und externe Stellen` oder `Dokumentenpflege`.
+5. Fachliche Phrase-/Tag-Treffer müssen deutlich stärker zählen als freie Token:
+   - Dokumentenmanagement / Dokumentenablage
+   - GEVER / ACTA NOVA / Geschäftsvorgangsbearbeitung
+   - administrative Sachbearbeitung / administrative Unterstützung
+   - Qualitätssicherung / formale Kontrolle / präzise Arbeitsweise
+   - Koordination / Sitzungsorganisation
+   - Redaktion / redaktionell / editorial / Medienmitteilungen
+   - Deutsch / Französisch / Amtssprachen
+   - Selbstorganisation / Prioritäten / Eigenverantwortung
+   - Informatiksysteme / rasche Einarbeitung
+6. Keine semantische Fähigkeit erfinden. Scoring priorisiert nur vorhandene source-backed Inhalte.
+7. Gleiche Eingaben erzeugen deterministisch dieselben Scores.
 
-- Dossiermanifest innen und aussen byte-identisch
-- alle Dossierdatei-Hashes korrekt
-- Archiv entpackbar und vollständig
-- Sidecar-Hash entspricht exakt der finalen Archivdatei
-- erneuter identischer Lauf erzeugt deterministisch denselben Archiv-Hash
-- keine nachträgliche Manifeständerung nach der finalen Archivierung
+`selectionReasonById` muss die tatsächlich gewichteten kanonischen Phrasen und Tags ausweisen; generische Stoppwörter dürfen dort nicht als Begründung erscheinen.
 
 ---
 
-# 4. Stellenrelevanz muss die Auswahl verändern, nicht nur sortieren
+# 3. Erwartete Skill-Auswahl für Administrations-/GEVER-Stellen
 
-Die aktuelle Implementierung berechnet Scores erst, nachdem die Variantenlogik die Kernbullets bereits ausgewählt hat. Dadurch ändert sich meist nur die Reihenfolge innerhalb eines festen Sets.
+Für den realen Parlamentsdienste-Kontext wurden unter anderem folgende Fehlprioritäten gemessen:
 
-Der Live-CV zeigt weiterhin prominent:
-
-- Webhoster
-- CMS-Administration
-- Onlineshop-Zahlungsprozesse
-- Google Analytics
-- Newsletter
-- Social Media
-- Landing Pages
-
-obwohl höher relevante belegte Inhalte vorhanden sind.
+- `skill-gever-document-work` wurde verdrängt, während `skill-cms-admin` und `skill-webhosters` sichtbar blieben.
+- `skill-responsibility-quality` und `skill-structured-projects` wurden verdrängt.
+- Onlineshop und Social Media erhielten durch generische Fehlmatches künstliche Relevanz.
 
 Verbindlich:
 
-- Erzeuge pro Skillset einen vollständigen evidence-backed Kandidatenpool aus Basis- und Supplemental-Bullets.
-- Berechne `jobAdMatchScore` vor der Auswahl.
-- Wähle daraus 6–8 sichtbare Bullets pro Skillset unter Beachtung der bestehenden Layout-/Evidence-Gates.
-- Höher relevante belegte Bullets verdrängen weniger relevante Bullets.
-- Erst danach darf die adaptive Füllung sichere Füller ergänzen.
-- Für Experience-Bullets muss der Score ebenfalls vor `slice()` beziehungsweise finaler Auswahl berücksichtigt werden.
-- BM und geschützte Education-Stations bleiben unverändert.
-- `unsupported_rejected` darf nie gerendert werden.
+## `ADMINISTRATION, GEVER & SYSTEME`
 
-Für den Administrations-/GEVER-Fixture müssen vor Onlineshop, Analytics und Social Media priorisiert werden:
+Vor CMS/Webhoster-Füllern priorisieren:
 
-- MS Office und Dokumentenverwaltung
-- GEVER / ACTA NOVA
-- digitale Geschäftsvorgangsbearbeitung
-- Dokumentenablage
-- formale Kontrolle und Qualitätssicherung
-- Prozessdokumentation und Wissenssicherung
-- Koordination interner und externer Stellen
-- administrative Unterstützung und Auskünfte
-- selbstständige Organisation und Prioritätensetzung
-- rasche Einarbeitung in Informatiksysteme
-- Deutsch/Französisch
-- redaktionelle und dokumentationsbezogene Praxis
+- `skill-system-support-office`
+- `skill-data-care-quality`
+- `skill-ms-office-docs`
+- `skill-acta-nova`
+- `skill-gever-document-work`
 
-Das Design und die vier Skillset-Sektionen bleiben erhalten. Weniger relevante Mediamatik-Inhalte dürfen nur als sichere Füller erscheinen, wenn keine höher relevante belegte Alternative verfügbar ist.
+CMS-Administration oder Webhoster dürfen erst danach als Füller erscheinen, wenn die Mindestzahl von sechs Bullets sonst nicht erreicht wird.
+
+## `ARBEITSWEISE & ZUSAMMENARBEIT`
+
+Für das reale Inserat insbesondere priorisieren:
+
+- `skill-structured-projects`
+- `skill-responsibility-quality`
+- `skill-fast-onboarding`
+- `skill-coordination-partners`
+- `skill-process-documentation`
+- `skill-knowledge-documentation`
+- `skill-de-fr-context`
+- `skill-service-quality`
+
+Die finale Auswahl bleibt layoutabhängig bei sechs bis acht evidence-backed Bullets.
+
+## Weniger relevante Sektionen
+
+Die vier bestehenden Skillset-Sektionen bleiben erhalten. Weniger relevante Mediamatik-/Marketing-Inhalte dürfen als sichere Füller sichtbar bleiben, aber sie erhalten keinen künstlichen Job-Ad-Score durch Wörter wie `betreuen`, `Produkte` oder `pflegen`.
+
+Tests müssen nicht nur Reihenfolge, sondern die tatsächlich sichtbaren IDs prüfen.
 
 ---
 
-# 5. Scoring robust und nachvollziehbar machen
+# 4. Experience-Auswahl aus vollständigem Kandidatenpool
 
-Die aktuelle Teilwortlogik erzeugt Fehlgewichtungen. Im Live-Report erhielt etwa die Zusammenarbeit mit Webhostern einen hohen Score, während ACTA NOVA teilweise `0` erhielt.
+PR #15 sortiert Experience-Bullets weiterhin erst nach:
 
-Verbindlich:
-
-- Nutze normalisierte Tags, `atsSynonyms`, kontrollierte Synonymgruppen und sinnvolle Token-/Stammübereinstimmung.
-- Verwende Stopwörter für generische Begriffe wie `Stellen`, `Arbeiten`, `sicher`, `intern`, `extern`, sofern sie allein keine fachliche Relevanz belegen.
-- Phrase-/Tag-Treffer wie Dokumentenmanagement, Administration, GEVER, Qualität, Koordination und Sprachen müssen stärker zählen als generische Teilworttreffer.
-- Keine semantischen Fähigkeiten erfinden; Scoring priorisiert nur vorhandene belegte Inhalte.
-- Gleiche Eingaben müssen deterministisch gleiche Scores und Auswahl erzeugen.
-
-`selectionReasonById` soll konkrete Treffer nennen, nicht nur `jobAdMatchScore=n`, beispielsweise:
-
-```json
-{
-  "score": 8,
-  "matchedTerms": ["Dokumentenmanagement", "Administration"],
-  "matchedTags": ["gever", "documentation"],
-  "selectionStage": "core-selection"
-}
+```js
+.filter((bullet) => selected.has(bullet.id) && !hidden.has(bullet.id))
 ```
 
+Damit bleibt die bisherige Varianten-Vorauswahl weitgehend eingefroren. Höher relevante, aber vorher nicht ausgewählte Bullets können nicht verdrängen.
+
+Der Live-Run bestätigt:
+
+- `bullet-kunz-guegg` mit eigenständiger redaktioneller Magazinproduktion wird depriorisiert.
+- `bullet-kunz-websites-landing` bleibt sichtbar.
+- `bullet-freelance-french` wird trotz geforderter zweiter Amtssprache depriorisiert.
+- `bullet-freelance-self-organization` wird trotz Selbstorganisation/Prioritätensetzung depriorisiert.
+
+Verbindliche Korrektur:
+
+1. Erzeuge pro nicht geschützter Experience-Station einen vollständigen source-backed Kandidatenpool aus:
+   - regulären Bullets
+   - optionalen Bullets mit passender beziehungsweise defensibel übertragbarer Variant-Relevanz
+   - bestehenden sicheren längeren/kurzen Formulierungen, sofern datengetrieben vorhanden
+2. Entferne `inferred_review_required` und unbelegte Kandidaten vor der Auswahl.
+3. Berechne den Job-Ad-Score vor der finalen Auswahl.
+4. Wähle daraus die in der Varianten-/Layoutlogik zulässige Zahl sichtbarer Bullets.
+5. Erst danach adaptive Füllung und Breadth-/Cross-Domain-Regeln anwenden.
+6. Cross-Domain-Bullet bleibt der letzte sichtbare Bullet der Station.
+7. BM und geschützte Education-Stationen bleiben unverändert.
+
+Für den realen Administrationskontext sollen bei Kunz Kunath insbesondere redaktionelle Magazinpraxis, Prozessübergaben, externe Koordination und dokumentationsnahe Arbeiten vor Website-/Onlineshop-Füllern stehen.
+
+Für Freelance sollen Französisch, Selbstorganisation und Stakeholder-Koordination vor generischer Marketingunterstützung priorisiert werden, sofern Layout und Evidence-Gates dies zulassen.
+
 ---
 
-# 6. `jobAdRelevance`-Report intern konsistent machen
-
-Im Live-Report sind mehrere IDs zugleich in `selectedSkillBulletIds` und `deprioritizedBulletIds` enthalten. Zudem ist `unsupportedTermsRejected` leer, obwohl der strukturierte Kontext eine konkrete `unsupported_rejected`-Anforderung enthält.
+# 5. `jobAdRelevance` muss den final sichtbaren DOM-Zustand abbilden
 
 Verbindlich:
 
-- `selectedSkillBulletIds`: nur final sichtbare Skill-Bullets
-- `selectedExperienceBulletIds`: nur final sichtbare Experience-Bullets
-- `deprioritizedBulletIds`: nur geprüfte, aber nicht sichtbare Kandidaten
-- keine Überschneidung zwischen selected und deprioritized
-- `unsupportedTermsRejected`: konkrete Text-/ID-Angaben aus Anforderungen mit `evidenceStatus: "unsupported_rejected"`
-- `selectionReasonById`: für ausgewählte und abgelehnte Kandidaten
-- Report muss den finalen DOM-Zustand nach adaptiver Füllung widerspiegeln, nicht einen früheren Zwischenstand
+- `selectedSkillBulletIds`: alle und nur final sichtbaren Skill-Bullets, einschliesslich tatsächlich sichtbarer adaptiver Füller.
+- `selectedExperienceBulletIds`: alle und nur final sichtbaren Experience-Bullets.
+- `deprioritizedBulletIds`: geprüfte, aber final nicht sichtbare Kandidaten.
+- Keine Überschneidung zwischen selected und deprioritized.
+- `unsupportedTermsRejected`: konkrete IDs und Texte aller `unsupported_rejected`-Anforderungen.
+- `selectionReasonById`: ausgewählte und abgelehnte Kandidaten mit Score, kanonischen matchedTerms, matchedTags und tatsächlicher Selection-Stage.
+- Report erst nach Abschluss der adaptiven DOM-Auswahl finalisieren.
 
-Ergänze Tests für Mengenüberschneidungen und DOM-/Report-Konsistenz.
+Ergänze echte Assertions, die sichtbare DOM-IDs gegen den Report vergleichen.
 
 ---
 
-# 7. Vollständige Bewerbungsakte mit echten Eckdaten
+# 6. Markdown-Kontaktwege korrekt darstellen
 
-Der strukturierte Live-Kontext enthielt zusätzliche echte Angaben, die aktuelle Markdown-Akte ignoriert sie jedoch weiterhin. Die Akte zeigte weder `unbefristet`, Referenznummer noch beide Kontakte und enthielt im Arbeitgeber-/Benefits-Bereich nur `-`.
+Die reale Stellenakte enthält beide Kontakte korrekt, aber die Spalte `Kontaktwege` ist leer, obwohl im Inserat jeweils ein Nachrichtenformular vorhanden ist.
 
-Erweitere Schema, Validierung, JSON und Markdown datengetrieben um optionale Felder:
+Ursache: Die Ausgabe prüft `addressMode === "portal"`, während `portal` kein zulässiger Ansprachemodus ist und fachlich auch kein Ansprachemodus sein soll.
+
+Verbindlich:
+
+- Trenne Ansprachemodus und Kontaktkanal.
+- Ergänze ein optionales Feld wie `contactChannels`, `contactMethod` oder `hasMessageForm`.
+- Für den Live-Fall muss die Kontaktspalte ausgeben:
+
+```text
+Nachrichtenformular; keine direkte E-Mail im Inserat
+```
+
+- `addressMode` bleibt `formal|informal|neutral|unknown`.
+- Keine E-Mail oder Telefonnummer erfinden.
+- Nur der Bewerbungskontakt bleibt Greeting-Kandidat.
+
+---
+
+# 7. Generische Belegmatrix-Zeile vollständig entfernen
+
+Die fiktive E2E-Markdown-Akte enthält weiterhin die erfundene Zeile:
+
+```text
+Nicht belegte Zusatzanforderung
+```
+
+und zusätzlich ein sichtbares literales `\n`.
+
+Verbindlich:
+
+- Entferne diese generische Zeile vollständig.
+- Jede Tabellenzeile muss einer konkreten Inseratsanforderung entsprechen.
+- Konkrete `unsupported_rejected`-Anforderungen werden regulär als eigene Anforderungszeile dargestellt.
+- Kein literales `\n` im Markdown.
+- Keine künstliche Ablehnung erzeugen, wenn keine konkrete unbelegte Anforderung vorliegt.
+
+---
+
+# 8. Fiktive E2E-Fixture muss alle neuen Archivfelder prüfen
+
+Der echte Live-Kontext erzeugt die erweiterten Felder korrekt. Die öffentliche fiktive E2E-Fixture enthält diese Felder jedoch nicht, obwohl ihr Originaltext Werte für Abteilung, Homeoffice, Befristung, Frist, Referenz und Benefits enthält. Dadurch bleibt die CI-Prüfung für diese Funktion unvollständig.
+
+Erweitere die vollständig fiktive strukturierte Fixture um:
 
 - `employmentType`
 - `referenceNumber`
 - `applicationDeadline`
 - `organisationUnit`
 - `homeOffice`
-- `jobContact`
-- `applicationContact`
+- getrennten `jobContact`
+- getrennten `applicationContact`
+- `contactMethod` beziehungsweise Nachrichtenformular
 - `benefits`
 - `employerDescription`
 - `applicationProcess`
 - `additionalNotes`
+- mindestens eine konkrete `unsupported_rejected`-Anforderung
 
-Kontaktregeln:
+E2E-/Unit-Assertions müssen prüfen:
 
-- Fachkontakt und Bewerbungskontakt getrennt speichern und anzeigen.
-- Nur `applicationContact` darf als Greeting-Kandidat verwendet werden.
-- Keine E-Mail oder Telefonnummer aus Namen ableiten.
-- Nachrichtenformular ohne sichtbare Adresse bleibt als `keine direkte E-Mail im Inserat` dokumentiert.
+- alle Werte in JSON und Markdown vorhanden
+- beide Kontakte mit Zweck
+- nur Bewerbungskontakt als Greeting
+- Nachrichtenformular ohne erfundene E-Mail
+- konkrete Ablehnung genau einmal
+- keine generische Ablehnungszeile
+- keine literalen Escape-Sequenzen
+- Benefits-/Arbeitgeberabschnitt nicht leer
+- offene Punkte nur für wirklich fehlende Werte
 
-Markdown-Anforderungen:
-
-- Eckdatentabelle enthält alle vorhandenen Werte.
-- Kontaktbereich enthält Zweck, Name, Funktion und vorhandene Kontaktwege beider Personen.
-- Arbeitgeber-/Umfeld-/Benefits-Abschnitt verwendet vorhandene Daten statt `-`.
-- Bewerbungsprozess enthält Onlineportal und komplettes Dossier.
-- Offene Punkte nennen tatsächlich fehlende Werte, beim Live-Fall mindestens:
-  - Bewerbungsfrist nicht genannt
-  - direkte Kontakt-E-Mail nicht sichtbar
-  - Homeoffice/Arbeitsmodell nicht genannt
-- `Keine offensichtlichen offenen Pflichtpunkte erkannt` darf nur erscheinen, wenn die definierten relevanten Metadaten vollständig sind.
-- Originaltext bleibt vollständig und unverändert archiviert.
+Der Default `Onlineportal und komplettes Dossier` darf nicht erfunden werden, wenn kein strukturierter oder explizit extrahierter Bewerbungsweg vorliegt. Ohne Quelle lautet die Ausgabe `nicht genannt`.
 
 ---
 
-# 8. Echte Application-E2E-Prüfung dauerhaft in CI
+# 9. Application-E2E-Status vollständig protokollieren
 
-PR #14 fügte keine echte Playwright-Application-E2E-Prüfung hinzu. Der bestehende Unit-Test mit `--skip-render-for-tests` bleibt, reicht aber nicht.
+Der Workflow prüft den Application-E2E-Exitcode korrekt im finalen Guard, aber `dist/command-status.json` enthält weiterhin nur:
 
-Füge nach den neutralen `render:all`- und `test:render`-Schritten einen vollständig fiktiven echten Application-E2E-Lauf hinzu.
+- `renderAllExitCode`
+- `renderTestsExitCode`
 
-Warum nach den neutralen Tests:
+Verbindlich:
 
-- Application-Suffix-Artefakte dürfen die vier neutralen PDF-/PNG-Zählungen nicht beeinflussen.
-- Mehrere Application-Renders müssen im selben Workspace möglich sein.
-
-Der CI-Schritt muss:
-
-- mit `set -o pipefail` oder explizitem `${PIPESTATUS[0]}` arbeiten
-- Exitcode separat speichern
-- Diagnoseartefakte auch bei Fehler hochladen
-- einen Fehllauf niemals als Erfolg maskieren
-- keine echten Arbeitgeber- oder Personendaten in Fixtures enthalten
-
-E2E-Akzeptanz:
-
-- echter Playwright-PDF-Render
-- Application-Exitcode `0`
-- Manifest vorhanden
-- Archiv und Sidecar vorhanden
-- Archiv entpackbar
-- zwei Seiten
-- ATS erfolgreich
-- keine Overflows, Collisions oder Warnings
-- korrekte Variante
-- korrektes Pensum
-- korrektes Datum-/Sofort-/Nach-Vereinbarung-Verhalten
-- grammatisch korrekt integriertes Greeting
-- neutrale Artefakte unverändert
+- Übergib `APPLICATION_E2E_EXIT_CODE` an `scripts/write-command-status.mjs`.
+- Schreibe `applicationE2EExitCode` in `command-status.json`.
+- Ergänze `applicationE2ESuccess`.
+- `allReportsSuccessful` bleibt auf die vier neutralen Reports bezogen.
+- Ergänze einen separaten Gesamtwert, beispielsweise `allProductionAndApplicationChecksSuccessful`.
+- Ein fehlender oder nicht numerischer E2E-Exitcode darf nicht als Erfolg gelten.
 
 ---
 
-# 9. Tests statt Quelltext-Suchassertions
+# 10. Verhaltens- und Integrationsprüfungen
 
-Die neuen Runde-53-Tests prüfen überwiegend nur, ob bestimmte Quelltextfragmente vorhanden sind. Ergänze echte Funktions- und Integrationsprüfungen.
+Reine `src.includes(...)`-Assertions reichen nicht als Nachweis.
 
-Mindestens testen:
+Ergänze echte Tests für:
 
-- strukturierter Kontext → sichtbarer Footertext
-- strukturierter Kontext → integrierter Kurzprofiltext
-- Kontext → tatsächlich andere Skill-/Experience-Auswahl als neutraler Render
-- finaler DOM → `jobAdRelevance`-Report
-- Application-CLI → Manifest, Archiv, Sidecar und Hashkonsistenz
-- zwei Application-Renders im selben `dist/`
-- neutraler Visual Review bleibt exakt bei vier kanonischen PDFs und acht PNGs
+1. Umlaut-/ASCII-Normalisierung:
+   - Qualität / qualitaet
+   - Französisch / franzoesisch
+   - Geschäftsvorgang / geschaeftsvorgang
+2. Stoppwörter erzeugen allein keinen Score.
+3. Dokumenten-/GEVER-/Qualitäts-/Sprach-Bullets verdrängen Onlineshop, Analytics und Social Media im fiktiven Administrationskontext.
+4. Experience-Auswahl kann einen zuvor nicht im Variant-Set sichtbaren redaktionellen oder sprachlichen Bullet auswählen.
+5. Finaler DOM und `jobAdRelevance` enthalten exakt dieselben sichtbaren IDs.
+6. Datum, sofort, nach Vereinbarung und unknown bleiben ohne Regression korrekt.
+7. Application-E2E erzeugt PDF, Report, Manifest, Archiv und Sidecar.
+8. Manifest innen/aussen byte-identisch; Sidecar korrekt.
+9. Fiktive Markdown-Akte enthält alle optionalen Felder und keine generische Ablehnung.
+10. Neutrale vier PDFs und acht PNGs bleiben unverändert isoliert.
 
 ---
 
-# 10. Eingefrorene erfolgreiche Eigenschaften
+# 11. Eingefrorene erfolgreiche Eigenschaften
 
 Nicht zurückbauen:
 
 - vier CV-Varianten
 - exakt zwei Seiten
 - aktuelles Design und Geometrie
-- vier Skillsets mit 6–8 evidence-backed Bullets
+- vier Skillsets mit sechs bis acht evidence-backed Bullets
 - drei BM-Pflichtbullets und BM-Ausschlüsse
-- echte adaptive Experience-Füllung
+- adaptive Experience-Füllung
+- Cross-Domain-Bullet jeweils zuletzt
 - Geschäftsnummer und Kontaktlayout
 - ATS-/Poppler-/PDF.js-Gates
 - neutrale Fallbackwerte
-- korrekte `Nach Vereinbarung`-Ausgabe
-- korrektes `..., ich bin Mediamatiker EFZ ...`
+- korrekte vierstufige Eintrittslogik
+- grammatisch integrierte Anrede
 - `selectedVariant` und kompatibles `variant`
+- vollständige Bewerbungsakte
+- Manifest und externe Sidecar-SHA
+- echter fiktiver Application-E2E-Lauf nach neutralen Tests
 - `applications/` und `exports/` git-ignored
 - vollständiger Originaltext
 
 ---
 
-# 11. Vollständige Abschlussprüfung
+# 12. Vollständige Abschlussprüfung
 
 Ausführen:
 
@@ -318,22 +363,24 @@ npm run render:all
 npm run test:render
 ```
 
-Zusätzlich den neuen echten fiktiven Application-E2E-Test ausführen.
+Der CI-Workflow muss zusätzlich den echten fiktiven Application-E2E-Lauf erfolgreich ausführen.
 
 Erfolg erst bei:
 
-- `renderAllExitCode: 0`
-- `renderTestsExitCode: 0`
-- alle vier neutralen Reports erfolgreich
-- Visual Review erfolgreich
-- Application-E2E-Exitcode `0`
-- Manifest innen und aussen identisch
-- Archiv-Sidecar-Hash korrekt
-- Datum, sofort, nach Vereinbarung und Fallback korrekt
-- selected/deprioritized ohne Überschneidung
-- `unsupportedTermsRejected` korrekt
-- Administrations-Fixture zeigt sichtbar relevantere Auswahl
-- vollständige Markdown-Eckdaten und beide Kontakte
+- alle neutralen Reports grün
+- alle Render-Tests grün
+- Application-E2E Exitcode `0`
+- `applicationE2ESuccess === true`
+- exakt zwei Seiten
+- keine Overflows, Collisions oder Warnings
+- ATS erfolgreich
+- keine selected/deprioritized-Überschneidung
+- DOM-/Report-ID-Konsistenz
+- keine generischen Fehlmatches
+- redaktionelle und sprachliche Experience-Punkte werden real auswählbar
+- Kontaktweg Nachrichtenformular korrekt dokumentiert
+- keine generische Belegmatrix-Zeile und kein literales `\n`
+- Archiv-/Sidecar-Integrität grün
 - finaler Guard übersprungen
 
 ## Abschlussbericht
@@ -342,15 +389,16 @@ Berichte mindestens:
 
 1. lokaler Commit-SHA
 2. Live-Head-SHA von PR #6
-3. Workflow-Link und Status aller Schritte
+3. Workflow Run und Status aller Schritte
 4. neutrale Render-/Test-Exitcodes
-5. Application-E2E-Exitcode
-6. Manifest-/Archiv-/Sidecar-Status
-7. Eintritts-, Pensum- und Greeting-Ergebnis
-8. ausgewählte und depriorisierte Skill-/Experience-IDs ohne Überschneidung
-9. `unsupportedTermsRejected`
-10. Markdown-Eckdaten- und Kontaktstatus
-11. PageCount, ATS, Overflows, Collisions, Warnings
-12. Bestätigung: kein neuer Branch, kein neuer PR, nichts gemergt
+5. Application-E2E-Exitcode und Gesamtstatus
+6. finale sichtbare Skill- und Experience-IDs des Administrations-Fixtures
+7. depriorisierte IDs und Nichtüberschneidung
+8. konkrete Selection-Reasons für Dokumentenmanagement, Qualität, Französisch, Redaktion sowie abgewählte Marketingpunkte
+9. Markdown-Kontakte und Kontaktwege
+10. Belegmatrix-Prüfung
+11. Manifest-, Archiv- und Sidecar-Status
+12. PageCount, ATS, Overflows, Collisions, Warnings
+13. Bestätigung: kein neuer Branch, kein neuer PR, PR #6/PR #5 nicht gemergt
 
 Beginne jetzt und fahre ohne weitere Rückfrage fort.
