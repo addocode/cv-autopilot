@@ -30,3 +30,6 @@
   --page-section-title-rule-gap:3.8mm;
   --body-line-height:1.25;--experience-body-font-size:8.2pt;--tool-font-size:7.1pt;--tools-more-gap:1.5mm;--skill-icon-size:18mm;--skill-icon-column-width:25mm;--skill-icon-text-gap:5mm;
 }
+
+/* Preserve the full four-skillset layout while maintaining the validated gap above languages. */
+html body .skill-section{padding:1.10mm 0}
