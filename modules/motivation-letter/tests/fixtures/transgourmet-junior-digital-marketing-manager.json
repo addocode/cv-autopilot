@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "fixtureId": "transgourmet-junior-digital-marketing-manager",
+  "purpose": "Second binding golden render case for the motivation-letter creator",
+  "applicationDate": "2026-07-21",
+  "company": "Transgourmet Schweiz AG",
+  "jobTitleOriginal": "(Junior) Digital Marketing Managerin / Manager",
+  "jobTitleRendered": "Junior Digital Marketing Manager",
+  "workload": "80-100%",
+  "location": "Moosseedorf",
+  "contact": {
+    "firstName": "Lisa",
+    "lastName": "Röthlisberger",
+    "role": "HR Marketing",
+    "salutation": "Guten Tag Frau Röthlisberger"
+  },
+  "reference": {
+    "visible": false,
+    "value": ""
+  },
+  "roleFamily": "digital-marketing-automation",
+  "strategy": {
+    "positioning": "Mediamatiker mit mehrjähriger Digital-Marketing-, Web-, Newsletter- und Kampagnenpraxis",
+    "motivationAngle": "Verbindung aus messbarer digitaler Kundenansprache, Handel, Gastronomie und systematischer Marketing Automation",
+    "valueProposition": "Operative Kampagnenpraxis, technisches Webverständnis, Stakeholder-Koordination und analytische Prozessentwicklung verbinden",
+    "gapHandling": [
+      {
+        "requirement": "BSI Marketing Automation",
+        "handling": "Keine BSI-Erfahrung behaupten; Lücke offen benennen und mit HTML/CSS, CMS, Webshop, E-Mail-Technologien, rascher Systemeinführung und Prozesspraxis überbrücken"
+      }
+    ],
+    "longTermSignal": "Bewusster langfristiger Entwicklungsschritt in Marketing Automation, Kampagnenmanagement und datenbasierte Kundenkommunikation",
+    "aiTrainingUse": "relevant-but-brief"
+  },
+  "requiredEvidenceIds": [
+    "education-mediamatiker-efz-berufsmaturitaet",
+    "experience-kunz-kunath-webshop-websites",
+    "experience-kunz-kunath-newsletter-campaigns",
+    "experience-kunz-kunath-stakeholder-coordination",
+    "skill-html-css",
+    "skill-google-analytics"
+  ],
+  "requiredContentChecks": {
+    "companyMotivation": true,
+    "roleMotivation": true,
+    "dataAndPerformanceFocus": true,
+    "marketingAutomationFocus": true,
+    "bsiGapExplicitAndHonest": true,
+    "technicalFoundation": true,
+    "gastronomyOrTradeContext": true,
+    "longTermSignal": true,
+    "genericOpeningBlocked": true
+  },
+  "renderExpectations": {
+    "pageCount": 1,
+    "brandBlue": "#15519F",
+    "referenceVisible": false,
+    "titlePrefix": "Bewerbung als",
+    "titleWorkloadOmitted": true,
+    "emphasisGroupsMin": 2,
+    "emphasisGroupsMax": 4,
+    "dateAlignedWithSalutation": true,
+    "uniformTopBar": true,
+    "uniformSideRails": true,
+    "maxFrameDeviationPx": 1,
+    "layoutSource": "modules/motivation-letter/APPROVED_GOLDEN_STANDARD.md"
+  }
+}
