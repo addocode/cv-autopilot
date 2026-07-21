@@ -29,6 +29,10 @@ test('canonical motivation letter render passes the reference-layout contract', 
   assert.equal(report.background.position, 'left top');
   assert.ok(report.geometry.bodySignatureGapPx >= 7);
   assert.equal(report.geometry.titleLineCount, 2);
+  assert.deepEqual(report.titleLines, [
+    'Bewerbung als (Junior) Digital Marketing',
+    'Managerin / Manager (80–100%)',
+  ]);
 });
 
 test('layout CSS keeps the reference dimensions and forbids the failed ad-hoc layout', () => {
@@ -39,6 +43,7 @@ test('layout CSS keeps the reference dimensions and forbids the failed ad-hoc la
   assert.match(css, /font-size:15\.96pt/);
   assert.match(css, /text-align:right/);
   assert.match(css, /font-size:12pt;line-height:1\.41/);
+  assert.match(css, /motivation-letter__salutation\{margin-bottom:8\.8mm\}/);
   assert.match(css, /background-size:cover/);
   assert.match(css, /background-position:left top/);
   assert.doesNotMatch(css, /motivation-letter__title[^}]*text-align:center/s);
