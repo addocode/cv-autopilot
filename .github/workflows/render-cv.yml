@@ -73,6 +73,25 @@ jobs:
           echo "exit_code=${code}" >> "$GITHUB_OUTPUT"
           echo "application E2E exit code: ${code}"
           exit 0
+      - name: Run Transgourmet live application with captured exit code
+        id: application_live
+        shell: bash
+        run: |
+          mkdir -p dist applications exports
+          set +e
+          set -o pipefail
+          npm run create:application -- \
+            --job-ad tests/fixtures/live-transgourmet-digital-marketing-job-ad.txt \
+            --extracted-context tests/fixtures/live-transgourmet-digital-marketing-context.json \
+            --source-url "https://jobs.transgourmet.ch/offene-stellen/junior-digital-marketing-managerin-manager/dbed0af8-0125-40c3-a1b7-7d059995797b" \
+            --source-type url \
+            --application-date 2026-07-21 \
+            --timestamp 2026-07-21T12:00:00+03:00 \
+            2>&1 | tee dist/application-live-command.log
+          code=${PIPESTATUS[0]}
+          echo "exit_code=${code}" >> "$GITHUB_OUTPUT"
+          echo "application live exit code: ${code}"
+          exit 0
       - name: Write command status
         if: always()
         env:
@@ -101,6 +120,7 @@ jobs:
             dist/command-status.json
             dist/render-all-exit-diagnostic.json
             dist/application-e2e-command.log
+            dist/application-live-command.log
             applications/**
             exports/**
       - name: Fail if render or render tests failed
@@ -109,7 +129,8 @@ jobs:
           (
             steps.render_all.outputs.exit_code != '0' ||
             steps.render_tests.outputs.exit_code != '0' ||
-            steps.application_e2e.outputs.exit_code != '0'
+            steps.application_e2e.outputs.exit_code != '0' ||
+            steps.application_live.outputs.exit_code != '0'
           )
         shell: bash
         run: |
@@ -119,10 +140,14 @@ jobs:
           echo "${{ steps.render_tests.outputs.exit_code }}"
           echo "application E2E exit code:"
           echo "${{ steps.application_e2e.outputs.exit_code }}"
+          echo "application live exit code:"
+          echo "${{ steps.application_live.outputs.exit_code }}"
           echo "Last render-all output:"
           tail -n 100 dist/render-all-command.log || true
           echo "Last render-test output:"
           tail -n 200 dist/render-tests-command.log || true
           echo "Last application E2E output:"
           tail -n 200 dist/application-e2e-command.log || true
+          echo "Last live application output:"
+          tail -n 200 dist/application-live-command.log || true
           exit 1
