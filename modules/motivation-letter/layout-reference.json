@@ -40,7 +40,8 @@
       "family": "Arial",
       "weight": 400,
       "sizePt": 11,
-      "lineHeightPt": 14
+      "lineHeightPt": 14,
+      "lineHeightMm": 4.9389
     },
     "bodyEmphasis": {
       "family": "Arial",
@@ -61,6 +62,22 @@
       "topMm": 23.5,
       "bottomMm": 0
     }
+  },
+  "logo": {
+    "assetRole": "application-monogram-A",
+    "referenceImage": "references/logo-alignment-reference.png",
+    "positioning": "absolute-overlay",
+    "anchor": "top-left-frame-intersection",
+    "zOrder": "above-top-bar-left-rail-and-white-panel",
+    "mustOverlap": [
+      "topBar",
+      "leftRail",
+      "whitePanel"
+    ],
+    "flushToTopBar": true,
+    "visibleGapToTopBarMm": 0,
+    "alignmentRule": "Reproduce the supplied reference screenshot: the A is an overlay spanning the blue horizontal bar, the blue left rail and the white panel; do not place it as a separately padded icon inside the white area.",
+    "geometrySource": "visual-reference"
   },
   "contentColumn": {
     "leftMm": 27,
@@ -88,10 +105,14 @@
   "body": {
     "fixedBottomMm": 281.093,
     "sampleStartMm": 95.779,
-    "latestAllowedStartGuideMm": 93.5,
+    "minimumLengthIncreaseLines": 2,
+    "minimumLengthIncreaseMm": 9.8778,
+    "previousLatestAllowedStartGuideMm": 93.5,
+    "previousLatestAllowedTextStartMm": 95.779,
+    "latestAllowedStartGuideMm": 83.6222,
     "earliestAllowedStartGuideMm": 57.765,
     "guideToTextGapMm": 2.279,
-    "latestAllowedTextStartMm": 95.779,
+    "latestAllowedTextStartMm": 85.9012,
     "earliestAllowedTextStartMm": 60.044,
     "growthDirection": "upward",
     "bottomAnchored": true,
@@ -127,11 +148,14 @@
     "maxCollisionCount": 0,
     "dateAlignmentToleranceMm": 1.5,
     "bodyStartToleranceMm": 0.8,
-    "titleRightAlignmentToleranceMm": 0.8
+    "titleRightAlignmentToleranceMm": 0.8,
+    "logoTopBarGapToleranceMm": 0.3
   },
   "notes": [
     "The red and green guides are diagnostic-only and must never render in production outputs.",
+    "The minimum text quantity is now two full 14 pt body lines greater than in the original reference; the red minimum-length boundary moves upward by 9.8778 mm.",
     "The body is bottom-anchored; longer copy moves the salutation and vertical date upward.",
+    "The A logo must follow the supplied visual alignment reference and sit flush against the blue top bar as an overlapping frame element.",
     "All production blues are normalized to the CV token #15519F."
   ]
 }
