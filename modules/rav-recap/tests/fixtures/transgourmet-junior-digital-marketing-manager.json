@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "applicationId": "2026-07-21_transgourmet_junior-digital-marketing-manager",
+  "applicationDate": "21.07.2026",
+  "applicationMethod": "Elektronisch",
+  "company": {
+    "name": "Transgourmet Schweiz AG",
+    "street": "Lochackerweg",
+    "number": "5",
+    "poBox": "Kein Postfach",
+    "country": "Schweiz",
+    "postalCode": "3302",
+    "city": "Moosseedorf",
+    "contactPerson": "Lisa Röthlisberger",
+    "email": "lisa.roethlisberger@transgourmet.ch",
+    "phone": "+41 31 858 48 48"
+  },
+  "job": {
+    "title": "Junior Digital Marketing Manager",
+    "applicationUrl": "https://jobs.transgourmet.ch/offene-stellen/junior-digital-marketing-managerin-manager/dbed0af8-0125-40c3-a1b7-7d059995797b",
+    "advertisedWorkload": "80-100%"
+  },
+  "ravAssignment": "Nein",
+  "workloadCategory": "Vollzeit",
+  "result": "Noch offen",
+  "instructions": [
+    "Im Job-Room jedes Feld einzeln aus der mobilen HTML-Datei kopieren.",
+    "Bei Bewerbungskanal Elektronisch markieren.",
+    "Bei RAV-Zuweisung Nein markieren.",
+    "Beim Pensum Vollzeit markieren, da das Inserat bis 100% reicht.",
+    "Beim Ergebnis Noch offen markieren."
+  ],
+  "sources": [
+    {
+      "field": "applicationDate",
+      "status": "inferred_high_confidence",
+      "value": "21.07.2026",
+      "reason": "Generierungs- und geplanter Bewerbungstag des Pakets.",
+      "confidence": 0.98
+    },
+    {
+      "field": "company.name",
+      "status": "job_ad_explicit",
+      "value": "Transgourmet Schweiz AG",
+      "reason": "Im Stelleninserat ausdrücklich genannt.",
+      "confidence": 1
+    },
+    {
+      "field": "company.address",
+      "status": "official_research",
+      "value": "Lochackerweg 5, 3302 Moosseedorf",
+      "reason": "Im offiziellen Stelleninserat und auf der offiziellen Unternehmensseite bestätigt.",
+      "url": "https://jobs.transgourmet.ch/offene-stellen/junior-digital-marketing-managerin-manager/dbed0af8-0125-40c3-a1b7-7d059995797b",
+      "confidence": 1
+    },
+    {
+      "field": "company.poBox",
+      "status": "fallback_required_field",
+      "value": "Kein Postfach",
+      "reason": "Es ist keine Postfachnummer publiziert; das Job-Room-Feld soll gemäss Workflow nicht leer bleiben.",
+      "confidence": 1
+    },
+    {
+      "field": "company.contactPerson",
+      "status": "job_ad_explicit",
+      "value": "Lisa Röthlisberger",
+      "reason": "Im offiziellen Stelleninserat als HR-Marketing-Ansprechperson genannt.",
+      "url": "https://jobs.transgourmet.ch/offene-stellen/junior-digital-marketing-managerin-manager/dbed0af8-0125-40c3-a1b7-7d059995797b",
+      "confidence": 1
+    },
+    {
+      "field": "company.email",
+      "status": "inferred_high_confidence",
+      "value": "lisa.roethlisberger@transgourmet.ch",
+      "reason": "Best-effort-Ableitung aus dem offiziell belegten Firmenmuster vorname.nachname@transgourmet.ch. Falls Job-Room die Adresse zurückweist, offizielle Standortadresse prodega-moosseedorf@transgourmet.ch verwenden.",
+      "confidence": 0.86
+    },
+    {
+      "field": "company.phone",
+      "status": "official_research",
+      "value": "+41 31 858 48 48",
+      "reason": "Offizielle Hauptnummer von Transgourmet Schweiz AG am Standort Lochackerweg 5.",
+      "url": "https://www.transgourmet.ch/de/ueber-uns/medien",
+      "confidence": 1
+    },
+    {
+      "field": "job.title",
+      "status": "job_ad_explicit",
+      "value": "Junior Digital Marketing Manager",
+      "reason": "Für Adam aus der ausgeschriebenen Doppelform bereinigt; Pensum entfernt.",
+      "confidence": 1
+    },
+    {
+      "field": "job.applicationUrl",
+      "status": "official_research",
+      "value": "https://jobs.transgourmet.ch/offene-stellen/junior-digital-marketing-managerin-manager/dbed0af8-0125-40c3-a1b7-7d059995797b",
+      "reason": "Stabile offizielle Stellen-URL.",
+      "confidence": 1
+    },
+    {
+      "field": "workloadCategory",
+      "status": "inferred_high_confidence",
+      "value": "Vollzeit",
+      "reason": "Inserat umfasst 80-100%; Standardregel wählt Vollzeit, solange keine Bewerbung ausschliesslich auf 80% dokumentiert ist.",
+      "confidence": 0.9
+    },
+    {
+      "field": "result",
+      "status": "inferred_high_confidence",
+      "value": "Noch offen",
+      "reason": "Neue Bewerbung ohne Rückmeldung.",
+      "confidence": 1
+    }
+  ]
+}
