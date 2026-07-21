@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "description": "Measured from the supplied one-page InDesign PDF reference",
+    "pageCount": 1,
+    "pageSize": {
+      "widthPt": 595.276,
+      "heightPt": 841.89,
+      "widthMm": 210,
+      "heightMm": 297
+    }
+  },
+  "colors": {
+    "brandBlue": "#1652A1",
+    "bodyText": "#000000",
+    "paper": "#FFFFFF",
+    "developmentMinGuide": "#CD171C",
+    "developmentMaxGuide": "#3FA535"
+  },
+  "fonts": {
+    "title": {
+      "family": "Roboto Slab",
+      "weight": 700,
+      "sizePt": 18,
+      "lineHeightPt": 19
+    },
+    "reference": {
+      "family": "Roboto Slab",
+      "weight": 700,
+      "sizePt": 10
+    },
+    "date": {
+      "family": "Roboto Slab",
+      "weight": 700,
+      "sizePt": 8,
+      "writingMode": "vertical-rl",
+      "rotationDeg": 180
+    },
+    "body": {
+      "family": "Arial",
+      "weight": 400,
+      "sizePt": 11,
+      "lineHeightPt": 14
+    },
+    "bodyEmphasis": {
+      "family": "Arial",
+      "weight": 700,
+      "sizePt": 11,
+      "color": "#1652A1"
+    }
+  },
+  "frame": {
+    "outerLeftMm": 10,
+    "outerRightMm": 10,
+    "outerTopMm": 15.525,
+    "sideRailWidthMm": 9.8,
+    "topBarHeightMm": 9.8,
+    "whitePanel": {
+      "leftMm": 19.8,
+      "rightMm": 19.8,
+      "topMm": 23.5,
+      "bottomMm": 0
+    }
+  },
+  "contentColumn": {
+    "leftMm": 27,
+    "rightMm": 28.5,
+    "widthMm": 154.5
+  },
+  "reference": {
+    "topMm": 18.168,
+    "bottomMm": 22.895,
+    "rightMm": 27,
+    "alignment": "right",
+    "conditional": true,
+    "removeFromDomWhenHidden": true
+  },
+  "title": {
+    "topMm": 31.997,
+    "bottomMm": 47.272,
+    "rightMm": 27,
+    "alignment": "right",
+    "requiredPrefix": "Bewerbung als",
+    "omitWorkload": true,
+    "maxLines": 2,
+    "overflowPolicy": "reduce-title-size-within-approved-range-or-review"
+  },
+  "body": {
+    "fixedBottomMm": 281.093,
+    "sampleStartMm": 95.779,
+    "latestAllowedStartGuideMm": 93.5,
+    "earliestAllowedStartGuideMm": 57.765,
+    "guideToTextGapMm": 2.279,
+    "latestAllowedTextStartMm": 95.779,
+    "earliestAllowedTextStartMm": 60.044,
+    "growthDirection": "upward",
+    "bottomAnchored": true,
+    "developmentGuidesVisibleInProduction": false
+  },
+  "date": {
+    "leftMm": 13.406,
+    "rightMm": 17.216,
+    "dynamicVerticalPosition": true,
+    "alignmentTarget": "salutation-first-line-top",
+    "sampleTopMm": 97.014,
+    "allowedAlignmentToleranceMm": 1.5,
+    "format": "Bern, DD.MM.YYYY",
+    "dateSource": "generation-date"
+  },
+  "signature": {
+    "leftMm": 27,
+    "sampleTopMm": 270.3,
+    "sampleBottomMm": 281.093,
+    "bottomAnchored": true,
+    "linkStyle": "Dolinsky bold black plus .ch blue"
+  },
+  "emphasis": {
+    "defaultMinGroups": 2,
+    "defaultMaxGroups": 4,
+    "maxGroupsPerParagraph": 1,
+    "maxWordShare": 0.06,
+    "repeatSameTerm": false
+  },
+  "qualityTolerances": {
+    "pageCount": 1,
+    "maxOverflowPx": 0,
+    "maxCollisionCount": 0,
+    "dateAlignmentToleranceMm": 1.5,
+    "bodyStartToleranceMm": 0.8,
+    "titleRightAlignmentToleranceMm": 0.8
+  },
+  "notes": [
+    "The red and green guides are diagnostic-only and must never render in production outputs.",
+    "The body is bottom-anchored; longer copy moves the salutation and vertical date upward.",
+    "The source PDF uses #1652A1, which is slightly different from the current CV token #15519F. Unification must be a deliberate visual decision and regression-tested."
+  ]
+}
