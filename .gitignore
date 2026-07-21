@@ -3,3 +3,7 @@ node_modules/
 *.log
 .DS_Store
 dist/
+applications/
+
+exports/
+modules/motivation-letter/references/private/

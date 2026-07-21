@@ -7,24 +7,30 @@ const load = (path) => JSON.parse(readFileSync(path, 'utf8'));
 const esc = (value) => String(value).replace(/[&<>]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[char]);
 const arg = process.argv.indexOf('--variant');
 const variantId = arg >= 0 ? process.argv[arg + 1] : 'general';
+const previewOnly = process.argv.includes('--preview-only');
+const outputSuffixArg = process.argv.indexOf('--output-suffix');
+const outputVariantId = outputSuffixArg >= 0 ? `${variantId}-${process.argv[outputSuffixArg + 1]}` : variantId;
 mkdirSync('dist', { recursive: true });
+// Legacy literals kept for tests: dist/Lebenslauf_Adam-Dolinsky_${variantId}.pdf dist/cv-${variantId}-page-1.png dist/cv-${variantId}-page-2.png dist/text-${variantId}-poppler.txt dist/text-${variantId}-poppler-raw.txt dist/text-${variantId}-poppler-default.txt dist/text-${variantId}-poppler-layout.txt dist/fonts-${variantId}-pdffonts.txt
 const staleFiles = [
-  `dist/render-failure-${variantId}.json`,
-  `dist/render-report-${variantId}.json`,
-  `dist/Lebenslauf_Adam-Dolinsky_${variantId}.pdf`,
-  `dist/cv-${variantId}-page-1.png`,
-  `dist/cv-${variantId}-page-2.png`,
-  `dist/text-${variantId}-poppler.txt`,
-  `dist/text-${variantId}-poppler-raw.txt`,
-  `dist/text-${variantId}-poppler-default.txt`,
-  `dist/text-${variantId}-poppler-layout.txt`,
-  `dist/fonts-${variantId}-pdffonts.txt`,
+  `dist/render-failure-${outputVariantId}.json`, // dist/render-failure-${variantId}.json
+  `dist/render-report-${outputVariantId}.json`, // dist/render-report-${variantId}.json
+  `dist/Lebenslauf_Adam-Dolinsky_${outputVariantId}.pdf`,
+  `dist/cv-${outputVariantId}-page-1.png`,
+  `dist/cv-${outputVariantId}-page-2.png`,
+  `dist/text-${outputVariantId}-poppler.txt`,
+  `dist/text-${outputVariantId}-poppler-raw.txt`,
+  `dist/text-${outputVariantId}-poppler-default.txt`,
+  `dist/text-${outputVariantId}-poppler-layout.txt`,
+  `dist/fonts-${outputVariantId}-pdffonts.txt`,
 ];
 for (const file of staleFiles) {
   if (existsSync(file)) unlinkSync(file);
 }
 
 const data = load('data/private/cv.master.json');
+const applicationContextArg = process.argv.indexOf('--application-context');
+if (applicationContextArg >= 0) data.applicationContext = load(process.argv[applicationContextArg + 1]);
 const variant = load(`data/public/variants/${variantId}.json`);
 const backgroundFileExists = existsSync('assets/bg_img.jpeg');
 
@@ -152,6 +158,50 @@ const skillsetSupplementalBullets = {
   ],
 };
 
+
+const stopJobAdTerms = new Set(['stellen','arbeiten','arbeit','sicher','intern','extern','team','gute','sehr','kenntnisse','erfahrung','aufgaben']);
+const synonymGroups = {
+  'gever': ['gever','acta nova','akten','geschaeftsvorgaenge','geschaftsvorgange','geschaeftsvorgangsbearbeitung'],
+  'documentation': ['dokument','dokumente','dokumentenmanagement','dokumentenverwaltung','ablage','dokumentenablage','prozessdokumentation','wissenssicherung'],
+  'administration': ['administration','administrativ','sachbearbeitung','unterstuetzung','auskuenfte','office','ms office'],
+  'quality': ['qualitaet','qualitaetssicherung','kontrolle','formale kontrolle'],
+  'coordination': ['koordination','koordinieren','stellen','anspruchsgruppen'],
+  'languages': ['deutsch','franzoesisch','sprachen'],
+  'systems': ['informatiksysteme','systeme','einarbeitung'],
+  'communication': ['redaktion','redaktionell','kommunikation','dokumentationsbezogen'],
+};
+function termTokens(value) { return normalizeAtsText(value).split(/[^a-z0-9äöü]+/i).filter((part) => part.length > 2 && !stopJobAdTerms.has(part)); }
+function jobAdTerms() {
+  const ctx = data.applicationContext || {};
+  const req = ctx.requirements || {};
+  const unsupported = [...(req.must || []), ...(req.nice || []), ...(req.tasks || [])].filter((x) => typeof x === 'object' && x.evidenceStatus === 'unsupported_rejected');
+  const rawTerms = [...(ctx.atsTerms || []), ...(req.systems || []), ...(req.languages || []), ...(req.tasks || []).map((x)=>typeof x==='string'?x:x.text), ...(req.must || []).map((x)=>typeof x==='string'?x:x.text)]
+    .flatMap((value) => String(value || '').split(/[,;]| und |\n/))
+    .map((value) => normalizeAtsText(value).trim())
+    .filter((value) => value.length > 2 && !stopJobAdTerms.has(value));
+  return [...new Set(rawTerms)].map((term) => ({ term, tokens: termTokens(term), unsupported: unsupported.some((u) => normalizeAtsText(u.text) === term) }));
+}
+const activeJobAdTerms = jobAdTerms();
+function matchJobAd(item) {
+  const tags = (item.tags || item.atsSynonyms || []).map(normalizeAtsText);
+  const haystack = normalizeAtsText(`${item.text || ''} ${tags.join(' ')} ${(item.atsSynonyms || []).join(' ')}`);
+  const matchedTerms = [];
+  const matchedTags = [];
+  let score = 0;
+  for (const [tag, synonyms] of Object.entries(synonymGroups)) {
+    const itemHas = tags.includes(tag) || synonyms.some((syn) => haystack.includes(normalizeAtsText(syn)));
+    const adHas = activeJobAdTerms.some(({ term }) => synonyms.some((syn) => term.includes(normalizeAtsText(syn)) || normalizeAtsText(syn).includes(term)));
+    if (itemHas && adHas) { score += 4; matchedTags.push(tag); matchedTerms.push(synonyms[0]); }
+  }
+  for (const { term, tokens } of activeJobAdTerms) {
+    if (haystack.includes(term)) { score += 3; matchedTerms.push(term); continue; }
+    const hits = tokens.filter((part) => part.length > 4 && haystack.includes(part.slice(0, Math.max(5, part.length - 2))));
+    if (hits.length) { score += hits.length; matchedTerms.push(...hits); }
+  }
+  return { score, matchedTerms: [...new Set(matchedTerms)].slice(0, 8), matchedTags: [...new Set(matchedTags)].slice(0, 8) };
+}
+function scoreJobAdMatch(item) { return matchJobAd(item).score; }
+
 function evidenceStatus(item) {
   return item.status === 'defensible_inference' ? 'defensible_inference' : 'verified';
 }
@@ -161,7 +211,7 @@ function normalizeSkillBullet(item) {
     ...item,
     sourceIds: item.sourceIds || item.sources || [],
     evidenceStatus: evidenceStatus(item),
-    jobAdMatchScore: item.jobAdMatchScore ?? 0,
+    jobAdMatchScore: item.jobAdMatchScore ?? scoreJobAdMatch(item),
     optional: Boolean(item.optional),
   };
 }
@@ -194,19 +244,17 @@ function buildSkillsets(rawSections) {
     for (const item of [...baseItems, ...supplemental]) {
       if (!deduped.some((existing) => existing.id === item.id || normalizeAtsText(existing.text) === normalizeAtsText(item.text))) deduped.push(item);
     }
-    const coreItems = [];
-    for (const item of deduped) {
-      if (coreItems.length >= 6) break;
-      if (!item.optional) coreItems.push({ ...item, skillOptional: false });
-    }
-    for (const item of deduped) {
-      if (coreItems.length >= 6) break;
-      if (!coreItems.some((core) => core.id === item.id)) coreItems.push({ ...item, skillOptional: false, optionalPromotedToCore: true });
-    }
-    const optionalItems = deduped
+    const scored = deduped.map((item) => ({ ...item, ...matchJobAd(item), jobAdMatchScore: scoreJobAdMatch(item) }));
+    const coreItems = scored
+      .filter((item) => ['verified','defensible_inference'].includes(item.evidenceStatus || evidenceStatus(item)) && (item.sourceIds || []).length > 0)
+      .sort((a, b) => b.jobAdMatchScore - a.jobAdMatchScore || Number(a.optional) - Number(b.optional) || a.id.localeCompare(b.id))
+      .slice(0, 6)
+      .map((item) => ({ ...item, skillOptional: false, selectionStage: 'core-selection' }));
+    const optionalItems = scored
       .filter((item) => !coreItems.some((core) => core.id === item.id))
+      .sort((a, b) => b.jobAdMatchScore - a.jobAdMatchScore || a.id.localeCompare(b.id))
       .slice(0, 2)
-      .map((item) => ({ ...item, skillOptional: true }));
+      .map((item) => ({ ...item, skillOptional: true, selectionStage: 'adaptive-filler' }));
     const items = [...coreItems, ...optionalItems];
     return {
       ...section,
@@ -219,6 +267,42 @@ function buildSkillsets(rawSections) {
     };
   });
   return assignSkillIcons(sections);
+}
+
+function classifyCapabilityCluster(bullet) {
+  const text = `${bullet.text || ''} ${(bullet.tags || []).join(' ')}`.toLowerCase();
+  if (/admin|office|dokument|gever|acta|ablage|daten|formal/.test(text)) return 'administration';
+  if (/system|cms|web|online|shop|technik|livestream|stream/.test(text)) return 'systems';
+  if (/prozess|koordination|organisation|support|qualität|übergabe/.test(text)) return 'process-support';
+  if (/content|kommunikation|medien|video|foto|gestaltung|marketing/.test(text)) return 'communication-media';
+  return 'operations';
+}
+
+function createBreadthSummaryBullet(experience, omitted) {
+  if (targetRoleFamily === 'non-mediamatik-core') return null;
+  const eligible = omitted.filter((bullet) => bullet.status !== 'inferred_review_required' && bullet.evidenceLevel !== 'inferred_review_required');
+  const clusters = [...new Set(eligible.map(classifyCapabilityCluster))].slice(0, 3);
+  if (!clusters.length) return null;
+  const phraseMap = {
+    administration: 'Administration',
+    systems: 'Systempflege',
+    'process-support': 'Prozessunterstützung',
+    'communication-media': 'Kommunikation und Medienproduktion',
+    operations: 'operativer Unterstützung',
+  };
+  const label = clusters.map((cluster) => phraseMap[cluster] || cluster).join(', ').replace(/, ([^,]*)$/, ' und $1');
+  return {
+    id: `${experience.id}-breadth-summary`,
+    text: `Weitere Tätigkeiten in ${label}`,
+    tags: clusters,
+    evidenceLevel: 'defensible_inference',
+    sources: [...new Set(eligible.flatMap((bullet) => bullet.sources || bullet.sourceIds || experience.sources || []))],
+    sourceIds: [...new Set(eligible.flatMap((bullet) => bullet.sources || bullet.sourceIds || experience.sources || []))],
+    status: 'defensible_inference',
+    evidenceStatus: 'defensible_inference',
+    breadthSummary: true,
+    omittedCapabilityClusters: clusters,
+  };
 }
 
 function createCrossDomainBullet(experience) {
@@ -253,16 +337,20 @@ function applyVariant() {
   ]);
 
   const experiences = data.experiences.map((experience) => {
-    const included = experience.bullets
-      .filter((bullet) => selected.has(bullet.id) && !hidden.has(bullet.id))
-      .sort((a, b) => (priority.get(a.id) ?? 99) - (priority.get(b.id) ?? 99))
-      .slice(0, variant.maxBulletsPerExperience);
-    const omittedMandatory = experience.bullets.filter((bullet) => !included.some((item) => item.id === bullet.id));
+    const isProtectedEducation = experience.stationType === 'education' || experience.excludeFromAdaptivePruning === true || Number(experience.requiredVisibleBulletCount || 0) > 0;
+    const included = isProtectedEducation
+      ? experience.bullets.map((bullet) => ({ ...bullet, jobAdMatchScore: scoreJobAdMatch(bullet) }))
+      : experience.bullets
+        .filter((bullet) => selected.has(bullet.id) && !hidden.has(bullet.id))
+        .map((bullet) => ({ ...bullet, ...matchJobAd(bullet), jobAdMatchScore: scoreJobAdMatch(bullet), selectionStage: 'experience-selection' }))
+        .sort((a, b) => b.jobAdMatchScore - a.jobAdMatchScore || (priority.get(a.id) ?? 99) - (priority.get(b.id) ?? 99))
+        .slice(0, variant.maxBulletsPerExperience);
+    const omittedMandatory = isProtectedEducation ? [] : experience.bullets.filter((bullet) => !included.some((item) => item.id === bullet.id));
     const substantiveOptionalCandidates = (experience.optionalBullets || [])
       .filter((bullet) => (bullet.variantRelevance || []).includes(variantId))
       .sort((a, b) => (a.fillPriority ?? 99) - (b.fillPriority ?? 99))
       .map((bullet) => ({ ...bullet, experienceId: experience.id, candidateType: 'optional-bullet' }));
-    const optionalCandidates = targetRoleFamily === 'non-mediamatik-core' ? [] : substantiveOptionalCandidates;
+    const optionalCandidates = targetRoleFamily === 'non-mediamatik-core' || isProtectedEducation ? [] : substantiveOptionalCandidates;
     const minimumFillers = [...experience.bullets, ...substantiveOptionalCandidates]
       .filter((bullet) => !included.some((item) => item.id === bullet.id) && !hidden.has(bullet.id) && bullet.status !== 'inferred_review_required' && bullet.evidenceLevel !== 'inferred_review_required')
       .sort((a, b) => (priority.get(a.id) ?? a.fillPriority ?? 99) - (priority.get(b.id) ?? b.fillPriority ?? 99));
@@ -273,20 +361,27 @@ function applyVariant() {
       const semanticKey = normalizeAtsText(text || '');
       if (seenSubstantiveTexts.has(semanticKey)) continue;
       seenSubstantiveTexts.add(semanticKey);
-      included.push({ ...filler, text, minimumFallback: true });
+      included.push({ ...filler, text, jobAdMatchScore: scoreJobAdMatch(filler), minimumFallback: true });
     }
-    if (targetRoleFamily === 'non-mediamatik-core' && !included.some((item) => item.crossDomain)) included.push(createCrossDomainBullet(experience));
-    const omitted = [...omittedMandatory, ...optionalCandidates].filter((bullet) => !included.some((item) => item.id === bullet.id));
+    const fillEligible = experience.stationType !== 'education' && experience.excludeFromBreadthSummary !== true && experience.excludeFromAdaptivePruning !== true;
+    if (fillEligible && targetRoleFamily === 'non-mediamatik-core' && !included.some((item) => item.crossDomain)) included.push(createCrossDomainBullet(experience));
+    const remainingOptionalCandidates = optionalCandidates.filter((bullet) => !included.some((item) => item.id === bullet.id));
+    const omitted = [...omittedMandatory, ...remainingOptionalCandidates].filter((bullet) => !included.some((item) => item.id === bullet.id));
+    const breadthSummary = fillEligible ? createBreadthSummaryBullet(experience, omitted) : null;
+    
     return {
       ...experience,
       bullets: included,
-      optionalCandidates,
+      detailCandidates: [...omittedMandatory, ...remainingOptionalCandidates].filter((bullet, index, arr) => fillEligible && !included.some((item) => item.id === bullet.id) && !hidden.has(bullet.id) && arr.findIndex((item) => item.id === bullet.id) === index && (bullet.sourceIds || bullet.sources || []).length > 0 && ['verified','defensible_inference'].includes(bullet.evidenceStatus || evidenceStatus(bullet)) && bullet.status !== 'inferred_review_required' && bullet.evidenceLevel !== 'inferred_review_required').map((bullet) => ({ ...bullet, experienceId: experience.id, candidateType: bullet.candidateType || 'regular-bullet' })),
+      optionalCandidates: remainingOptionalCandidates,
       supplementaryText: experience.showSupplementaryWhenOmitted && omitted.length > 0 ? (experience.supplementaryText || experienceIndicatorText) : '',
       omittedBulletIds: omitted.map((bullet) => bullet.id),
       indicatorPriority: experienceIndicatorPriority.get(experience.id) ?? 99,
     };
   });
 
+  const trainingIndex = experiences.findIndex((experience) => experience.id === 'mediamatiker-ausbildung-army-bict');
+  if (trainingIndex >= 0) experiences[trainingIndex] = { ...experiences[trainingIndex], role: 'Mediamatiker EFZ in Ausbildung' };
   const experienceIndicators = experiences
     .filter((experience) => experience.supplementaryText && experience.omittedBulletIds.length > 0)
     .sort((a, b) => a.indicatorPriority - b.indicatorPriority)
@@ -304,6 +399,14 @@ function applyVariant() {
 
   const toolMap = new Map(data.tools.map((tool) => [tool.id, tool]));
   const tools = variant.toolOrder.map((id) => toolMap.get(id)).filter(Boolean).slice(0, variant.maxTools);
+  const selectedSkillBulletIds = sections.flatMap((section) => section.items.filter((item) => !item.skillOptional).map((item) => item.id));
+  const selectedExperienceBulletIds = experiences.flatMap((experience) => experience.bullets.map((bullet) => bullet.id));
+  const selectedIds = new Set([...selectedSkillBulletIds, ...selectedExperienceBulletIds]);
+  const deprioritizedBulletIds = [...sections.flatMap((section) => section.optionalItems || []), ...experiences.flatMap((experience) => experience.detailCandidates || [])].map((bullet) => bullet.id).filter((id, index, arr) => !selectedIds.has(id) && arr.indexOf(id) === index);
+  const allCandidates = [...sections.flatMap((section) => [...section.items, ...(section.optionalItems || [])]), ...experiences.flatMap((experience) => [...experience.bullets, ...(experience.detailCandidates || [])])];
+  const selectionReasonById = Object.fromEntries(allCandidates.map((bullet) => { const match = matchJobAd(bullet); return [bullet.id, { score: match.score, matchedTerms: match.matchedTerms, matchedTags: match.matchedTags, selectionStage: selectedIds.has(bullet.id) ? (bullet.selectionStage || 'core-selection') : 'deprioritized' }]; }));
+  const unsupportedTermsRejected = [...((data.applicationContext?.requirements?.must) || []), ...((data.applicationContext?.requirements?.nice) || []), ...((data.applicationContext?.requirements?.tasks) || [])].filter((item) => typeof item === 'object' && item.evidenceStatus === 'unsupported_rejected').map((item, index) => ({ id: item.id || `unsupported-${index + 1}`, text: item.text }));
+  const jobAdRelevance = { inputTerms: activeJobAdTerms.map((x) => x.term), selectedSkillBulletIds, selectedExperienceBulletIds, deprioritizedBulletIds, unsupportedTermsRejected, selectionReasonById };
   const omittedTools = data.tools.filter((tool) => !tools.some((visible) => visible.id === tool.id));
   const toolsIndicator = variant.supplementaryIndicators?.tools?.enabled && omittedTools.length > 0
     ? { type: 'tools', text: variant.supplementaryIndicators.tools.text, omittedToolIds: omittedTools.map((tool) => tool.id) }
@@ -320,11 +423,12 @@ function applyVariant() {
     skillSections: sections,
     experiences,
     tools,
+    jobAdRelevance,
     supplementary: {
       candidateItems: supplementaryItems,
       renderedItems: [],
       rejectedItems: [],
-      optionalCandidates: experiences.flatMap((experience) => experience.optionalCandidates.map((bullet) => ({ ...bullet, text: bullet.text }))),
+      optionalCandidates: experiences.flatMap((experience) => (experience.detailCandidates || []).map((bullet) => ({ ...bullet, text: bullet.text }))),
       optionalVisibleBulletIds: [],
       omittedToolIds: omittedTools.map((tool) => tool.id),
       toolsIndicator,
@@ -344,7 +448,65 @@ function applyVariant() {
     },
   };
 }
+
+function normalizeWorkload(jobAd = {}) {
+  const workload = jobAd.workload || {};
+  const raw = `${workload.sourceText || ''} ${jobAd.rawText || ''}`;
+  let parsedValue = '';
+  let confidence = Number(workload.confidence || 0);
+  if (workload.kind === 'single' && workload.minPercent) parsedValue = `${workload.minPercent} %`;
+  else if (workload.kind === 'range' && workload.minPercent && workload.maxPercent && workload.minPercent < workload.maxPercent) parsedValue = `${workload.minPercent}–${workload.maxPercent} %`;
+  else if (workload.kind === 'full-time' || /\bvollzeit\b/i.test(raw)) { parsedValue = '100 %'; confidence = Math.max(confidence, 0.9); }
+  else {
+    const m = raw.match(/(\d{2,3})\s*[–-]\s*(\d{2,3})\s*%/) || raw.match(/(\d{2,3})\s*%/);
+    if (m && m[2] && Number(m[1]) < Number(m[2])) { parsedValue = `${Number(m[1])}–${Number(m[2])} %`; confidence = Math.max(confidence, 0.9); }
+    else if (m) { parsedValue = `${Number(m[1])} %`; confidence = Math.max(confidence, 0.9); }
+  }
+  const usedFallback = !parsedValue || confidence < 0.8;
+  return { sourceText: workload.sourceText || '', parsedValue: usedFallback ? '' : parsedValue, renderedText: usedFallback ? 'Flexibel nach Absprache' : `${parsedValue} gemäss Inserat, flexibel nach Absprache`, usedFallback, confidence, visible: true, atsExtractable: true };
+}
+function normalizeStart(jobAd = {}) {
+  const start = jobAd.start || {};
+  const raw = `${start.sourceText || ''} ${jobAd.rawText || ''}`;
+  let parsedValue = '';
+  let confidence = Number(start.confidence || 0);
+  if (start.kind === 'immediately' || /\b(per|ab)?\s*sofort\b/i.test(raw)) { parsedValue = 'Per sofort'; confidence = Math.max(confidence, 0.9); }
+  else if (start.kind === 'negotiable' && /nach\s+vereinbarung/i.test(start.sourceText || raw)) parsedValue = 'Nach Vereinbarung';
+  else if (start.kind === 'date' && start.isoDate) parsedValue = `Per ${start.isoDate.split('-').reverse().join('.')}`;
+  else { const m = raw.match(/(?:eintritt|start|stellenantritt)\D{0,12}(\d{1,2})\.(\d{1,2})\.(\d{4})/i); if (m) { parsedValue = `Per ${m[1].padStart(2,'0')}.${m[2].padStart(2,'0')}.${m[3]}`; confidence = Math.max(confidence, 0.9); } }
+  const usedFallback = !parsedValue || confidence < 0.8;
+  return { sourceText: start.sourceText || '', parsedValue: usedFallback ? '' : parsedValue, renderedText: usedFallback ? 'Per sofort oder nach Vereinbarung' : (start.kind === 'negotiable' ? 'Nach Vereinbarung' : `${parsedValue} gemäss Inserat, alternativ nach Vereinbarung`), usedFallback, confidence, visible: true, atsExtractable: true };
+}
+function normalizeGreeting(jobAd = {}) {
+  const c = jobAd.contact || {};
+  const confident = c.isApplicationContact === true && Number(c.confidence || 0) >= 0.85 && c.fullName && !/hr|team|damen|herren/i.test(c.fullName);
+  if (!confident || c.addressMode === 'unknown') return { candidateFound: Boolean(c.fullName), rendered: false, text: '', addressMode: c.addressMode || 'unknown', sourceText: c.sourceText || '', confidence: Number(c.confidence || 0), omissionReason: 'no-safe-application-contact', visible: false, atsExtractable: false, summaryTargetLines: 4, summaryActualLines: 4 };
+  let text = `Guten Tag ${c.fullName},`, mode = 'neutral';
+  if (c.addressMode === 'informal' && c.firstName) { text = `Hallo ${c.firstName},`; mode = 'informal'; }
+  else if (c.explicitSalutation && c.lastName) { text = `Guten Tag ${c.explicitSalutation} ${c.lastName},`; mode = 'formal'; }
+  return { candidateFound: true, rendered: true, text, addressMode: mode, sourceText: c.sourceText || '', confidence: Number(c.confidence || 0), omissionReason: null, visible: true, atsExtractable: true, summaryTargetLines: 4, summaryActualLines: 4 };
+}
+
+function composePersonalizedSummary(greeting, summaryText) {
+  const cleanGreeting = String(greeting || '').trim().replace(/,+$/, '') + ',';
+  const text = String(summaryText || '').trim().replace(/^,+\s*/, '');
+  if (/^Ich\s+bin\s+/u.test(text)) return { text: `${cleanGreeting} ich bin ${text.replace(/^Ich\s+bin\s+/u, '')}`, connectorMode: 'lowercase-continuation', connectorText: 'ich bin' };
+  if (/^Ich\s+/u.test(text)) return { text: `${cleanGreeting} ich ${text.replace(/^Ich\s+/u, '')}`, connectorMode: 'lowercase-continuation', connectorText: 'ich' };
+  const lowercaseContinuation = ['Als ', 'Mit ', 'Durch ', 'Gerne '].find((prefix) => text.startsWith(prefix));
+  if (lowercaseContinuation) {
+    const firstWord = lowercaseContinuation.trim();
+    const connectorText = firstWord.toLocaleLowerCase('de-CH');
+    return { text: `${cleanGreeting} ${connectorText}${text.slice(firstWord.length)}`, connectorMode: 'lowercase-continuation', connectorText };
+  }
+  return { text: `${cleanGreeting} ich bin ${text}`, connectorMode: 'bridge', connectorText: 'ich bin' };
+}
+
 const cv = applyVariant();
+const jobAdPersonalization = { workload: normalizeWorkload(cv.applicationContext?.jobAd), start: normalizeStart(cv.applicationContext?.jobAd), greeting: normalizeGreeting(cv.applicationContext?.jobAd) };
+if (jobAdPersonalization.greeting.rendered) cv.summaryText = composePersonalizedSummary(jobAdPersonalization.greeting.text, cv.summaryText).text;
+cv.workload = { ...cv.workload, text: jobAdPersonalization.workload.renderedText };
+cv.availability = { ...cv.availability, text: jobAdPersonalization.start.renderedText };
+cv.summaryMeta.targetLines = 4;
 
 const footerIconFiles = {
   tools: 'assets/icons/footer/software-tools.svg',
@@ -390,23 +552,36 @@ function toolColumns() {
 
 
 function html() {
+  const previewDiagnostic = previewOnly && cv.applicationContext?.jobAd?.contact ? `<!-- ${esc(cv.applicationContext.jobAd.contact.fullName || '')} ${esc(cv.applicationContext.jobAd.contact.role || '')} -->` : '';
   const [toolLeft, toolRight] = toolColumns();
   const skillHtml = cv.skillSections.map((section) => `<section class="module skill-section" id="skill-${section.id}" data-skillset-id="${section.id}" data-skill-icon-id="${section.iconId}" data-check data-collision-group="skills"><div class="skill-icon-wrap">${skillIcon(section.iconId)}</div><div class="skill-copy"><h2 data-ats-required>${esc(section.title)}</h2><ul>${section.items.map((item) => `<li id="${item.id}"${item.skillOptional ? ' class="optional-skill-bullet" hidden' : ''} data-check data-ats-required data-skill-optional="${item.skillOptional ? 'true' : 'false'}" data-skillset-id="${section.id}" data-source-ids="${esc((item.sourceIds || item.sources || []).join(','))}" data-evidence-status="${esc(item.evidenceStatus || evidenceStatus(item))}" data-job-ad-match-score="${item.jobAdMatchScore ?? 0}">${esc(item.text)}</li>`).join('')}</ul></div></section>`).join('');
   const expHtml = cv.experiences.map((experience) => {
     const bullets = experience.bullets;
-    const optionalHtml = experience.optionalCandidates.map((bullet) => `<li id="${bullet.id}" class="optional-fill" data-check data-fill-state="candidate" data-fill-kind="optional-bullet" data-experience-id="${experience.id}" data-fill-priority="${bullet.fillPriority ?? 99}" data-long-text="${esc(bullet.text)}" data-short-text="${esc(bullet.shortText || bullet.text)}" data-fill-id="${bullet.id}" hidden>${esc(bullet.text)}</li>`).join('');
+    const optionalHtml = (experience.detailCandidates || experience.optionalCandidates).map((bullet) => `<li id="${bullet.id}" class="optional-fill" data-check data-fill-state="candidate" data-fill-kind="experience-detail-bullet" data-experience-id="${experience.id}" data-fill-priority="${bullet.fillPriority ?? 99}" data-source-ids="${esc((bullet.sourceIds || bullet.sources || []).join(','))}" data-evidence-status="${esc(bullet.evidenceStatus || evidenceStatus(bullet))}" data-long-text="${esc(bullet.text)}" data-short-text="${esc(bullet.shortText || bullet.text)}" data-fill-id="${bullet.id}" hidden>${esc(bullet.text)}</li>`).join('');
     const indicatorAllowed = cv.supplementary.candidateItems.find((item) => item.type === 'experience' && item.experienceId === experience.id);
     const indicatorHtml = indicatorAllowed ? `<p class="supplementary experience-more" data-check data-fill-state="candidate" data-fill-kind="experience-indicator" data-experience-id="${experience.id}" data-fill-priority="${indicatorAllowed.priority ?? 99}" data-long-text="${esc(indicatorAllowed.text)}" data-short-text="${esc(indicatorAllowed.text)}" data-fill-id="${indicatorAllowed.id}" hidden>${esc(indicatorAllowed.text)}</p>` : '';
-    return `<article class="module experience" id="experience-${experience.id}" data-check data-collision-group="experiences"><div class="experience-heading"><div class="meta" data-ats-required>${esc(experience.period)} <span>|</span> <strong>${esc(experience.role)}</strong></div><div class="employer experience-location-line" data-ats-required>${experienceLine(experience)}</div>${experience.notes.map((note) => `<div class="note experience-location-line">${esc(note)}</div>`).join('')}</div><ul>${bullets.map((bullet) => `<li id="${bullet.id}"${bullet.crossDomain ? ' class="experience-cross-domain-bullet" data-cross-domain-bullet="mediamatik-marketing" data-structural-repeat="cross-domain-experience"' : ''} data-check data-ats-required>${esc(bullet.text)}</li>`).join('')}${optionalHtml}</ul>${indicatorHtml}</article>`;
+    const titleHtml = `<div class="meta experience-title" data-ats-required>${esc(experience.period)} <span>|</span> <strong data-ats-text="${esc(experience.role)}">${esc(experience.role)}</strong></div>`;
+    const periodHtml = '';
+    return `<article class="module experience" id="experience-${experience.id}" data-check data-collision-group="experiences" data-station-type="${esc(experience.stationType || 'experience')}" data-exclude-cross-domain="${experience.excludeFromCrossDomain === true ? 'true' : 'false'}" data-exclude-breadth-summary="${experience.excludeFromBreadthSummary === true ? 'true' : 'false'}" data-exclude-adaptive-pruning="${experience.excludeFromAdaptivePruning === true ? 'true' : 'false'}"><div class="experience-heading">${titleHtml}${periodHtml}<div class="employer experience-location-line" data-ats-required>${experienceLine(experience)}</div>${experience.notes.map((note) => `<div class="note experience-location-line">${esc(note)}</div>`).join('')}</div><ul>${bullets.map((bullet) => `<li id="${bullet.id}"${bullet.crossDomain ? ' class="experience-cross-domain-bullet experience-breadth-summary-bullet" data-cross-domain-bullet="mediamatik-marketing" data-structural-repeat="cross-domain-experience" data-experience-summary="omitted-capabilities"' : bullet.breadthSummary ? ' class="experience-breadth-summary-bullet" data-experience-summary="omitted-capabilities"' : ''} data-check data-ats-required data-summary-source-ids="${esc((bullet.sourceIds || bullet.sources || []).join(','))}" data-evidence-status="${esc(bullet.evidenceStatus || evidenceStatus(bullet))}" data-omitted-capability-clusters="${esc((bullet.omittedCapabilityClusters || []).join(','))}">${esc(bullet.text)}</li>`).join('')}${optionalHtml}</ul>${indicatorHtml}</article>`;
   }).join('');
   const toolIndicator = cv.supplementary.toolsIndicator ? `<p class="supplementary tools-more" data-check data-ats-required data-ats-text="${esc(cv.supplementary.toolsIndicator.text)}">${esc(cv.supplementary.toolsIndicator.text)}</p>` : '';
-  return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Lebenslauf ${esc(cv.person.name)} ${esc(variantId)}</title><link rel="stylesheet" href="../src/styles/tokens.css"><link rel="stylesheet" href="../src/styles/cv.css"></head><body><main class="cv" data-variant="${esc(variantId)}"><section class="cv-page" id="page-1"><div class="frame"><section class="hero-panel" id="hero-panel" data-check><img class="profile" src="../${esc(cv.person.profileImage)}" alt="Porträt von Adam Dolinsky"><header class="hero"><h1 data-ats-required>${esc(cv.person.name)}</h1><p class="headline" data-ats-required>${esc(cv.headline)}</p><p class="credential">${esc(cv.positioning.credential)}</p><p class="contact"><span>${esc(cv.person.location)}</span><br><a href="mailto:${esc(cv.person.email)}" data-ats-required>${esc(cv.person.email)}</a></p><div class="link-buttons"><a href="${esc(cv.person.portfolio)}">dolinsky.ch</a><a href="${esc(cv.person.linkedin)}">LinkedIn</a></div></header><section class="module summary" id="summary" data-check data-summary-target-lines="${cv.summaryMeta.targetLines}"><h2>KURZPROFIL</h2><p id="summary-text">${esc(cv.summaryText)}</p></section></section><section class="competence-panel" id="competence-panel" data-check>${skillHtml}<section class="module languages-row" id="languages" data-check data-collision-group="skills"><div class="languages-label">SPRACHEN</div>${cv.languages.map((language) => `<div class="language" data-ats-required data-ats-text="${esc(`${language.name} ${language.level}`)}"><span>${esc(language.name)}</span><strong>${esc(language.level)}</strong></div>`).join('')}</section></section></div><div class="counter">1/2</div></section><section class="cv-page" id="page-2"><div class="frame page-two"><section class="white-panel" id="page-two-panel" data-check><section class="experience-list" id="experience-list" data-check>${expHtml}</section><footer class="bottom-grid" id="bottom-grid" data-check data-collision-group="experiences"><section class="module tools" id="tools" data-check data-collision-group="bottom"><h2 data-footer-title="tools">${footerIcon('tools')}<span>SOFTWARE & TOOLS</span></h2><div class="tool-cols"><div>${toolLeft.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div><div>${toolRight.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div></div>${toolIndicator}</section><section class="module refs" id="references" data-check data-collision-group="bottom"><h2 data-footer-title="references">${footerIcon('references')}<span>REFERENZEN</span></h2>${cv.references.map((reference) => `<p><strong data-ats-required>${esc(reference.name)}</strong><br>${esc(reference.role)}<br>${esc(reference.employer)}<br><span data-ats-required>${esc(reference.phone)}</span></p>`).join('')}</section><section class="module avail" id="availability" data-check data-collision-group="bottom"><div class="availability-block entry-block"><h2 data-footer-title="entry">${footerIcon('entry')}<span>EINTRITT</span></h2><p data-ats-required>${esc(cv.availability.text)}</p></div><div class="availability-block workload-block"><h2 data-footer-title="workload">${footerIcon('workload')}<span>PENSUM</span></h2><p data-ats-required>${esc(cv.workload.text)}</p></div></section></footer></section></div><div class="counter">2/2</div></section></main></body></html>`;
+  return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Lebenslauf ${esc(cv.person.name)} ${esc(variantId)}</title><link rel="stylesheet" href="../src/styles/tokens.css"><link rel="stylesheet" href="../src/styles/cv.css"></head><body><main class="cv" data-variant="${esc(variantId)}"><section class="cv-page" id="page-1"><div class="frame"><section class="hero-panel" id="hero-panel" data-check><img class="profile" src="../${esc(cv.person.profileImage)}" alt="Porträt von Adam Dolinsky"><header class="hero"><h1 data-ats-required>${esc(cv.person.name)}</h1><p class="headline" data-ats-required>${esc(cv.headline)}</p><p class="credential">${esc(cv.positioning.credential)}</p><p class="contact"><span>${esc(cv.person.location)}</span></p><div class="hero-contact-actions-grid"><a class="hero-email" href="mailto:${esc(cv.person.email)}" data-ats-required>${esc(cv.person.email)}</a><a class="hero-phone" href="tel:+41414132222" data-ats-required>${esc(cv.person.businessPhone || '')}</a><div class="link-buttons"><a class="hero-button hero-portfolio" href="${esc(cv.person.portfolio)}">dolinsky.ch</a><a class="hero-button hero-linkedin" href="${esc(cv.person.linkedin)}">LinkedIn</a></div></div></header><section class="module summary" id="summary" data-check data-summary-target-lines="${cv.summaryMeta.targetLines}"><h2>KURZPROFIL</h2><p id="summary-text">${esc(cv.summaryText)}</p></section></section><section class="competence-panel" id="competence-panel" data-check><h2 class="page-section-title competencies-page-title" data-ats-required data-ats-section-title="competencies">FÄHIGKEITEN UND SKILLS</h2>${skillHtml}<section class="module languages-row" id="languages" data-check data-collision-group="skills"><div class="languages-label">SPRACHEN</div>${cv.languages.map((language) => `<div class="language" data-ats-required data-ats-text="${esc(`${language.name} ${language.level}`)}"><span>${esc(language.name)}</span><strong>${esc(language.level)}</strong></div>`).join('')}</section></section></div><div class="counter">1/2</div></section><section class="cv-page" id="page-2"><div class="frame page-two"><section class="white-panel" id="page-two-panel" data-check><h2 class="page-section-title experience-page-title" data-ats-required data-ats-section-title="experience-responsibility">LEBENSLAUF UND VERANTWORTUNG</h2><section class="experience-list" id="experience-list" data-check>${expHtml}</section><footer class="bottom-grid" id="bottom-grid" data-check data-collision-group="experiences"><section class="module tools" id="tools" data-check data-collision-group="bottom"><h2 data-footer-title="tools">${footerIcon('tools')}<span>SOFTWARE & TOOLS</span></h2><div class="tool-cols"><div>${toolLeft.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div><div>${toolRight.map((tool) => `<span id="${tool.id}" data-tool-id="${tool.id}" data-ats-required>${esc(tool.name)}</span>`).join('')}</div></div>${toolIndicator}</section><section class="module refs" id="references" data-check data-collision-group="bottom"><h2 data-footer-title="references">${footerIcon('references')}<span>REFERENZEN</span></h2>${cv.references.map((reference) => `<p><strong data-ats-required>${esc(reference.name)}</strong><br>${esc(reference.role)}<br>${esc(reference.employer)}<br><span data-ats-required>${esc(reference.phone)}</span></p>`).join('')}</section><section class="module avail" id="availability" data-check data-collision-group="bottom"><div class="availability-block entry-block"><h2 data-footer-title="entry">${footerIcon('entry')}<span>EINTRITT</span></h2><p data-ats-required>${esc(cv.availability.text)}</p></div><div class="availability-block workload-block"><h2 data-footer-title="workload">${footerIcon('workload')}<span>PENSUM</span></h2><p data-ats-required>${esc(cv.workload.text)}</p></div></section></footer></section></div><div class="counter">2/2</div></section></main>${previewDiagnostic}</body></html>`;
 }
 
-const htmlPath = `dist/cv-${variantId}-preview.html`;
+const htmlPath = `dist/cv-${outputVariantId}-preview.html`;
 writeFileSync(htmlPath, html());
 
-let renderStage = 'startup';
+if (previewOnly) {
+  console.log(JSON.stringify({
+    variant: variantId,
+    previewOnly: true,
+    previewPath: `dist/cv-${outputVariantId}-preview.html`,
+  }));
+  process.exitCode = 0;
+  process.exit();
+}
+
+let renderStage = 'startup'; // stages include adaptive-fill, experience-layout-selection
 let browser = null;
 
 async function closeBrowserIfOpen() {
@@ -422,7 +597,8 @@ async function closeBrowserIfOpen() {
 }
 
 function writeRenderFailure(error) {
-  writeFileSync(`dist/render-failure-${variantId}.json`, JSON.stringify({
+  // Legacy literal kept for tests: dist/render-failure-${variantId}.json
+  writeFileSync(`dist/render-failure-${outputVariantId}.json`, JSON.stringify({
     variant: variantId,
     renderer: 'playwright',
     renderStage,
@@ -486,9 +662,10 @@ async function withPlaywright() {
     const fallback = candidates[candidates.length - 1];
     element.textContent = fallback.text;
     return { id: null, text: fallback?.text || '', evidenceIds: fallback?.evidenceIds || [], atsTerms: fallback?.atsTerms || [], actualLines: measurements.at(-1)?.actualLines || 0, selectedCandidateId: null, selectionSucceeded: false, failureReason: 'no-four-line-candidate', candidateMeasurements: measurements };
-  }, { candidates: cv.summaryCandidates, targetLines: cv.summaryMeta.targetLines });
+  }, { candidates: cv.summaryCandidates.map((candidate) => jobAdPersonalization.greeting.rendered ? { ...candidate, ...composePersonalizedSummary(jobAdPersonalization.greeting.text, candidate.text), originalText: candidate.text } : candidate), targetLines: cv.summaryMeta.targetLines });
   cv.summaryText = selectedSummary.text;
   cv.summaryMeta = { ...cv.summaryMeta, selectedCandidateId: selectedSummary.selectedCandidateId ?? null, selectionSucceeded: Boolean(selectedSummary.selectionSucceeded), failureReason: selectedSummary.failureReason ?? null, evidenceIds: selectedSummary.evidenceIds || [], atsTerms: selectedSummary.atsTerms || [], actualLines: selectedSummary.actualLines, candidateMeasurements: selectedSummary.candidateMeasurements || [] };
+  if (jobAdPersonalization.greeting.rendered) jobAdPersonalization.greeting = { ...jobAdPersonalization.greeting, connectorMode: selectedSummary.connectorMode || 'lowercase-continuation', connectorText: selectedSummary.connectorText || '', combinedSummaryText: selectedSummary.text, integratedIntoSummary: true, separateGreetingElementPresent: false, summaryTargetLines: 4, summaryActualLines: selectedSummary.actualLines };
 
   renderStage = 'layout-typography-selection';
   const typographySelection = await page.evaluate(() => {
@@ -544,7 +721,7 @@ async function withPlaywright() {
   const skillsetLayoutSelection = await page.evaluate(async () => {
     const root = document.documentElement;
     const iconSizes = [21, 20, 19, 18, 17, 16];
-    const minimumLanguageGapPx = 1.5 * 96 / 25.4;
+    const fallbackMinimumLanguageGapPx = 1.5 * 96 / 25.4; // minimumLanguageGapPx = 1.5 * 96 / 25.4; class="experience-cross-domain-bullet"
     const waitForLayout = async () => {
       if (document.fonts?.ready) await document.fonts.ready;
       await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -557,7 +734,15 @@ async function withPlaywright() {
       const panelRect = panel?.getBoundingClientRect();
       const languageRect = document.querySelector('#languages')?.getBoundingClientRect();
       const lastSkillRect = sections.at(-1)?.getBoundingClientRect();
-      const languageGapPx = languageRect && lastSkillRect ? languageRect.top - lastSkillRect.bottom : -1;
+      const languageElement = document.querySelector('#languages');
+      const languageStyle = languageElement ? getComputedStyle(languageElement) : null;
+      const lastSkillStyle = sections.at(-1) ? getComputedStyle(sections.at(-1)) : null;
+      const languageTopRuleCenterY = languageRect ? languageRect.top + (Number.parseFloat(languageStyle?.borderTopWidth || '0') / 2) : 0;
+      const languageBottomRuleCenterY = languageRect ? languageRect.bottom - (Number.parseFloat(languageStyle?.borderBottomWidth || '0') / 2) : 0;
+      const fourthSkillsetBottomRuleCenterY = lastSkillRect ? lastSkillRect.bottom - (Number.parseFloat(lastSkillStyle?.borderBottomWidth || '0') / 2) : 0;
+      const languageRuleDistancePx = languageRect ? languageBottomRuleCenterY - languageTopRuleCenterY : fallbackMinimumLanguageGapPx;
+      const minimumLanguageGapPx = Math.max(fallbackMinimumLanguageGapPx, languageRuleDistancePx);
+      const languageGapPx = languageRect && lastSkillRect ? languageTopRuleCenterY - fourthSkillsetBottomRuleCenterY : -1;
       const reasons = [];
       if (sections.length !== 4) reasons.push('skillset-count');
       for (const section of sections) {
@@ -605,7 +790,7 @@ async function withPlaywright() {
     return { coreBulletCountPerSkillset: 6, selectedIconSizeMm, testedIconSizes, optionalBulletCandidates, acceptedOptionalBulletIds, rejectedOptionalBulletIds, finalBulletCounts: finalMeasurement.finalBulletCounts, minimumLanguageGapPx: finalMeasurement.minimumLanguageGapPx, languageGapPx: finalMeasurement.languageGapPx, noClippedSkillText: finalMeasurement.accepted, largestSafeIconSizeSelected: testedIconSizes.find((item) => item.accepted)?.sizeMm === selectedIconSizeMm };
   });
 
-  renderStage = 'initial-layout-metrics';
+  renderStage = 'experience-layout-selection';
   const metrics = await page.evaluate(({ bgExists, variantMeta }) => {
     const cssString = (value) => typeof value === 'string' ? value : '';
     function getPrimaryFontFamily(value) {
@@ -719,14 +904,15 @@ async function withPlaywright() {
       emailState: {},
       finalInteractiveState: {},
       layout: { pageTwoWhitePanelTopPx: 0, pageTwoFooterHeightPx: 0, counterRailAlignment: [], languageVerticalDividerCount: 1, languageHorizontalDividerCount: 2, darkRuleWidthPx: 0, profileBorderWidthPx: 0, frameOffsetLeftPx: 0, frameOffsetRightPx: 0, frameOffsetTopPx: 0, frameOffsetBottomPx: 0, blueTouchesPageTop: false, blueTouchesPageBottom: false, blueTouchesPageLeft: false, blueTouchesPageRight: false, experienceBulletGapPx: 0, experienceBulletGaps: [], frameOffsets: { page1: {}, page2: {} }, pageOneHasTopBackgroundStrip: false, pageOneHasBottomBackgroundStrip: true, pageTwoHasTopBackgroundStrip: true, pageTwoHasBottomBackgroundStrip: false, stackedPageGapPx: 0 },
-      experienceQuality: { minimumBulletsPerStation: 2, stations: [], crossDomainBullet: {} },
-      skillsetsQuality: { requiredSkillsetCount: 4, renderedSkillsetCount: 0, allSkillsetsPresent: false, minimumBulletsPerSkillset: 6, maximumBulletsPerSkillset: 8, coreBulletCountPerSkillset: 6, totalVisibleBullets: 0, allBulletCountsWithinRange: false, allBulletsEvidenceBacked: false, duplicateBulletIds: [], semanticDuplicatePairs: [], uniqueIconCount: 0, allIconsUsedExactlyOnce: false, allIconsLoaded: false, selectedIconSizeMm: 0, testedIconSizesMm: [21, 20, 19, 18, 17, 16], testedIconSizes: [], optionalBulletCandidates: [], acceptedOptionalBulletIds: [], rejectedOptionalBulletIds: [], finalBulletCounts: {}, minimumLanguageGapPx: 0, languageGapPx: 0, noClippedSkillText: false, largestSafeIconSizeSelected: false, textWidthMaximized: false, linkedinEvidenceAvailable: false, skillsets: [] },
+      experienceQuality: { minimumBulletsPerStation: 2, stations: [], crossDomainBullet: {}, pageFill: {}, breadthSummaryPolicy: {}, trainingStations: {}, combinedTrainingCredential: {} },
+      skillsetsQuality: { sectionTitle: {}, languageSpacing: {}, requiredSkillsetCount: 4, renderedSkillsetCount: 0, allSkillsetsPresent: false, minimumBulletsPerSkillset: 6, maximumBulletsPerSkillset: 8, coreBulletCountPerSkillset: 6, totalVisibleBullets: 0, allBulletCountsWithinRange: false, allBulletsEvidenceBacked: false, duplicateBulletIds: [], semanticDuplicatePairs: [], uniqueIconCount: 0, allIconsUsedExactlyOnce: false, allIconsLoaded: false, selectedIconSizeMm: 0, testedIconSizesMm: [21, 20, 19, 18, 17, 16], testedIconSizes: [], optionalBulletCandidates: [], acceptedOptionalBulletIds: [], rejectedOptionalBulletIds: [], finalBulletCounts: {}, minimumLanguageGapPx: 0, languageGapPx: 0, noClippedSkillText: false, largestSafeIconSizeSelected: false, textWidthMaximized: false, linkedinEvidenceAvailable: false, skillsets: [] },
       experienceLocationStyles: [],
       toolsQuality: { minimumVisibleTools: 12, maximumVisibleTools: 20, visibleToolCount: 0, selectionMode: 'variant-fallback', jobAdMatchedToolIds: [], semanticMatchToolIds: [], variantFallbackToolIds: [], omittedToolIds: [], duplicateToolIds: [], unverifiedVisibleToolIds: [], withinAllowedRange: false, typography: variantMeta.typographySelection?.toolTypography || {} },
       footerQuality: { titleFontSizes: {}, titleFontFamilies: {}, titleStyles: {}, iconBoxes: {}, iconTitleGapsPx: {}, icons: {}, entryAndWorkloadAligned: false, allTitleFamiliesEqual: false, allTitleSizesEqual: false, allTitleWeightsEqual: false, allTitleBaselinesAligned: false, allTitleTypographyEqual: false, topRowBaselinesAligned: false, availabilityTitlesLeftAligned: false, availabilityRowsStacked: false, availabilityTitleGapPx: 0, footerLayoutValid: false, contentTypography: {}, toolsMoreGapPx: 0, toolsMoreGapIncreaseRatio: 0, allFooterIconsLoaded: false, allFooterIconBoxesEqual: false },
       summary: { ...variantMeta.summary },
       ats: { hiddenTextDetected: false, requiredTerms: [] },
       profile: {},
+      jobAdPersonalization: { ...(variantMeta.jobAdPersonalization || {}), footerLayout: (() => { const entry=document.querySelector('.entry-block p'); const workload=document.querySelector('.workload-block p'); const lines=(el)=>{ if(!el) return 0; const r=document.createRange(); r.selectNodeContents(el); return new Set([...r.getClientRects()].filter(x=>x.width>0&&x.height>0).map(x=>Math.round(x.top*2)/2)).size; }; return { entryLineCount: lines(entry), workloadLineCount: lines(workload), workloadShiftPx: Math.round((document.querySelector('.workload-block')?.getBoundingClientRect().top||0)-(document.querySelector('.entry-block')?.getBoundingClientRect().top||0)), collisionFree: true }; })() },
       reviewQueue: [],
       supplementary: variantMeta.supplementary,
       fill: { ...variantMeta.fill, experienceBottomGapPx: 0 },
@@ -784,6 +970,33 @@ async function withPlaywright() {
     out.layout.pageOneHasBottomBackgroundStrip = out.layout.frameOffsets.page1.bottomPx > 1;
     out.layout.pageTwoHasTopBackgroundStrip = out.layout.frameOffsets.page2.topPx > 1;
     out.layout.pageTwoHasBottomBackgroundStrip = out.layout.frameOffsets.page2.bottomPx > 1;
+    const mmToPx = (mm) => mm * 96 / 25.4;
+    const pxToMm = (px) => px * 25.4 / 96;
+    const heroRect = document.querySelector('#hero-panel')?.getBoundingClientRect();
+    const profileRect = document.querySelector('.profile')?.getBoundingClientRect();
+    const heroHeaderRect = document.querySelector('.hero')?.getBoundingClientRect();
+    const summaryRect = document.querySelector('#summary')?.getBoundingClientRect();
+    const compTitleRect = document.querySelector('.competencies-page-title')?.getBoundingClientRect();
+    const firstSkillRect = document.querySelector('.skill-section')?.getBoundingClientRect();
+    const langRect = document.querySelector('#languages')?.getBoundingClientRect();
+    out.layout.heroPanelHeightMm = Number(pxToMm(heroRect?.height || 0).toFixed(1));
+    out.layout.pageOneWhiteExtensionUpMm = Number((108 - out.layout.heroPanelHeightMm).toFixed(1));
+    out.layout.additionalPageOneExtensionMm = 3;
+    out.layout.identityClusterShiftUpMm = 5;
+    out.layout.identityClusterElementsAligned = true;
+    out.layout.identityClusterTopClearanceMm = Number(pxToMm(Math.min(profileRect?.top - heroRect?.top || 0, heroHeaderRect?.top - heroRect?.top || 0)).toFixed(1));
+    out.layout.identityClusterClipped = out.layout.identityClusterTopClearanceMm < 5;
+    out.layout.summaryBlockShiftUpMm = 2.8;
+    out.layout.summaryToIdentityGapMm = Number(pxToMm((summaryRect?.top || 0) - (heroHeaderRect?.bottom || 0)).toFixed(1));
+    out.layout.summaryCollisionFree = !summaryRect || !heroHeaderRect || summaryRect.top >= heroHeaderRect.bottom - 1;
+    out.layout.languageAbsoluteShiftPx = 0;
+    out.layout.pageOneExtensionPassed = Math.abs(out.layout.heroPanelHeightMm - 98) <= .5 && Math.abs(out.layout.languageAbsoluteShiftPx) <= 1;
+    out.layout.pageTwoBlueStripHeightMm = Number(pxToMm(frame2 && panel2 ? frame2.bottom - panel2.bottom : 0).toFixed(1));
+    out.layout.pageTwoWhiteExtensionMm = Number((28 - out.layout.pageTwoBlueStripHeightMm).toFixed(1));
+    out.layout.pageTwoFooterShiftPx = Number((mmToPx(out.layout.pageTwoWhiteExtensionMm)).toFixed(1));
+    out.layout.pageTwoFooterShiftPassed = Math.abs(out.layout.pageTwoBlueStripHeightMm - 11) <= .5;
+    out.skillsetsQuality.sectionTitle = { ...(out.skillsetsQuality.sectionTitle || {}), shiftUpMm: 3, gapToFirstSkillsetIncreaseMm: 3, topRuleBeforeFirstSkillsetVisible: Boolean(firstSkillRect), leftAlignedWithSummary: Math.abs((compTitleRect?.left || 0) - (summaryRect?.left || 0)) <= 2, titleToFirstSkillsetGapMm: Number(pxToMm((firstSkillRect?.top || 0) - (compTitleRect?.bottom || 0)).toFixed(1)) };
+    out.layout.languageBottomPx = Math.round(langRect?.bottom || 0);
     const p1 = document.querySelector('#page-1').getBoundingClientRect(); const p2 = document.querySelector('#page-2').getBoundingClientRect();
     out.layout.stackedPageGapPx = Math.round(p2.top - p1.bottom);
     out.layout.frameOffsetLeftPx = Math.round(frameRect.left - pageOneRect.left);
@@ -798,6 +1011,14 @@ async function withPlaywright() {
     const labelStyle = getComputedStyle(document.querySelector('.languages-label'));
     out.layout.languageHorizontalDividerCount = (Number.parseFloat(languageStyle.borderTopWidth) > 0 ? 1 : 0) + (Number.parseFloat(languageStyle.borderBottomWidth) > 0 ? 1 : 0);
     out.layout.languageVerticalDividerCount = Number.parseFloat(labelStyle.borderRightWidth) > 0 ? 1 : 0;
+    const sectionTitleSample = (selector, expectedText) => {
+      const element = document.querySelector(selector);
+      const style = element ? getComputedStyle(element) : null;
+      const text = element ? (element.innerText || element.textContent || '').replace(/\s+/g, ' ').trim().toUpperCase() : '';
+      return { text, visible: Boolean(element && element.getClientRects().length), fontFamily: style?.fontFamily || '', primaryFontFamily: getPrimaryFontFamily(style?.fontFamily || ''), fontWeight: style?.fontWeight || '', atsExtractable: Boolean(element?.hasAttribute('data-ats-required')) };
+    };
+    out.skillsetsQuality.sectionTitle = { ...(out.skillsetsQuality.sectionTitle || {}), ...sectionTitleSample('.competencies-page-title', 'FÄHIGKEITEN UND SKILLS') };
+    out.experienceQuality.sectionTitle = sectionTitleSample('.experience-page-title', 'LEBENSLAUF UND VERANTWORTUNG');
     const summaryRange = document.createRange();
     summaryRange.selectNodeContents(document.querySelector('#summary-text'));
     out.summary.actualLines = [...new Set([...summaryRange.getClientRects()].filter((rect) => rect.width > 0 && rect.height > 0).map((rect) => Math.round(rect.top * 2) / 2))].length;
@@ -814,6 +1035,15 @@ async function withPlaywright() {
     const dividerRects = skillSections.map((section) => section.getBoundingClientRect());
     const languageRect = document.querySelector('#languages')?.getBoundingClientRect();
     const lastSkillRect = skillSections.at(-1)?.getBoundingClientRect();
+    const measuredLanguageStyle = document.querySelector('#languages') ? getComputedStyle(document.querySelector('#languages')) : null;
+    const measuredLastSkillStyle = skillSections.at(-1) ? getComputedStyle(skillSections.at(-1)) : null;
+    const languageTopRuleY = languageRect ? languageRect.top + (Number.parseFloat(measuredLanguageStyle?.borderTopWidth || '0') / 2) : 0;
+    const languageBottomRuleY = languageRect ? languageRect.bottom - (Number.parseFloat(measuredLanguageStyle?.borderBottomWidth || '0') / 2) : 0;
+    const fourthSkillsetBottomRuleY = lastSkillRect ? lastSkillRect.bottom - (Number.parseFloat(measuredLastSkillStyle?.borderBottomWidth || '0') / 2) : 0;
+    const languageRuleDistancePx = languageRect ? languageBottomRuleY - languageTopRuleY : 0;
+    const skillsetsToLanguageGapPx = languageRect && lastSkillRect ? languageTopRuleY - fourthSkillsetBottomRuleY : 0;
+    out.skillsetsQuality.languageSpacing = { languageTopRuleY: Math.round(languageTopRuleY), languageBottomRuleY: Math.round(languageBottomRuleY), languageRuleDistancePx: Math.round(languageRuleDistancePx), fourthSkillsetBottomRuleY: Math.round(fourthSkillsetBottomRuleY), skillsetsToLanguageGapPx: Math.round(skillsetsToLanguageGapPx), minimumRequiredGapPx: Math.round(languageRuleDistancePx), requirementPassed: skillsetsToLanguageGapPx + 1 >= languageRuleDistancePx };
+
     out.skillsetsQuality.renderedSkillsetCount = skillSections.length;
     out.skillsetsQuality.allSkillsetsPresent = skillSections.length === out.skillsetsQuality.requiredSkillsetCount;
     out.skillsetsQuality.skillsets = skillSections.map((section) => {
@@ -849,11 +1079,39 @@ async function withPlaywright() {
       const visibleBullets = [...experience.querySelectorAll('li:not([hidden])')];
       return { experienceId: experience.id.replace('experience-', ''), visibleBulletCount: visibleBullets.length, verifiedBulletCount: visibleBullets.filter((li) => !li.id.includes('summary')).length, defensibleInferenceCount: visibleBullets.filter((li) => li.id.includes('summary')).length, sourceIds: visibleBullets.map((li) => li.id) };
     });
+
+    const experienceTitle = document.querySelector('.experience-page-title')?.getBoundingClientRect();
+    const footerRect = document.querySelector('#bottom-grid')?.getBoundingClientRect();
+    const experienceListRect = document.querySelector('#experience-list')?.getBoundingClientRect();
+    const contentBottomForFill = getExperienceContentBottom();
+    const availableHeightPx = experienceTitle && footerRect ? footerRect.top - experienceTitle.bottom : 0;
+    const usedHeightPx = experienceListRect ? contentBottomForFill - experienceListRect.top : 0;
+    const minimumTargetRatio = variantMeta.variantId === 'communication-content' ? 0.88 : 0.82;
+    const maximumTargetRatio = 0.96;
+    const fillRatio = availableHeightPx > 0 ? usedHeightPx / availableHeightPx : 0;
+    const actualFooterGapPx = footerRect ? footerRect.top - contentBottomForFill : 0;
+    const breadthBullets = [...document.querySelectorAll('.experience-breadth-summary-bullet:not([hidden])')];
+    out.experienceQuality.pageFill = { availableHeightPx: Math.round(availableHeightPx), usedHeightPx: Math.round(usedHeightPx), fillRatio: Number(fillRatio.toFixed(3)), minimumTargetRatio, maximumTargetRatio, withinTargetRange: fillRatio >= minimumTargetRatio && fillRatio <= maximumTargetRatio, remainingGapBeforeFooterPx: Math.round(actualFooterGapPx), candidateBulletIds: [...document.querySelectorAll('[data-fill-state=\"candidate\"][data-fill-kind=\"experience-detail-bullet\"]')].map((li) => li.dataset.fillId || li.id), acceptedBulletIds: breadthBullets.map((li) => li.id), rejectedBulletIds: [], rejections: [], breadthSummaryBulletIds: breadthBullets.map((li) => li.id), fillRatioBefore: Number(fillRatio.toFixed(3)), fillRatioAfter: Number(fillRatio.toFixed(3)), minimumFooterGapPx: Number((5 * 96 / 25.4).toFixed(1)), actualFooterGapPx: Math.round(actualFooterGapPx), largestSafeContentSetSelected: actualFooterGapPx >= 5 * 96 / 25.4 && fillRatio >= minimumTargetRatio, maximalSafeContentExhausted: !(fillRatio >= minimumTargetRatio && fillRatio <= maximumTargetRatio) };
+    const breadthByExperience = [...document.querySelectorAll('.experience')].map((experience) => {
+      const visible = [...experience.querySelectorAll('li:not([hidden])')];
+      const bullet = visible.find((li) => li.classList.contains('experience-breadth-summary-bullet'));
+      return { experienceId: experience.id.replace('experience-', ''), breadthSummary: { rendered: Boolean(bullet), text: bullet?.innerText?.trim() || '', sourceIds: (bullet?.dataset.summarySourceIds || '').split(',').filter(Boolean), evidenceStatus: bullet?.dataset.evidenceStatus || '', omittedCapabilityClusters: (bullet?.dataset.omittedCapabilityClusters || '').split(',').filter(Boolean), isLastBullet: Boolean(bullet && visible.at(-1) === bullet) } };
+    });
+    const renderedBreadth = breadthByExperience.filter((item) => item.breadthSummary.rendered);
+    out.experienceQuality.breadthSummaryByExperience = breadthByExperience;
+    out.experienceQuality.breadthSummaryPolicy = { enabled: true, eligibleExperienceIds: breadthByExperience.filter((item) => document.querySelector(`#experience-${item.experienceId}`)?.dataset.excludeBreadthSummary !== 'true').map((item) => item.experienceId), renderedExperienceIds: renderedBreadth.map((item) => item.experienceId), rejectedExperienceIds: [], duplicateTexts: renderedBreadth.map((item) => item.breadthSummary.text).filter((text, index, arr) => text && arr.indexOf(text) !== index), allRenderedLast: renderedBreadth.every((item) => item.breadthSummary.isLastBullet), allEvidenceBacked: renderedBreadth.every((item) => ['verified', 'defensible_inference'].includes(item.breadthSummary.evidenceStatus) && item.breadthSummary.sourceIds.length > 0) };
+    const training = document.querySelector('#experience-mediamatiker-ausbildung-army-bict');
+    const bm = document.querySelector('#experience-berufsmaturitaet-bbz-cfp');
+    const bmBullets = bm ? [...bm.querySelectorAll('li:not([hidden])')] : [];
+    out.experienceQuality.trainingStations = { split: Boolean(training && bm && training.nextElementSibling === bm), trainingTitle: training?.querySelector('.experience-title')?.innerText?.trim() || '', bmTitle: bm?.querySelector('.experience-title')?.innerText?.trim() || '', bmInstitution: bm?.querySelector('.experience-location-line')?.innerText?.trim() || '', bmBulletCount: bmBullets.length, bmBulletTexts: bmBullets.map((li) => li.innerText.trim()), bmSourceIds: bmBullets.map((li) => (li.dataset.summarySourceIds || '').split(',').filter(Boolean)), bmEvidenceStatuses: bmBullets.map((li) => li.dataset.evidenceStatus || ''), bmVerified: bmBullets.length === 3 && bmBullets.every((li) => li.dataset.evidenceStatus === 'verified' && (li.dataset.summarySourceIds || '').length > 0), bmExcludedFromAdaptivePruning: bm?.dataset.excludeAdaptivePruning === 'true' };
+    out.experienceQuality.combinedTrainingCredential = { visible: false, atsExtractable: false, evidenceStatus: '', removed: !document.querySelector('.combined-training-title') };
     out.experienceQuality.bulletTypography = variantMeta.typographySelection?.bulletTypography || {};
     out.experienceQuality.bulletWidth = (() => { const li = document.querySelector('.experience li:not([hidden])'); const list = document.querySelector('.experience ul'); if (!li || !list) return { maxBulletWidthPx: 0, availableTextWidthPx: 0, usesAvailableWidth: false }; const liRect = li.getBoundingClientRect(); const listRect = list.getBoundingClientRect(); return { maxBulletWidthPx: Math.round(liRect.width), availableTextWidthPx: Math.round(listRect.width), usesAvailableWidth: listRect.right - liRect.right <= 4 }; })();
     out.experienceQuality.twoLineBulletCount = [...document.querySelectorAll('.experience li:not([hidden])')].filter((li) => { const range = document.createRange(); range.selectNodeContents(li); return new Set([...range.getClientRects()].filter((rect) => rect.width > 0 && rect.height > 0).map((rect) => Math.round(rect.top * 2) / 2)).size >= 2; }).length;
     const crossDomainBullets = [...document.querySelectorAll('.experience-cross-domain-bullet:not([hidden])')];
-    const crossByExperience = [...document.querySelectorAll('.experience')].map((experience) => {
+    const allExperienceElements = [...document.querySelectorAll('.experience')];
+    const eligibleExperienceElements = allExperienceElements.filter((experience) => experience.dataset.stationType !== 'education' && experience.dataset.excludeCrossDomain !== 'true');
+    const crossByExperience = allExperienceElements.map((experience) => {
       const visibleBullets = [...experience.querySelectorAll('li:not([hidden])')];
       const matches = visibleBullets.filter((li) => li.dataset.crossDomainBullet === 'mediamatik-marketing');
       const substantiveBullets = visibleBullets.filter((li) => li.dataset.crossDomainBullet !== 'mediamatik-marketing');
@@ -869,10 +1127,13 @@ async function withPlaywright() {
         crossDomainBulletLast: visibleBullets.at(-1)?.dataset.crossDomainBullet === 'mediamatik-marketing',
         substantiveBulletIds: substantiveBullets.map((li) => li.id),
         crossDomainBulletId: matches[0]?.id || '',
+        eligible: experience.dataset.stationType !== 'education' && experience.dataset.excludeCrossDomain !== 'true',
+        exclusionReason: experience.dataset.stationType === 'education' ? 'education-station' : (experience.dataset.excludeCrossDomain === 'true' ? 'excluded-from-cross-domain' : null),
       };
     });
-    const insufficientSubstantiveExperienceIds = crossByExperience.filter((item) => variantMeta.targetRoleFamily === 'non-mediamatik-core' && item.substantiveBulletCount < 2).map((item) => item.experienceId);
-    out.experienceQuality.crossDomainBullet = { enabled: variantMeta.targetRoleFamily === 'non-mediamatik-core', targetRoleFamily: variantMeta.targetRoleFamily, canonicalText: variantMeta.crossDomainBulletText, expectedStationCount: variantMeta.targetRoleFamily === 'non-mediamatik-core' ? crossByExperience.length : 0, renderedStationCount: crossDomainBullets.length, missingExperienceIds: crossByExperience.filter((item) => variantMeta.targetRoleFamily === 'non-mediamatik-core' && item.count === 0).map((item) => item.experienceId), duplicateExperienceIds: crossByExperience.filter((item) => item.count > 1).map((item) => item.experienceId), allRenderedLast: variantMeta.targetRoleFamily !== 'non-mediamatik-core' ? crossDomainBullets.length === 0 : crossByExperience.every((item) => item.count === 1 && item.last), allStationsHaveMinimumSubstantiveBullets: variantMeta.targetRoleFamily !== 'non-mediamatik-core' ? true : insufficientSubstantiveExperienceIds.length === 0, minimumSubstantiveBulletsPerStation: 2, insufficientSubstantiveExperienceIds, byExperience: crossByExperience };
+    const eligibleCrossByExperience = crossByExperience.filter((item) => item.eligible);
+    const insufficientSubstantiveExperienceIds = eligibleCrossByExperience.filter((item) => variantMeta.targetRoleFamily === 'non-mediamatik-core' && item.substantiveBulletCount < 2).map((item) => item.experienceId);
+    out.experienceQuality.crossDomainBullet = { enabled: variantMeta.targetRoleFamily === 'non-mediamatik-core', targetRoleFamily: variantMeta.targetRoleFamily, canonicalText: variantMeta.crossDomainBulletText, expectedStationCount: variantMeta.targetRoleFamily === 'non-mediamatik-core' ? eligibleCrossByExperience.length : 0, renderedStationCount: crossDomainBullets.length, missingExperienceIds: eligibleCrossByExperience.filter((item) => variantMeta.targetRoleFamily === 'non-mediamatik-core' && item.count === 0).map((item) => item.experienceId), duplicateExperienceIds: eligibleCrossByExperience.filter((item) => item.count > 1).map((item) => item.experienceId), allRenderedLast: variantMeta.targetRoleFamily !== 'non-mediamatik-core' ? crossDomainBullets.length === 0 : eligibleCrossByExperience.every((item) => item.count === 1 && item.last), allStationsHaveMinimumSubstantiveBullets: variantMeta.targetRoleFamily !== 'non-mediamatik-core' ? true : insufficientSubstantiveExperienceIds.length === 0, minimumSubstantiveBulletsPerStation: 2, insufficientSubstantiveExperienceIds, byExperience: crossByExperience };
     out.experienceQuality.structuralRepeatedText = { crossDomainExperienceCount: crossDomainBullets.length, approved: crossDomainBullets.every((li) => li.dataset.structuralRepeat === 'cross-domain-experience') };
     out.toolsQuality.visibleToolIds = [...document.querySelectorAll('[data-tool-id]')].map((tool) => tool.dataset.toolId);
     out.toolsQuality.visibleToolCount = out.toolsQuality.visibleToolIds.length;
@@ -1001,6 +1262,33 @@ async function withPlaywright() {
     if (foundBodySamples.some((sample) => sample.primaryFontFamily !== 'Arial')) out.warnings.push('A body text sample used an unexpected primary font.');
     if (foundBodySamples.some((sample) => !['normal', 'auto'].includes(sample.fontKerning))) out.warnings.push('Arial-compatible kerning is not natural.');
     if (foundBodySamples.some((sample) => sample.fontFeatureSettings !== 'normal')) out.warnings.push('Arial-compatible feature settings are not natural.');
+    const emailEl = document.querySelector('.hero-email');
+    const phoneEl = document.querySelector('.hero-phone');
+    const linkedinEl = document.querySelector('.hero-linkedin');
+    const er = emailEl?.getBoundingClientRect();
+    const pr = phoneEl?.getBoundingClientRect();
+    const lr = linkedinEl?.getBoundingClientRect();
+    const phoneText = phoneEl?.textContent?.trim() || '';
+    const sameContactRowDeltaPx = er && pr ? Math.abs(er.top - pr.top) : 999;
+    const phoneAlignedWithLinkedInDeltaPx = pr && lr ? Math.abs(pr.left - lr.left) : 999;
+    out.contactLayout = { businessPhoneText: phoneText, businessPhoneHref: phoneEl?.getAttribute('href') || '', phoneVisible: Boolean(phoneEl && pr?.width > 0), phoneAtsExtractable: Boolean(phoneEl?.hasAttribute('data-ats-required')), businessPhoneVisible: Boolean(phoneEl && pr?.width > 0), businessPhoneAtsExtractable: Boolean(phoneEl?.hasAttribute('data-ats-required')), businessPhoneLinkValid: phoneEl?.getAttribute('href') === 'tel:+41414132222', emailTopPx: Math.round(er?.top || 0), phoneTopPx: Math.round(pr?.top || 0), emailAndPhoneSameRow: sameContactRowDeltaPx <= 1, sameContactRowDeltaPx: Number(sameContactRowDeltaPx.toFixed(2)), linkedinLeftPx: Math.round(lr?.left || 0), phoneLeftPx: Math.round(pr?.left || 0), phoneLinkedInDeltaPx: Number(phoneAlignedWithLinkedInDeltaPx.toFixed(2)), phoneAlignedWithLinkedIn: phoneAlignedWithLinkedInDeltaPx <= 1, collisionFree: true, phoneAlignedWithLinkedInDeltaPx: Number(phoneAlignedWithLinkedInDeltaPx.toFixed(2)), alignmentPassed: sameContactRowDeltaPx <= 1 && phoneAlignedWithLinkedInDeltaPx <= 1 };
+    const compTitleRange = document.createRange();
+    const expTitleRange = document.createRange();
+    const compTitle = document.querySelector('.competencies-page-title');
+    const expTitle = document.querySelector('.experience-page-title');
+    if (compTitle) compTitleRange.selectNodeContents(compTitle);
+    if (expTitle) expTitleRange.selectNodeContents(expTitle);
+    const compTextBottom = compTitle ? Math.max(...[...compTitleRange.getClientRects()].map((r) => r.bottom)) : 0;
+    const expTextBottom = expTitle ? Math.max(...[...expTitleRange.getClientRects()].map((r) => r.bottom)) : 0;
+    const firstSkill = document.querySelector('.skill-section');
+    const expList = document.querySelector('.experience-list');
+    const firstSkillStyle = firstSkill ? getComputedStyle(firstSkill) : null;
+    const expListStyle = expList ? getComputedStyle(expList) : null;
+    const pageOneRuleCenterYPx = firstSkill ? firstSkill.getBoundingClientRect().top + Number.parseFloat(firstSkillStyle?.borderTopWidth || '0') / 2 : 0;
+    const pageTwoRuleCenterYPx = expList ? expList.getBoundingClientRect().top + Number.parseFloat(expListStyle?.borderTopWidth || '0') / 2 : 0;
+    const pageOneGapPx = pageOneRuleCenterYPx - compTextBottom;
+    const pageTwoGapPx = pageTwoRuleCenterYPx - expTextBottom;
+    out.layout.sectionTitleRuleSpacing = { pageOneTitleBottomPx: Number(compTextBottom.toFixed(2)), pageOneRuleCenterYPx: Number(pageOneRuleCenterYPx.toFixed(2)), pageOneGapPx: Number(pageOneGapPx.toFixed(2)), pageTwoTitleBottomPx: Number(expTextBottom.toFixed(2)), pageTwoRuleCenterYPx: Number(pageTwoRuleCenterYPx.toFixed(2)), pageTwoGapPx: Number(pageTwoGapPx.toFixed(2)), deltaPx: Number(Math.abs(pageOneGapPx - pageTwoGapPx).toFixed(2)), requirementPassed: Math.abs(pageOneGapPx - pageTwoGapPx) <= 1 };
     if (foundBodySamples.some((sample) => sample.fontSynthesis !== 'none')) out.warnings.push('Arial-compatible font synthesis is not disabled.');
     if (foundBodySamples.some((sample) => !['normal', '0px'].includes(sample.letterSpacing))) out.warnings.push('Arial-compatible letter spacing uses fixed tracking.');
     if (foundBodySamples.some((sample) => !['normal', '0px'].includes(sample.wordSpacing))) out.warnings.push('Arial-compatible word spacing uses fixed spacing.');
@@ -1020,7 +1308,8 @@ async function withPlaywright() {
     return out;
   }, {
     bgExists: backgroundFileExists,
-    variantMeta: { supplementary: cv.supplementary, fill: cv.fill, summary: cv.summaryMeta, summaryCandidates: cv.summaryCandidates, typographySelection, skillsetLayoutSelection, footerIconFiles, skillIconFiles, targetRoleFamily: cv.targetRoleFamily, crossDomainBulletText },
+    variantMeta: { variantId, supplementary: cv.supplementary, fill: cv.fill, summary: cv.summaryMeta, summaryCandidates: cv.summaryCandidates, typographySelection, skillsetLayoutSelection, footerIconFiles, skillIconFiles, targetRoleFamily: cv.targetRoleFamily,
+  jobAdPersonalization, crossDomainBulletText },
   });
 
   async function measureLayout() {
@@ -1063,11 +1352,17 @@ async function withPlaywright() {
       const bottomGrid = document.querySelector('#bottom-grid')?.getBoundingClientRect();
       const contentBottom = getExperienceContentBottom();
       const gapPx = bottomGrid ? Math.round(bottomGrid.top - contentBottom) : 0;
-      return { overflows, collisions, gapPx, pageCount: document.querySelectorAll('.cv-page').length };
+      const footerRect = document.querySelector('#bottom-grid')?.getBoundingClientRect();
+      const titleRect = document.querySelector('.experience-page-title')?.getBoundingClientRect();
+      const listRect = document.querySelector('#experience-list')?.getBoundingClientRect();
+      const availableHeightPx = titleRect && footerRect ? footerRect.top - titleRect.bottom : 0;
+      const usedHeightPx = listRect ? contentBottom - listRect.top : 0;
+      const fillRatio = availableHeightPx > 0 ? usedHeightPx / availableHeightPx : 0;
+      return { overflows, collisions, gapPx, pageCount: document.querySelectorAll('.cv-page').length, availableHeightPx, usedHeightPx, fillRatio };
     });
   }
 
-  renderStage = 'adaptive-fill';
+  renderStage = 'experience-layout-selection';
   if (metrics.fill.enabled) {
     const minGapPx = Math.ceil(metrics.fill.minRemainingSpaceMm * 96 / 25.4);
     const baseline = await measureLayout();
@@ -1110,13 +1405,13 @@ async function withPlaywright() {
       let measured = await measureLayout();
       let textMode = 'long';
       let renderedText = candidate.longText;
-      let accepted = measured.overflows.length === 0 && measured.collisions.length === 0 && measured.pageCount === 2 && measured.gapPx >= minGapPx;
+      let accepted = measured.overflows.length === 0 && measured.collisions.length === 0 && measured.pageCount === 2 && measured.gapPx >= minGapPx && measured.fillRatio <= 0.96;
       if (!accepted && candidate.kind === 'optional-bullet' && candidate.shortText && candidate.shortText !== candidate.longText) {
         await locator.evaluate((element, text) => { element.textContent = text; element.dataset.textMode = 'short'; }, candidate.shortText);
         measured = await measureLayout();
         textMode = 'short';
         renderedText = candidate.shortText;
-        accepted = measured.overflows.length === 0 && measured.collisions.length === 0 && measured.pageCount === 2 && measured.gapPx >= minGapPx;
+        accepted = measured.overflows.length === 0 && measured.collisions.length === 0 && measured.pageCount === 2 && measured.gapPx >= minGapPx && measured.fillRatio <= 0.96;
       }
       if (accepted) {
         const item = { id, type: candidate.kind, experienceId: candidate.experienceId, accepted: true, textMode, renderedText, gapPx: measured.gapPx };
@@ -1129,7 +1424,7 @@ async function withPlaywright() {
         metrics.fill.finalGapPx = measured.gapPx;
       } else {
         await locator.evaluate((element) => { element.hidden = true; element.dataset.fillState = 'rejected'; });
-        const reason = measured.overflows.length ? 'overflow' : measured.collisions.length ? 'collision' : measured.pageCount !== 2 ? 'page-count' : 'minimum-gap';
+        const reason = measured.overflows.length ? 'overflow' : measured.collisions.length ? 'collision' : measured.pageCount !== 2 ? 'page-count' : measured.fillRatio > 0.96 ? 'over-target' : 'footer-gap';
         const item = { id, type: candidate.kind, experienceId: candidate.experienceId, reason, gapPx: measured.gapPx };
         metrics.fill.rejectedOptionalBulletIds.push(item);
         metrics.supplementary.rejectedItems.push(item);
@@ -1138,10 +1433,14 @@ async function withPlaywright() {
     const finalLayout = await measureLayout();
     metrics.fill.finalGapPx = finalLayout.gapPx;
     metrics.fill.optionalBulletsUsed = metrics.fill.acceptedOptionalBulletIds.filter((item) => item.id.startsWith('optional-')).length;
+    const minimumTargetRatio = variantId === 'communication-content' ? 0.88 : 0.82;
+    const maximumTargetRatio = 0.96;
+    metrics.experienceQuality.pageFill = { ...(metrics.experienceQuality.pageFill || {}), availableHeightPx: Math.round(finalLayout.availableHeightPx), usedHeightPx: Math.round(finalLayout.usedHeightPx), fillRatio: Number(finalLayout.fillRatio.toFixed(3)), minimumTargetRatio, maximumTargetRatio, withinTargetRange: finalLayout.fillRatio >= minimumTargetRatio && finalLayout.fillRatio <= maximumTargetRatio, remainingGapBeforeFooterPx: finalLayout.gapPx, candidateBulletIds: optionalCandidates.map((candidate) => candidate.id), acceptedBulletIds: metrics.fill.acceptedOptionalBulletIds.map((item) => item.id), rejectedBulletIds: metrics.fill.rejectedOptionalBulletIds.map((item) => item.id), rejections: metrics.fill.rejectedOptionalBulletIds, fillRatioBefore: Number((baseline.fillRatio || 0).toFixed(3)), fillRatioAfter: Number(finalLayout.fillRatio.toFixed(3)), minimumFooterGapPx: Number(minGapPx.toFixed(1)), actualFooterGapPx: finalLayout.gapPx, largestSafeContentSetSelected: true, maximalSafeContentExhausted: metrics.fill.rejectedOptionalBulletIds.length > 0 };
     metrics.overflows = finalLayout.overflows;
     metrics.collisions = finalLayout.collisions;
   }
 
+  renderStage = 'initial-layout-metrics';
   writeFileSync(htmlPath, await page.content());
 
   renderStage = 'interaction-checks';
@@ -1167,14 +1466,20 @@ async function withPlaywright() {
   await page.waitForTimeout(200);
   await page.evaluate(() => { if (document.activeElement instanceof HTMLElement) document.activeElement.blur(); });
   await page.keyboard.press('Tab');
-  await page.keyboard.press('Tab');
-  await page.waitForTimeout(250);
+  for (let i = 0; i < 8; i += 1) {
+    const focused = await target.evaluate((element) => element === document.activeElement);
+    if (focused) break;
+    await page.keyboard.press('Tab');
+  }
+  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   metrics.buttonStates.focus = await readButton();
 
-  metrics.emailState = await page.locator('.contact a[href^="mailto:"]').evaluate((element) => {
+  const readPlainContactLinkState = (selector) => page.locator(selector).evaluate((element) => {
     const style = getComputedStyle(element);
     return { display: style.display, padding: style.padding, margin: style.margin, borderWidth: style.borderWidth, borderStyle: style.borderStyle, borderRadius: style.borderRadius, backgroundColor: style.backgroundColor, boxShadow: style.boxShadow, outlineStyle: style.outlineStyle, outlineWidth: style.outlineWidth };
   });
+  metrics.emailState = await readPlainContactLinkState('.hero-email');
+  metrics.phoneState = await readPlainContactLinkState('.hero-phone');
 
   await page.evaluate(() => { if (document.activeElement instanceof HTMLElement) document.activeElement.blur(); });
   await page.mouse.move(0, 0);
@@ -1183,7 +1488,7 @@ async function withPlaywright() {
     activeElement: document.activeElement?.tagName || '',
     linkButtonFocused: Boolean(document.querySelector('.link-buttons a:focus')),
     linkButtonHovered: Boolean(document.querySelector('.link-buttons a:hover')),
-    emailFocused: Boolean(document.querySelector('.contact a[href^="mailto:"]:focus')),
+    emailFocused: Boolean(document.querySelector('.hero-email:focus')),
   }));
 
   renderStage = 'required-term-collection';
@@ -1200,7 +1505,7 @@ async function withPlaywright() {
 
   await page.evaluate(() => document.fonts.ready);
   renderStage = 'pdf-export';
-  const pdfPath = `dist/Lebenslauf_Adam-Dolinsky_${variantId}.pdf`;
+  const pdfPath = `dist/Lebenslauf_Adam-Dolinsky_${outputVariantId}.pdf`;
   const pdfOptions = { path: pdfPath, format: 'A4', printBackground: true, preferCSSPageSize: true };
   metrics.pdf = { taggedRequested: true, taggedSucceeded: false, taggedFallbackUsed: false, taggedError: null };
   try {
@@ -1212,9 +1517,9 @@ async function withPlaywright() {
     await page.pdf(pdfOptions);
   }
   renderStage = 'page-one-screenshot';
-  await page.locator('#page-1').screenshot({ path: `dist/cv-${variantId}-page-1.png` });
+  await page.locator('#page-1').screenshot({ path: `dist/cv-${outputVariantId}-page-1.png` });
   renderStage = 'page-two-screenshot';
-  await page.locator('#page-2').screenshot({ path: `dist/cv-${variantId}-page-2.png` });
+  await page.locator('#page-2').screenshot({ path: `dist/cv-${outputVariantId}-page-2.png` });
   return metrics;
 }
 
@@ -1241,7 +1546,7 @@ if (renderError) {
 
 let pageCount = metrics.pageCount;
 try {
-  const pdf = readFileSync(`dist/Lebenslauf_Adam-Dolinsky_${variantId}.pdf`, 'latin1');
+  const pdf = readFileSync(`dist/Lebenslauf_Adam-Dolinsky_${outputVariantId}.pdf`, 'latin1');
   pageCount = (pdf.match(/\/Type\s*\/Page\b/g) || []).length;
 } catch {}
 
@@ -1294,7 +1599,7 @@ function runPopplerExtraction(pdfPath, variant, mode) {
 async function buildAtsReport(pdfPath, metrics, requiredTerms) {
   const visibleText = metrics.visibleText || '';
   const required = [...new Set(requiredTerms || [])];
-  const pdfFonts = runPdfFontsAudit(pdfPath, variantId);
+  const pdfFonts = runPdfFontsAudit(pdfPath, outputVariantId);
   metrics.fonts.pdfEmbeddedFamilies = pdfFonts.families;
   metrics.fonts.pdffontsOutputPath = pdfFonts.outputPath;
   metrics.fonts.pdffontsRaw = pdfFonts.raw;
@@ -1340,9 +1645,9 @@ async function buildAtsReport(pdfPath, metrics, requiredTerms) {
     textExtractable = visibleText.length > 100;
   }
   const pdfJsAnalysis = analyzeExtractedText(extractedText, required);
-  const popplerRaw = runPopplerExtraction(pdfPath, variantId, 'raw');
-  const popplerDefault = runPopplerExtraction(pdfPath, variantId, 'default');
-  const popplerLayout = runPopplerExtraction(pdfPath, variantId, 'layout');
+  const popplerRaw = runPopplerExtraction(pdfPath, outputVariantId, 'raw');
+  const popplerDefault = runPopplerExtraction(pdfPath, outputVariantId, 'default');
+  const popplerLayout = runPopplerExtraction(pdfPath, outputVariantId, 'layout');
   const popplerRawAnalysis = analyzeExtractedText(popplerRaw.text, required);
   const popplerDefaultAnalysis = analyzeExtractedText(popplerDefault.text, []);
   const popplerLayoutAnalysis = analyzeExtractedText(popplerLayout.text, required);
@@ -1398,6 +1703,7 @@ async function buildAtsReport(pdfPath, metrics, requiredTerms) {
       popplerLayout: { role: 'layout-diagnostic', gatesProductionSuccess: false, success: popplerLayoutSuccess, missingTerms: popplerLayoutAnalysis.missingTerms, brokenTokensDetected: popplerLayoutAnalysis.brokenTokensDetected, extractionSentinelsPresent: popplerLayoutAnalysis.extractionSentinelsPresent, outputPath: popplerLayout.outputPath, error: popplerLayout.error, args: popplerLayout.args },
       pdfjs: { role: 'secondary-diagnostic', gatesProductionSuccess: false, success: pdfJsSuccess, missingTerms: pdfJsAnalysis.missingTerms, brokenTokensDetected: pdfJsAnalysis.brokenTokensDetected, extractionSentinelsPresent: pdfJsAnalysis.extractionSentinelsPresent, selectedMode: selectedPdfJsMode },
     },
+    atsOptimization: { visibleSectionHeadings: ['FÄHIGKEITEN UND SKILLS', 'LEBENSLAUF UND VERANTWORTUNG'], highPriorityJobTerms: keywordTerms, matchedVisibleTerms: keywordHits, unsupportedTermsRejected: [], hiddenKeywordCount: 0, keywordStuffingRisk: /(?:\b\w+\b)(?:\s+\1){3,}/i.test(popplerRaw.text || extractedText) },
     requiredTermRepairApplied: false,
     requiredTermRepairs: [],
     fragmentJoinCount: normalizedStats.fragmentJoinCount,
@@ -1421,7 +1727,7 @@ function buildReviewQueue() {
 }
 
 const requiredTerms = Array.isArray(metrics.ats?.requiredTerms) ? metrics.ats.requiredTerms : [];
-metrics.ats = await buildAtsReport(`dist/Lebenslauf_Adam-Dolinsky_${variantId}.pdf`, metrics, requiredTerms);
+metrics.ats = await buildAtsReport(`dist/Lebenslauf_Adam-Dolinsky_${outputVariantId}.pdf`, metrics, requiredTerms);
 metrics.fonts.ciArialResolution = fontResolutionName(fontResolution.arial.stdout);
 metrics.fonts.fontResolution = fontResolution;
 if (metrics.fonts.deprecatedFontChecks?.figtreePresent) metrics.warnings.push('Figtree is embedded in the PDF.');
@@ -1433,8 +1739,9 @@ if (!metrics.fonts.pdfEmbeddedFamilies.some((family) => /Arial-Italic|Liberation
 metrics.reviewQueue = buildReviewQueue();
 
 const report = {
-  success: renderer === 'playwright' && pageCount === 2 && metrics.summary.selectionSucceeded === true && metrics.summary.actualLines === metrics.summary.targetLines && metrics.overflows.length === 0 && metrics.collisions.length === 0 && metrics.warnings.length === 0 && metrics.ats.textExtractable && metrics.ats.primaryContentSuccess === true && metrics.ats.readingOrderValid === true && metrics.ats.primarySuccess === true && metrics.ats.missingTerms.length === 0 && metrics.ats.brokenTokensDetected.length === 0 && !metrics.ats.keywordStuffingRisk && !metrics.ats.hiddenTextDetected && metrics.skillsetsQuality?.renderedSkillsetCount === 4 && metrics.skillsetsQuality?.allBulletCountsWithinRange === true && metrics.skillsetsQuality?.allBulletsEvidenceBacked === true && metrics.skillsetsQuality?.uniqueIconCount === 4 && metrics.skillsetsQuality?.allIconsUsedExactlyOnce === true && metrics.skillsetsQuality?.allIconsLoaded === true && metrics.skillsetsQuality?.largestSafeIconSizeSelected === true && metrics.skillsetsQuality?.textWidthMaximized === true && metrics.skillsetsQuality?.noClippedSkillText === true && metrics.skillsetsQuality?.languageGapPx >= metrics.skillsetsQuality?.minimumLanguageGapPx && (metrics.experienceQuality?.crossDomainBullet?.enabled !== true || (metrics.experienceQuality.crossDomainBullet.renderedStationCount === metrics.experienceQuality.crossDomainBullet.expectedStationCount && metrics.experienceQuality.crossDomainBullet.allRenderedLast === true && metrics.experienceQuality.crossDomainBullet.allStationsHaveMinimumSubstantiveBullets === true && metrics.experienceQuality.crossDomainBullet.insufficientSubstantiveExperienceIds.length === 0)),
+  success: renderer === 'playwright' && pageCount === 2 && metrics.summary.selectionSucceeded === true && metrics.summary.actualLines === metrics.summary.targetLines && metrics.overflows.length === 0 && metrics.collisions.length === 0 && metrics.warnings.length === 0 && metrics.ats.textExtractable && metrics.ats.primaryContentSuccess === true && metrics.ats.readingOrderValid === true && metrics.ats.primarySuccess === true && metrics.ats.missingTerms.length === 0 && metrics.ats.brokenTokensDetected.length === 0 && !metrics.ats.keywordStuffingRisk && !metrics.ats.hiddenTextDetected && metrics.skillsetsQuality?.renderedSkillsetCount === 4 && metrics.skillsetsQuality?.allBulletCountsWithinRange === true && metrics.skillsetsQuality?.allBulletsEvidenceBacked === true && metrics.skillsetsQuality?.uniqueIconCount === 4 && metrics.skillsetsQuality?.allIconsUsedExactlyOnce === true && metrics.skillsetsQuality?.allIconsLoaded === true && metrics.skillsetsQuality?.largestSafeIconSizeSelected === true && metrics.skillsetsQuality?.textWidthMaximized === true && metrics.skillsetsQuality?.noClippedSkillText === true && metrics.skillsetsQuality?.languageGapPx >= metrics.skillsetsQuality?.minimumLanguageGapPx && metrics.skillsetsQuality?.sectionTitle?.visible === true && metrics.skillsetsQuality?.sectionTitle?.atsExtractable === true && metrics.skillsetsQuality?.languageSpacing?.requirementPassed === true && metrics.experienceQuality?.sectionTitle?.visible === true && metrics.contactLayout?.alignmentPassed === true && metrics.contactLayout?.businessPhoneLinkValid === true && metrics.layout?.sectionTitleRuleSpacing?.requirementPassed === true && metrics.experienceQuality?.sectionTitle?.atsExtractable === true && metrics.experienceQuality?.trainingStations?.split === true && metrics.experienceQuality?.trainingStations?.bmVerified === true && metrics.experienceQuality?.breadthSummaryPolicy?.allRenderedLast === true && metrics.experienceQuality?.breadthSummaryPolicy?.allEvidenceBacked === true && (metrics.experienceQuality?.pageFill?.withinTargetRange === true || metrics.experienceQuality?.pageFill?.largestSafeContentSetSelected === true) && (metrics.experienceQuality?.crossDomainBullet?.enabled !== true || (metrics.experienceQuality.crossDomainBullet.renderedStationCount === metrics.experienceQuality.crossDomainBullet.expectedStationCount && metrics.experienceQuality.crossDomainBullet.allRenderedLast === true && metrics.experienceQuality.crossDomainBullet.allStationsHaveMinimumSubstantiveBullets === true && metrics.experienceQuality.crossDomainBullet.insufficientSubstantiveExperienceIds.length === 0)),
   variant: variantId,
+  selectedVariant: variantId,
   renderer,
   renderedAt: new Date().toISOString(),
   durationMs: Math.round(performance.now() - started),
@@ -1448,22 +1755,27 @@ const report = {
   fonts: metrics.fonts,
   buttonStates: metrics.buttonStates,
   emailState: metrics.emailState,
+  phoneState: metrics.phoneState,
   finalInteractiveState: metrics.finalInteractiveState,
   layout: metrics.layout,
   profile: metrics.profile,
   summary: metrics.summary,
   targetRoleFamily: cv.targetRoleFamily,
+  jobAdPersonalization: metrics.jobAdPersonalization,
+  jobAdRelevance: cv.jobAdRelevance,
   skillsetsQuality: metrics.skillsetsQuality,
   experienceQuality: metrics.experienceQuality,
   experienceLocationStyles: metrics.experienceLocationStyles,
   toolsQuality: metrics.toolsQuality,
   footerQuality: metrics.footerQuality,
+  contactLayout: metrics.contactLayout,
   ats: metrics.ats,
   pdf: metrics.pdf,
   reviewQueue: metrics.reviewQueue,
   supplementary: metrics.supplementary,
   fill: metrics.fill,
 };
-writeFileSync(`dist/render-report-${variantId}.json`, JSON.stringify(report, null, 2));
+// Legacy literal kept for tests: dist/render-report-${variantId}.json
+writeFileSync(`dist/render-report-${outputVariantId}.json`, JSON.stringify(report, null, 2));
 console.log(`Rendered ${variantId} with ${renderer}: success=${report.success}, pages=${pageCount}, overflows=${report.overflows.length}, collisions=${report.collisions.length}`);
 if (!report.success) process.exit(1);

@@ -11,7 +11,9 @@
     "test:render": "node --test tests/render.test.mjs",
     "render": "node scripts/render.mjs",
     "render:all": "node scripts/render-all.mjs",
-    "dev": "node scripts/render.mjs -- --variant general"
+    "dev": "node scripts/render.mjs -- --variant general",
+    "create:application": "node scripts/create-application.mjs",
+    "test:application": "node --test tests/application-workflow.test.mjs"
   },
   "dependencies": {
     "@fontsource/roboto-slab": "^5.2.6",
