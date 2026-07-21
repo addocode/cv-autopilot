@@ -20,7 +20,8 @@ Die Werte wurden anhand der bestehenden Word-/PDF-Referenzdokumente wie `1_Motiv
 | Titel | Roboto Slab/Rockwell-Fallback, 15.96 pt, fett, rechtsbündig |
 | Fliesstext | Aptos/Segoe UI/Arial/Liberation-Sans-Fallback, 12 pt |
 | Zeilenhöhe | 1.41 |
-| Absatzabstand | 2.85 mm |
+| Normaler Absatzabstand | 2.85 mm |
+| Abstand nach der Anrede | 8.8 mm |
 | Seitenlabel | weiss, fett, um −90° gedreht, im linken blauen Steg |
 | Signatur | am unteren Referenzanker; `Adam Dolinsky.ch` mit differenzierter Linkgestaltung |
 
@@ -32,12 +33,12 @@ Der Titel wird als `titleLines` mit einer oder zwei manuell geprüften Zeilen ü
 {
   "titleLines": [
     "Bewerbung als (Junior) Digital Marketing",
-    "Manager (80–100%)"
+    "Managerin / Manager (80–100%)"
   ]
 }
 ```
 
-Der Titel ist **rechtsbündig**, nicht zentriert.
+Der Titel ist **rechtsbündig**, nicht zentriert. Die Stellenbezeichnung ist exakt aus dem Inserat zu übernehmen; eigenmächtige Kürzungen wie nur «Manager» statt «Managerin / Manager» sind nicht zulässig.
 
 ## Inhalt und Hervorhebungen
 
@@ -68,6 +69,7 @@ Ein Produktionsrender ist nur erfolgreich, wenn:
 - Hintergrund, blauer Rahmen, weisses Papierfeld und Inhaltsbereich den Referenzkoordinaten entsprechen;
 - Titelgrösse, Rechtsausrichtung, Fliesstextgrösse und Zeilenhöhe stimmen;
 - Titelzeilen der expliziten Eingabe entsprechen;
+- die Anrede den vergrösserten Referenzabstand zum ersten Absatz besitzt;
 - alle Pflichtbegriffe im PDF extrahierbar sind;
 - der Qualitätsreport `success: true` meldet.
 
@@ -103,4 +105,5 @@ Folgende Vorgehensweisen dürfen nicht mehr eingesetzt werden:
 - automatisch reduzierte Zeilenhöhe oder Absatzabstände;
 - vertikales Seitenlabel in der Seitenmitte ohne Referenzanker;
 - ungeprüfter automatischer Titelumbruch;
+- gekürzte oder umformulierte Stellenbezeichnungen im Titel;
 - Export ohne PNG-Sichtprüfung und grünen Qualitätsreport.
