@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "fixtureId": "admin-sachbearbeiter-fk-golden",
+  "purpose": "Primary binding golden render case for the motivation-letter creator",
+  "applicationDate": "2026-07-21",
+  "company": "Parlamentsdienste PD",
+  "jobTitleOriginal": "Admin. Sachbearbeiter/-in FK",
+  "jobTitleRendered": "Admin. Sachbearbeiter FK",
+  "workload": "80%",
+  "location": "Bern",
+  "contact": {
+    "firstName": "Martina",
+    "lastName": "Probst",
+    "role": "Leiterin administratives Sekretariat FK",
+    "salutation": "Sehr geehrte Frau Probst"
+  },
+  "reference": {
+    "visible": true,
+    "value": "JRQ$540-19713",
+    "label": "Referenz"
+  },
+  "roleFamily": "administration-gever",
+  "strategy": {
+    "positioning": "Digitale Administration mit Mediamatik-, ACTA-NOVA- und Bundeserfahrung",
+    "motivationAngle": "Bewusste langfristige Entwicklung in eine strukturierte und gesellschaftlich sinnvolle Verwaltungsfunktion",
+    "gapHandling": [
+      {
+        "requirement": "klassische kaufmännische Ausbildung",
+        "handling": "Nicht behaupten; über Berufsmaturität, ACTA NOVA, Geschäftsvorgänge, Qualitätssicherung, Dokumentenmanagement und übertragbare Berufspraxis argumentieren"
+      }
+    ],
+    "longTermSignal": "Keine Übergangslösung, sondern bewusste langfristige Entwicklung"
+  },
+  "renderExpectations": {
+    "pageCount": 1,
+    "brandBlue": "#15519F",
+    "referenceVisible": true,
+    "referenceFontSizePt": 8,
+    "dateFontSizePt": 8,
+    "titlePrefix": "Bewerbung als",
+    "titleWorkloadOmitted": true,
+    "dateAlignedWithSalutation": true,
+    "uniformTopBar": true,
+    "uniformSideRails": true,
+    "maxFrameDeviationPx": 1,
+    "layoutSource": "modules/motivation-letter/APPROVED_GOLDEN_STANDARD.md"
+  }
+}
