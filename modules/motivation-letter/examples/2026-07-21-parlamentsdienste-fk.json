@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "fixtureType": "golden-live-test",
+  "applicationId": "2026-07-21_parlamentsdienste-pd_admin-sachbearbeiter-fk",
+  "generationDate": "2026-07-21",
+  "generateCv": false,
+  "employer": "Parlamentsdienste PD",
+  "jobTitleOriginal": "Admin. Sachbearbeiter/-in FK",
+  "jobTitleRendered": "Admin. Sachbearbeiter FK",
+  "workload": "80%",
+  "start": "nach Vereinbarung",
+  "employmentType": "unbefristet",
+  "contact": {
+    "fullName": "Martina Probst",
+    "explicitSalutation": "Frau",
+    "role": "Leiterin administratives Sekretariat FK",
+    "addressMode": "formal"
+  },
+  "reference": {
+    "label": "Referenz",
+    "value": "JRQ$540-19713",
+    "sourceText": "Referenz-Nr.: JRQ$540-19713",
+    "confidence": 1,
+    "visible": true
+  },
+  "roleFamily": "administration-gever",
+  "strategy": {
+    "positioning": "Digital-affiner administrativer Quereinsteiger mit Berufsmaturität, GEVER-Erfahrung und redaktioneller Praxis",
+    "motivationAngle": "Langfristige Hin-zu-Entwicklung in sorgfältige Geschäftsbearbeitung und eine institutionell sinnvolle Aufgabe im Dienst des Parlaments",
+    "valueProposition": "Sitzungs- und Dokumentenprozesse zuverlässig unterstützen, schriftliche Produkte sorgfältig prüfen und interne sowie externe Anspruchsgruppen verständlich begleiten",
+    "selectedEvidence": [
+      "Mediamatiker EFZ mit Berufsmaturität",
+      "Geschäftsvorgangsbearbeitung im GEVER-System ACTA NOVA",
+      "Qualitätssicherung von Schriftverkehr und Entscheidungsunterlagen",
+      "Koordination zwischen internen Organisationseinheiten",
+      "Redaktion und Produktion des Kundenmagazins Gügg Grüggüü",
+      "Französischkenntnisse und Erfahrung im französischsprachigen Umfeld"
+    ],
+    "longTermSignal": true,
+    "portfolioUse": false,
+    "aiTrainingUse": false
+  },
+  "letter": {
+    "salutation": "Sehr geehrte Frau Probst",
+    "paragraphs": [
+      "Die Finanzkommission begleitet einen zentralen Bereich parlamentarischer Arbeit: den sorgfältigen Umgang mit öffentlichen Mitteln. Verlässlich vorbereitete Sitzungen, korrekt geführte Dokumente und präzise geprüfte Unterlagen schaffen die Grundlage für fundierte politische Entscheidungen. Genau diese Verbindung aus strukturierter Sachbearbeitung, digitalem Dokumentenmanagement und einer Aufgabe mit gesellschaftlicher Wirkung ist der Grund, weshalb ich mich bewusst für die Position als Admin. Sachbearbeiter FK bewerbe.",
+      "Als Mediamatiker EFZ mit Berufsmaturität verbinde ich organisatorisches Verständnis mit hoher IT-Affinität und redaktioneller Erfahrung. Während meines Führungsdienstes beim Stab Personelles der Armee bearbeitete und verteilte ich Geschäftsvorgänge im GEVER-System ACTA NOVA, kontrollierte Schriftverkehr und Entscheidungsunterlagen und koordinierte Informationen zwischen internen Organisationseinheiten. Sorgfältige Ablage, nachvollziehbare Prozesse und der diskrete Umgang mit sensiblen Inhalten sind mir daher bereits aus einem Umfeld des Bundes vertraut.",
+      "Bei Kunz Kunath AG koordinierte ich parallel laufende Kommunikations- und Webprojekte, arbeitete mit externen Partnern und verantwortete die redaktionelle und gestalterische Produktion des Kundenmagazins «Gügg Grüggüü». Texte zu prüfen, Inhalte korrekt aufzubereiten, Termine und Beteiligte zusammenzuführen und auch bei mehreren Pendenzen den Überblick zu behalten, gehörte zu meinem Alltag. Mein kommunikativer Hintergrund ist zudem ein Zusatznutzen bei Veröffentlichungen sowie im Kontakt mit internen und externen Stellen.",
+      "Neue Anwendungen eigne ich mir rasch und strukturiert an. Neben Deutsch als Muttersprache kann ich mich auch auf Französisch verständigen und habe diese Kenntnisse in einem französischsprachigen Umfeld vertieft.",
+      "Der Wechsel in eine administrative Funktion ist für mich keine Übergangslösung, sondern eine bewusste langfristige Entwicklung. Ich möchte meine Stärken künftig noch stärker in klaren Abläufen, sorgfältiger Geschäftsbearbeitung und einer institutionell sinnvollen Aufgabe einsetzen. Die Parlamentsdienste sprechen mich besonders an, weil sie unabhängig, unparteiisch und unmittelbar im Dienst der Demokratie arbeiten.",
+      "Gerne erläutere ich Ihnen persönlich, wie ich das Sekretariat der Finanzkommission mit meiner GEVER-Erfahrung, redaktionellen Sicherheit und digitalen Arbeitsweise zuverlässig unterstützen kann."
+    ],
+    "emphasisGroups": [
+      "Admin. Sachbearbeiter FK",
+      "Mediamatiker EFZ mit Berufsmaturität",
+      "GEVER-System ACTA NOVA",
+      "keine Übergangslösung, sondern eine bewusste langfristige Entwicklung"
+    ],
+    "closing": "Freundliche Grüsse",
+    "signature": "Adam Dolinsky.ch"
+  },
+  "expectedReport": {
+    "pageCount": 1,
+    "brandBlue": "#15519F",
+    "referenceVisible": true,
+    "bodyStartMm": 85.251,
+    "bodyStartWithinGuides": true,
+    "dateAlignmentDeltaMm": 0.011,
+    "dateAlignedWithSalutation": true,
+    "emphasisGroupCount": 4,
+    "unsupportedClaims": [],
+    "overflows": [],
+    "collisions": []
+  }
+}
