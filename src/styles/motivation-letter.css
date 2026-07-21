@@ -12,6 +12,7 @@ body{font-family:Aptos,'Segoe UI',Arial,'Liberation Sans',sans-serif;color:#1010
 .motivation-letter__title-line{display:block}
 .motivation-letter__body{position:absolute;left:0;right:0;top:31.7mm;bottom:17mm;font-family:Aptos,'Segoe UI',Arial,'Liberation Sans',sans-serif;font-size:12pt;line-height:1.41;overflow:hidden}
 .motivation-letter__body p{margin:0 0 2.85mm}
+.motivation-letter__body .motivation-letter__salutation{margin-bottom:8.8mm}
 .motivation-letter__body p:last-child{margin-bottom:0}
 .motivation-letter__body strong{font-weight:700}
 .motivation-letter__signature{position:absolute;left:0;bottom:0;font-family:Aptos,'Segoe UI',Arial,'Liberation Sans',sans-serif;font-size:12pt;line-height:1.41}
