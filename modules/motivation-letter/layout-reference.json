@@ -1,8 +1,9 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "source": {
-    "description": "Measured from the supplied one-page InDesign PDF reference",
+    "description": "Binding golden layout approved from the final Admin. Sachbearbeiter FK live test, including the corrected uniform frame geometry",
     "pageCount": 1,
+    "goldenApplication": "Admin. Sachbearbeiter FK - Parlamentsdienste PD",
     "pageSize": {
       "widthPt": 595.276,
       "heightPt": 841.89,
@@ -11,7 +12,7 @@
     }
   },
   "colors": {
-    "brandBlue": "#1652A1",
+    "brandBlue": "#15519F",
     "bodyText": "#000000",
     "paper": "#FFFFFF",
     "developmentMinGuide": "#CD171C",
@@ -27,26 +28,30 @@
     "reference": {
       "family": "Roboto Slab",
       "weight": 700,
-      "sizePt": 10
+      "sizePt": 8,
+      "background": "transparent"
     },
     "date": {
       "family": "Roboto Slab",
       "weight": 700,
       "sizePt": 8,
       "writingMode": "vertical-rl",
-      "rotationDeg": 180
+      "rotationDeg": 180,
+      "background": "transparent"
     },
     "body": {
       "family": "Arial",
+      "approvedMetricCompatibleFamily": "Arimo",
       "weight": 400,
       "sizePt": 11,
       "lineHeightPt": 14
     },
     "bodyEmphasis": {
       "family": "Arial",
+      "approvedMetricCompatibleFamily": "Arimo",
       "weight": 700,
       "sizePt": 11,
-      "color": "#1652A1"
+      "color": "#15519F"
     }
   },
   "frame": {
@@ -60,12 +65,27 @@
       "rightMm": 19.8,
       "topMm": 23.5,
       "bottomMm": 0
-    }
+    },
+    "drawingRule": "The top bar and both side rails are drawn only by the continuous base frame rectangles. Text wrappers for reference and date must never draw blue backgrounds, borders, outlines, shadows or pseudo-elements.",
+    "uniformityTolerancePx": 1
+  },
+  "logo": {
+    "asset": "modules/motivation-letter/references/ad_logo.png",
+    "transparentBackground": true,
+    "bboxPt": {
+      "left": 28.856819,
+      "top": 53.730755,
+      "right": 100.062866,
+      "bottom": 109.998474
+    },
+    "alignmentRule": "The approved A logo overlaps the continuous top bar, left rail and white panel exactly as in the golden Admin. Sachbearbeiter FK render. Do not centre or reposition it automatically."
   },
   "contentColumn": {
     "leftMm": 27,
     "rightMm": 28.5,
-    "widthMm": 154.5
+    "widthMm": 154.5,
+    "leftPt": 76.5,
+    "widthPt": 432
   },
   "reference": {
     "topMm": 18.168,
@@ -73,7 +93,12 @@
     "rightMm": 27,
     "alignment": "right",
     "conditional": true,
-    "removeFromDomWhenHidden": true
+    "removeFromDomWhenHidden": true,
+    "wrapperBackground": "transparent",
+    "wrapperBorder": 0,
+    "wrapperOutline": 0,
+    "wrapperBoxShadow": "none",
+    "wrapperPadding": 0
   },
   "title": {
     "topMm": 31.997,
@@ -87,12 +112,14 @@
   },
   "body": {
     "fixedBottomMm": 281.093,
-    "sampleStartMm": 95.779,
-    "latestAllowedStartGuideMm": 93.5,
+    "approvedGoldenStartMm": 71.25,
+    "latestAllowedStartGuideMm": 83.622,
     "earliestAllowedStartGuideMm": 57.765,
     "guideToTextGapMm": 2.279,
-    "latestAllowedTextStartMm": 95.779,
+    "latestAllowedTextStartMm": 85.901,
     "earliestAllowedTextStartMm": 60.044,
+    "minimumLengthIncreaseVsOriginalLines": 2,
+    "minimumLengthIncreaseVsOriginalMm": 9.878,
     "growthDirection": "upward",
     "bottomAnchored": true,
     "developmentGuidesVisibleInProduction": false
@@ -102,10 +129,14 @@
     "rightMm": 17.216,
     "dynamicVerticalPosition": true,
     "alignmentTarget": "salutation-first-line-top",
-    "sampleTopMm": 97.014,
     "allowedAlignmentToleranceMm": 1.5,
     "format": "Bern, DD.MM.YYYY",
-    "dateSource": "generation-date"
+    "dateSource": "generation-date",
+    "wrapperBackground": "transparent",
+    "wrapperBorder": 0,
+    "wrapperOutline": 0,
+    "wrapperBoxShadow": "none",
+    "wrapperPadding": 0
   },
   "signature": {
     "leftMm": 27,
@@ -127,11 +158,17 @@
     "maxCollisionCount": 0,
     "dateAlignmentToleranceMm": 1.5,
     "bodyStartToleranceMm": 0.8,
-    "titleRightAlignmentToleranceMm": 0.8
+    "titleRightAlignmentToleranceMm": 0.8,
+    "frameUniformityTolerancePx": 1,
+    "allowLocalTopBarProtrusion": false,
+    "allowLocalSideRailProtrusion": false
   },
   "notes": [
+    "This file is the cross-chat and future web-app source of truth for motivation-letter layout.",
+    "The Admin. Sachbearbeiter FK letter is the binding golden standard for visual structure, spacing, typography and content density.",
     "The red and green guides are diagnostic-only and must never render in production outputs.",
     "The body is bottom-anchored; longer copy moves the salutation and vertical date upward.",
-    "The source PDF uses #1652A1, which is slightly different from the current CV token #15519F. Unification must be a deliberate visual decision and regression-tested."
+    "All motivation-letter colours are aligned with the CV brand blue #15519F.",
+    "Reference and date are transparent text overlays. They must not create separate coloured rectangles because those caused the previously observed local frame bulges."
   ]
 }
