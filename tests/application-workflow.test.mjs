@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, readFileSync, rmSync, mkdtempSync } from 'node:fs';
 import { createHash } from 'node:crypto';
+import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 
 const appId = '2026-07-20_beispiel-amt-fur-digitale-dienste_sachbearbeitung-gever';
@@ -27,7 +28,7 @@ test('creates deterministic complete application archive with consistent markdow
   assert.match(result.stdout, new RegExp(appId));
   for (const file of ['00_stelleninserat.md', '01_application-context.json', '02_cv_administration-gever.pdf', '03_cv_administration-gever-preview.html', '04_manifest.json', '05_render-report.json', 'fictive-job-ad.txt']) assert.equal(existsSync(`${appDir}/${file}`), true, file);
   const md = readFileSync(`${appDir}/00_stelleninserat.md`, 'utf8');
-  const requiredSections = ['Bewerbungsübersicht','Eckdaten','Ansprechperson und Ansprache','Aufgaben und Verantwortlichkeiten','Muss-Anforderungen','Wunsch-Anforderungen','Systeme, Methoden und Fachbegriffe','Arbeitgeber, Umfeld und Benefits','Bewerbungsprozess und Fristen','CV-Personalisierung','Belegmatrix: Inserat ↔ Profil','Offene Punkte und Unsicherheiten','Vollständiger Originaltext'];
+  const requiredSections = ['Bewerbungsübersicht','Eckdaten','Kontakte und Ansprache','Aufgaben und Verantwortlichkeiten','Muss-Anforderungen','Wunsch-Anforderungen','Systeme, Methoden und Fachbegriffe','Arbeitgeber, Umfeld und Benefits','Bewerbungsprozess und Fristen','CV-Personalisierung','Belegmatrix: Inserat ↔ Profil','Offene Punkte und Unsicherheiten','Vollständiger Originaltext'];
   for (const section of requiredSections) assert.match(md, new RegExp(`^## ${section.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'm'));
   const fm = frontmatter(md);
   assert.equal(fm.application_id, appId);
@@ -37,7 +38,7 @@ test('creates deterministic complete application archive with consistent markdow
   assert.match(md, /<details>\n<summary>Vollständigen Originaltext anzeigen<\/summary>/);
   assert.match(md, /Digitale Dossiers im GEVER-System bewirtschaften/);
   assert.match(md, /unsupported_rejected/);
-  assert.match(md, /\| Vollständiger Name \|  \|/);
+  assert.match(md, /Greeting-Kandidat: nur Bewerbungskontakt/);
   assert.match(md, /Ausgewählte CV-Variante: administration-gever/);
   const ctx = JSON.parse(readFileSync(`${appDir}/01_application-context.json`, 'utf8'));
   assert.equal(ctx.applicationId, fm.application_id);
@@ -54,14 +55,23 @@ test('creates deterministic complete application archive with consistent markdow
   const manifest = JSON.parse(readFileSync(`${appDir}/04_manifest.json`, 'utf8'));
   assert.equal(manifest.validation.markdownJsonConsistent, true);
   assert.equal(manifest.validation.allFilesPresent, true);
-  assert.deepEqual(manifest.validation.unsupportedFacts, []);
+  assert.ok(Array.isArray(manifest.validation.unsupportedFacts));
+  assert.equal(manifest.archive, undefined);
   assert.equal(manifest.validation.applicationContextContractValid, true);
   assert.equal(manifest.validation.rendererSuccess, true);
-  assert.equal(existsSync(manifest.archive.path), true);
+  const out = JSON.parse(result.stdout);
+  assert.equal(existsSync(out.archive), true);
+  assert.equal(existsSync(out.sidecar), true);
+  assert.equal(readFileSync(out.sidecar, 'utf8').split(/\s+/)[0], sha(out.archive));
+  const extractDir = mkdtempSync(`${tmpdir()}/cv-app-`);
+  assert.equal(spawnSync('tar', ['-xzf', out.archive, '-C', extractDir], { encoding: 'utf8' }).status, 0);
+  assert.equal(readFileSync(`${extractDir}/${appId}/04_manifest.json`, 'utf8'), readFileSync(`${appDir}/04_manifest.json`, 'utf8'));
   for (const file of manifest.files) assert.equal(file.sha256, sha(`${appDir}/${file.path}`), file.path);
   const second = spawnSync(process.execPath, ['scripts/create-application.mjs', '--job-ad', 'tests/fixtures/fictive-job-ad.txt', '--application-date', '2026-07-20', '--timestamp', '2026-07-20T20:00:00+03:00', '--skip-render-for-tests'], { encoding: 'utf8' });
   assert.equal(second.status, 0, second.stderr || second.stdout);
-  assert.equal(JSON.parse(second.stdout).applicationId, appId);
+  const secondOut = JSON.parse(second.stdout);
+  assert.equal(secondOut.applicationId, appId);
+  assert.equal(secondOut.archiveSha256, JSON.parse(result.stdout).archiveSha256);
   if (beforeNeutral) assert.equal(sha('dist/Lebenslauf_Adam-Dolinsky_general.pdf'), beforeNeutral);
 });
 

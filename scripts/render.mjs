@@ -159,21 +159,48 @@ const skillsetSupplementalBullets = {
 };
 
 
+const stopJobAdTerms = new Set(['stellen','arbeiten','arbeit','sicher','intern','extern','team','gute','sehr','kenntnisse','erfahrung','aufgaben']);
+const synonymGroups = {
+  'gever': ['gever','acta nova','akten','geschaeftsvorgaenge','geschaftsvorgange','geschaeftsvorgangsbearbeitung'],
+  'documentation': ['dokument','dokumente','dokumentenmanagement','dokumentenverwaltung','ablage','dokumentenablage','prozessdokumentation','wissenssicherung'],
+  'administration': ['administration','administrativ','sachbearbeitung','unterstuetzung','auskuenfte','office','ms office'],
+  'quality': ['qualitaet','qualitaetssicherung','kontrolle','formale kontrolle'],
+  'coordination': ['koordination','koordinieren','stellen','anspruchsgruppen'],
+  'languages': ['deutsch','franzoesisch','sprachen'],
+  'systems': ['informatiksysteme','systeme','einarbeitung'],
+  'communication': ['redaktion','redaktionell','kommunikation','dokumentationsbezogen'],
+};
+function termTokens(value) { return normalizeAtsText(value).split(/[^a-z0-9äöü]+/i).filter((part) => part.length > 2 && !stopJobAdTerms.has(part)); }
 function jobAdTerms() {
   const ctx = data.applicationContext || {};
   const req = ctx.requirements || {};
-  return [...(ctx.atsTerms || []), ...(req.systems || []), ...(req.tasks || []).map((x)=>typeof x==='string'?x:x.text), ...(req.must || []).map((x)=>typeof x==='string'?x:x.text)]
+  const unsupported = [...(req.must || []), ...(req.nice || []), ...(req.tasks || [])].filter((x) => typeof x === 'object' && x.evidenceStatus === 'unsupported_rejected');
+  const rawTerms = [...(ctx.atsTerms || []), ...(req.systems || []), ...(req.languages || []), ...(req.tasks || []).map((x)=>typeof x==='string'?x:x.text), ...(req.must || []).map((x)=>typeof x==='string'?x:x.text)]
     .flatMap((value) => String(value || '').split(/[,;]| und |\n/))
     .map((value) => normalizeAtsText(value).trim())
-    .filter((value) => value.length > 2);
+    .filter((value) => value.length > 2 && !stopJobAdTerms.has(value));
+  return [...new Set(rawTerms)].map((term) => ({ term, tokens: termTokens(term), unsupported: unsupported.some((u) => normalizeAtsText(u.text) === term) }));
 }
 const activeJobAdTerms = jobAdTerms();
-function scoreJobAdMatch(item) {
-  if (!activeJobAdTerms.length) return 0;
-  const haystack = normalizeAtsText(`${item.text || ''} ${(item.tags || []).join(' ')}`);
-  const hits = activeJobAdTerms.filter((term) => haystack.includes(term) || term.split(' ').some((part) => part.length > 4 && haystack.includes(part)));
-  return [...new Set(hits)].length;
+function matchJobAd(item) {
+  const tags = (item.tags || item.atsSynonyms || []).map(normalizeAtsText);
+  const haystack = normalizeAtsText(`${item.text || ''} ${tags.join(' ')} ${(item.atsSynonyms || []).join(' ')}`);
+  const matchedTerms = [];
+  const matchedTags = [];
+  let score = 0;
+  for (const [tag, synonyms] of Object.entries(synonymGroups)) {
+    const itemHas = tags.includes(tag) || synonyms.some((syn) => haystack.includes(normalizeAtsText(syn)));
+    const adHas = activeJobAdTerms.some(({ term }) => synonyms.some((syn) => term.includes(normalizeAtsText(syn)) || normalizeAtsText(syn).includes(term)));
+    if (itemHas && adHas) { score += 4; matchedTags.push(tag); matchedTerms.push(synonyms[0]); }
+  }
+  for (const { term, tokens } of activeJobAdTerms) {
+    if (haystack.includes(term)) { score += 3; matchedTerms.push(term); continue; }
+    const hits = tokens.filter((part) => part.length > 4 && haystack.includes(part.slice(0, Math.max(5, part.length - 2))));
+    if (hits.length) { score += hits.length; matchedTerms.push(...hits); }
+  }
+  return { score, matchedTerms: [...new Set(matchedTerms)].slice(0, 8), matchedTags: [...new Set(matchedTags)].slice(0, 8) };
 }
+function scoreJobAdMatch(item) { return matchJobAd(item).score; }
 
 function evidenceStatus(item) {
   return item.status === 'defensible_inference' ? 'defensible_inference' : 'verified';
@@ -217,20 +244,18 @@ function buildSkillsets(rawSections) {
     for (const item of [...baseItems, ...supplemental]) {
       if (!deduped.some((existing) => existing.id === item.id || normalizeAtsText(existing.text) === normalizeAtsText(item.text))) deduped.push(item);
     }
-    const coreItems = [];
-    for (const item of deduped) {
-      if (coreItems.length >= 6) break;
-      if (!item.optional) coreItems.push({ ...item, jobAdMatchScore: scoreJobAdMatch(item), skillOptional: false });
-    }
-    for (const item of deduped) {
-      if (coreItems.length >= 6) break;
-      if (!coreItems.some((core) => core.id === item.id)) coreItems.push({ ...item, skillOptional: false, optionalPromotedToCore: true });
-    }
-    const optionalItems = deduped
+    const scored = deduped.map((item) => ({ ...item, ...matchJobAd(item), jobAdMatchScore: scoreJobAdMatch(item) }));
+    const coreItems = scored
+      .filter((item) => ['verified','defensible_inference'].includes(item.evidenceStatus || evidenceStatus(item)) && (item.sourceIds || []).length > 0)
+      .sort((a, b) => b.jobAdMatchScore - a.jobAdMatchScore || Number(a.optional) - Number(b.optional) || a.id.localeCompare(b.id))
+      .slice(0, 6)
+      .map((item) => ({ ...item, skillOptional: false, selectionStage: 'core-selection' }));
+    const optionalItems = scored
       .filter((item) => !coreItems.some((core) => core.id === item.id))
+      .sort((a, b) => b.jobAdMatchScore - a.jobAdMatchScore || a.id.localeCompare(b.id))
       .slice(0, 2)
-      .map((item) => ({ ...item, skillOptional: true }));
-    const items = [...coreItems, ...optionalItems].map((item) => ({ ...item, jobAdMatchScore: scoreJobAdMatch(item) })).sort((a, b) => b.jobAdMatchScore - a.jobAdMatchScore || a.id.localeCompare(b.id));
+      .map((item) => ({ ...item, skillOptional: true, selectionStage: 'adaptive-filler' }));
+    const items = [...coreItems, ...optionalItems];
     return {
       ...section,
       title: variant.skillSectionTitles[section.id] || section.title,
@@ -317,9 +342,9 @@ function applyVariant() {
       ? experience.bullets.map((bullet) => ({ ...bullet, jobAdMatchScore: scoreJobAdMatch(bullet) }))
       : experience.bullets
         .filter((bullet) => selected.has(bullet.id) && !hidden.has(bullet.id))
-        .sort((a, b) => (priority.get(a.id) ?? 99) - (priority.get(b.id) ?? 99))
-        .slice(0, variant.maxBulletsPerExperience)
-        .map((bullet) => ({ ...bullet, jobAdMatchScore: scoreJobAdMatch(bullet) }));
+        .map((bullet) => ({ ...bullet, ...matchJobAd(bullet), jobAdMatchScore: scoreJobAdMatch(bullet), selectionStage: 'experience-selection' }))
+        .sort((a, b) => b.jobAdMatchScore - a.jobAdMatchScore || (priority.get(a.id) ?? 99) - (priority.get(b.id) ?? 99))
+        .slice(0, variant.maxBulletsPerExperience);
     const omittedMandatory = isProtectedEducation ? [] : experience.bullets.filter((bullet) => !included.some((item) => item.id === bullet.id));
     const substantiveOptionalCandidates = (experience.optionalBullets || [])
       .filter((bullet) => (bullet.variantRelevance || []).includes(variantId))
@@ -374,11 +399,14 @@ function applyVariant() {
 
   const toolMap = new Map(data.tools.map((tool) => [tool.id, tool]));
   const tools = variant.toolOrder.map((id) => toolMap.get(id)).filter(Boolean).slice(0, variant.maxTools);
-  const selectedSkillBulletIds = sections.flatMap((section) => section.items.map((item) => item.id));
+  const selectedSkillBulletIds = sections.flatMap((section) => section.items.filter((item) => !item.skillOptional).map((item) => item.id));
   const selectedExperienceBulletIds = experiences.flatMap((experience) => experience.bullets.map((bullet) => bullet.id));
-  const deprioritizedBulletIds = [...sections.flatMap((section) => section.optionalItems || []), ...experiences.flatMap((experience) => experience.detailCandidates || [])].map((bullet) => bullet.id);
-  const selectionReasonById = Object.fromEntries([...sections.flatMap((section) => section.items), ...experiences.flatMap((experience) => experience.bullets)].map((bullet) => [bullet.id, `jobAdMatchScore=${bullet.jobAdMatchScore || 0}`]));
-  const jobAdRelevance = { inputTerms: activeJobAdTerms, selectedSkillBulletIds, selectedExperienceBulletIds, deprioritizedBulletIds, unsupportedTermsRejected: [], selectionReasonById };
+  const selectedIds = new Set([...selectedSkillBulletIds, ...selectedExperienceBulletIds]);
+  const deprioritizedBulletIds = [...sections.flatMap((section) => section.optionalItems || []), ...experiences.flatMap((experience) => experience.detailCandidates || [])].map((bullet) => bullet.id).filter((id, index, arr) => !selectedIds.has(id) && arr.indexOf(id) === index);
+  const allCandidates = [...sections.flatMap((section) => [...section.items, ...(section.optionalItems || [])]), ...experiences.flatMap((experience) => [...experience.bullets, ...(experience.detailCandidates || [])])];
+  const selectionReasonById = Object.fromEntries(allCandidates.map((bullet) => { const match = matchJobAd(bullet); return [bullet.id, { score: match.score, matchedTerms: match.matchedTerms, matchedTags: match.matchedTags, selectionStage: selectedIds.has(bullet.id) ? (bullet.selectionStage || 'core-selection') : 'deprioritized' }]; }));
+  const unsupportedTermsRejected = [...((data.applicationContext?.requirements?.must) || []), ...((data.applicationContext?.requirements?.nice) || []), ...((data.applicationContext?.requirements?.tasks) || [])].filter((item) => typeof item === 'object' && item.evidenceStatus === 'unsupported_rejected').map((item, index) => ({ id: item.id || `unsupported-${index + 1}`, text: item.text }));
+  const jobAdRelevance = { inputTerms: activeJobAdTerms.map((x) => x.term), selectedSkillBulletIds, selectedExperienceBulletIds, deprioritizedBulletIds, unsupportedTermsRejected, selectionReasonById };
   const omittedTools = data.tools.filter((tool) => !tools.some((visible) => visible.id === tool.id));
   const toolsIndicator = variant.supplementaryIndicators?.tools?.enabled && omittedTools.length > 0
     ? { type: 'tools', text: variant.supplementaryIndicators.tools.text, omittedToolIds: omittedTools.map((tool) => tool.id) }
@@ -447,7 +475,7 @@ function normalizeStart(jobAd = {}) {
   else if (start.kind === 'date' && start.isoDate) parsedValue = `Per ${start.isoDate.split('-').reverse().join('.')}`;
   else { const m = raw.match(/(?:eintritt|start|stellenantritt)\D{0,12}(\d{1,2})\.(\d{1,2})\.(\d{4})/i); if (m) { parsedValue = `Per ${m[1].padStart(2,'0')}.${m[2].padStart(2,'0')}.${m[3]}`; confidence = Math.max(confidence, 0.9); } }
   const usedFallback = !parsedValue || confidence < 0.8;
-  return { sourceText: start.sourceText || '', parsedValue: usedFallback ? '' : parsedValue, renderedText: usedFallback ? 'Per sofort oder nach Vereinbarung' : parsedValue, usedFallback, confidence, visible: true, atsExtractable: true };
+  return { sourceText: start.sourceText || '', parsedValue: usedFallback ? '' : parsedValue, renderedText: usedFallback ? 'Per sofort oder nach Vereinbarung' : (start.kind === 'negotiable' ? 'Nach Vereinbarung' : `${parsedValue} gemäss Inserat, alternativ nach Vereinbarung`), usedFallback, confidence, visible: true, atsExtractable: true };
 }
 function normalizeGreeting(jobAd = {}) {
   const c = jobAd.contact || {};
