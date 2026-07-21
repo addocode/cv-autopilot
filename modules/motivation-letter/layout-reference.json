@@ -11,7 +11,7 @@
     }
   },
   "colors": {
-    "brandBlue": "#1652A1",
+    "brandBlue": "#15519F",
     "bodyText": "#000000",
     "paper": "#FFFFFF",
     "developmentMinGuide": "#CD171C",
@@ -46,7 +46,7 @@
       "family": "Arial",
       "weight": 700,
       "sizePt": 11,
-      "color": "#1652A1"
+      "color": "#15519F"
     }
   },
   "frame": {
@@ -132,6 +132,6 @@
   "notes": [
     "The red and green guides are diagnostic-only and must never render in production outputs.",
     "The body is bottom-anchored; longer copy moves the salutation and vertical date upward.",
-    "The source PDF uses #1652A1, which is slightly different from the current CV token #15519F. Unification must be a deliberate visual decision and regression-tested."
+    "All production blues are normalized to the CV token #15519F."
   ]
 }
