@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "source": "modules/motivation-letter/APPROVED_GOLDEN_STANDARD.md",
+  "checks": [
+    "pageCount == 1",
+    "brandBlue == #15519F",
+    "bodyFontSizePt == 11",
+    "bodyLineHeightPt == 14",
+    "referenceFontSizePt == 8 when visible",
+    "dateFontSizePt == 8",
+    "dateTopAlignedToSalutationTop within 1.5mm",
+    "referenceWrapperHasNoBackground",
+    "dateWrapperHasNoBackground",
+    "topBarDeviationPx <= 1",
+    "leftRailDeviationPx <= 1",
+    "rightRailDeviationPx <= 1",
+    "logoMatchesApprovedBBox",
+    "bodyStartWithinGuides",
+    "noOverflow",
+    "noCollision",
+    "selectableText",
+    "dolinskyLinkClickable"
+  ]
+}
