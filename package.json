@@ -11,6 +11,8 @@
     "test:render": "node --test tests/render.test.mjs",
     "render": "node scripts/render.mjs",
     "render:all": "node scripts/render-all.mjs",
+    "render:motivation-letter": "node scripts/render-motivation-letter.mjs",
+    "test:motivation-letter": "node --test tests/motivation-letter.test.mjs",
     "dev": "node scripts/render.mjs -- --variant general",
     "create:application": "node scripts/create-application.mjs",
     "test:application": "node --test tests/application-workflow.test.mjs"
