@@ -1,0 +1,63 @@
+{
+  "id": "bsm-records-manager",
+  "titleLines": [
+    "Bewerbung als Records Managerin /",
+    "Records Manager (50–60%)"
+  ],
+  "salutation": "Sehr geehrte Frau Bossart",
+  "maxWords": 300,
+  "paragraphs": [
+    {
+      "runs": [
+        { "text": "Die ausgeschriebene Funktion spricht mich besonders an, weil sie " },
+        { "text": "Records Management, GEVER, Prozess- und Wissensmanagement", "bold": true },
+        { "text": " sowie technische Unterstützung in einem sicherheitsnahen Umfeld verbindet. Als Mediamatiker EFZ mit Berufsmaturität bringe ich praktische Erfahrung genau an dieser Schnittstelle mit." }
+      ]
+    },
+    {
+      "runs": [
+        { "text": "Während meines Führungsdienstes im Stab Personelles der Armee bearbeitete und verteilte ich Geschäftsvorgänge im " },
+        { "text": "GEVER-System ACTA NOVA", "bold": true },
+        { "text": ". Zu meinen Aufgaben gehörten zudem die Qualitätssicherung von Schriftverkehr und Entscheidungsgrundlagen, die strukturierte Dokumentenverwaltung sowie die Koordination zwischen internen Organisationseinheiten. Dadurch kenne ich die Bedeutung einer nachvollziehbaren Aktenführung, klarer Zuständigkeiten und verlässlicher Abläufe aus der Praxis." }
+      ]
+    },
+    {
+      "runs": [
+        { "text": "Bei der Kunz Kunath AG betreute ich digitale Systeme und Inhalte, koordinierte externe Partner und dokumentierte Prozesse so, dass Wissen langfristig gesichert und Aufgaben sauber übergeben werden konnten. Ich arbeite mich rasch in Anwendungen ein, löse technische und organisatorische Fragestellungen pragmatisch und behalte auch bei parallelen Aufgaben den Überblick." }
+      ]
+    },
+    {
+      "runs": [
+        { "text": "Meine Mediamatiker-Ausbildung und meine Einsätze am Internationalen Schachfestival Biel ergänzen dieses Profil: Dort richtete ich PCs, Kameras und Audioequipment ein und betreute " },
+        { "text": "Livestreams mit Wirecast Pro", "bold": true },
+        { "text": ". Diese Erfahrung möchte ich bei Informations- und Grossanlässen sowie bei der Betreuung der Multimedia-Infrastruktur einbringen." }
+      ]
+    },
+    {
+      "runs": [
+        { "text": "Besonders motiviert mich, das Records Management im BSM zuverlässig zu betreuen und gemeinsam weiterzuentwickeln. Mit meiner Kombination aus ACTA NOVA, Prozessdokumentation, ICT-Verständnis und Multimedia kann ich die Führungsunterstützung fachlich breit entlasten. Meine Französischkenntnisse habe ich durch längere Aufenthalte und berufliche Praxis in Neukaledonien auf " },
+        { "text": "Niveau B2", "bold": true },
+        { "text": " vertieft." }
+      ]
+    },
+    {
+      "runs": [
+        { "text": "Ich freue mich darauf, Sie persönlich kennenzulernen und mehr darüber zu erfahren, wie ich Ihr Team unterstützen kann." }
+      ]
+    }
+  ],
+  "signature": {
+    "firstName": "Adam",
+    "lastName": "Dolinsky",
+    "domainSuffix": ".ch",
+    "url": "https://dolinsky.ch"
+  },
+  "requiredTerms": [
+    "Records Management",
+    "GEVER",
+    "ACTA NOVA",
+    "Wirecast Pro",
+    "Niveau B2",
+    "BSM"
+  ]
+}
