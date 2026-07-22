@@ -31,6 +31,11 @@ export async function renderMotivationLetter(letterInput, options = {}) {
   const assets = {
     background: dataUrl(join(ROOT, 'assets/bg_img.jpeg'), 'image/jpeg'),
     logo: dataUrl(join(ROOT, 'modules/motivation-letter/references/ad_logo.png'), 'image/png'),
+    fonts: {
+      robotoSlab700: dataUrl(join(ROOT, 'node_modules/@fontsource/roboto-slab/files/roboto-slab-latin-700-normal.woff2'), 'font/woff2'),
+      arimo400: dataUrl(join(ROOT, 'node_modules/@fontsource/arimo/files/arimo-latin-400-normal.woff2'), 'font/woff2'),
+      arimo700: dataUrl(join(ROOT, 'node_modules/@fontsource/arimo/files/arimo-latin-700-normal.woff2'), 'font/woff2'),
+    },
   };
   const html = renderMotivationLetterHtml(letter, css, assets);
   const artifacts = {

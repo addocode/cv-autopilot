@@ -19,9 +19,9 @@
     "scripts/render.mjs": "3cbd81544dbb592ddc7ff3b02ae00c04b5bbcffb391b4450c190c63bea41d0a6",
     "modules/motivation-letter/layout-reference.json": "291f965b647bb8d0a2dbaf104538a4ca384aa8d446a4d2759c73dbb6aa0220f1",
     "modules/motivation-letter/references/ad_logo.png": "8a0381353dc1bb47763c96ade594015c8737aae30571a741706e6e66f6997c01",
-    "modules/motivation-letter/styles/motivation-letter.css": "3f06f4dd41b3291f24f778f4b0ca96e8c029ab80b5afe89b4184b65876bc85b2",
-    "modules/motivation-letter/src/template.mjs": "eccf0958b5ed845916d416e326443d5fe174f4cf1ac532fa364d6981bedf264f",
-    "modules/motivation-letter/src/renderer.mjs": "c2147bdf88d721bf9cded77c9a4403325a7b2aaf43dca431dfc3e494c388da7c",
+    "modules/motivation-letter/styles/motivation-letter.css": "769ebd490243e2dd2aee23e94838afc80e5bb0a1d9dc1bef15cd05456a722c3f",
+    "modules/motivation-letter/src/template.mjs": "222a58a7528b329724dc6e0a72580035be4708bba9375880a9bee2f5ac6e5b8e",
+    "modules/motivation-letter/src/renderer.mjs": "3a3bc06b3041ea2d6f309790eef3a0d08a9c256b63d355583603cfa2fc2cc051",
     "modules/rav-recap/mobile-template.html": "7c9e449bb5d44b13d8ed2117c294224a1d5b05ffc2088405c5ad1e0e117d3ade",
     "modules/rav-recap/src/render.mjs": "64c0c7435d998a8c7cd6e838bbca59a6f29583555cbd23ba29365fd76a99d505"
   }

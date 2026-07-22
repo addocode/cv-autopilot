@@ -1,6 +1,6 @@
-@font-face{font-family:'Roboto Slab';font-style:normal;font-weight:700;font-display:swap;src:url('../../node_modules/@fontsource/roboto-slab/files/roboto-slab-latin-700-normal.woff2') format('woff2')}
-@font-face{font-family:'Arimo';font-style:normal;font-weight:400;font-display:swap;src:url('../../node_modules/@fontsource/arimo/files/arimo-latin-400-normal.woff2') format('woff2')}
-@font-face{font-family:'Arimo';font-style:normal;font-weight:700;font-display:swap;src:url('../../node_modules/@fontsource/arimo/files/arimo-latin-700-normal.woff2') format('woff2')}
+@font-face{font-family:'Roboto Slab';font-style:normal;font-weight:700;font-display:swap;src:url('__ROBOTO_SLAB_700_DATA_URL__') format('woff2')}
+@font-face{font-family:'Arimo';font-style:normal;font-weight:400;font-display:swap;src:url('__ARIMO_400_DATA_URL__') format('woff2')}
+@font-face{font-family:'Arimo';font-style:normal;font-weight:700;font-display:swap;src:url('__ARIMO_700_DATA_URL__') format('woff2')}
 @page{size:A4;margin:0}
 *{box-sizing:border-box}
 html,body{margin:0;width:210mm;height:297mm}

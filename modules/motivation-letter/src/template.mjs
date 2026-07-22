@@ -14,7 +14,10 @@ export function renderMotivationLetterHtml(letter, css, assets) {
     : '';
   const hydratedCss = css
     .replaceAll('__BACKGROUND_DATA_URL__', assets.background)
-    .replaceAll('__LOGO_DATA_URL__', assets.logo);
+    .replaceAll('__LOGO_DATA_URL__', assets.logo)
+    .replaceAll('__ROBOTO_SLAB_700_DATA_URL__', assets.fonts.robotoSlab700)
+    .replaceAll('__ARIMO_400_DATA_URL__', assets.fonts.arimo400)
+    .replaceAll('__ARIMO_700_DATA_URL__', assets.fonts.arimo700);
   return `<!doctype html>
 <html lang="de-CH">
 <head>
