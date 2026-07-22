@@ -14,4 +14,24 @@ for (const update of updateSet.updates || []) {
 }
 
 writeFileSync(masterPath, `${JSON.stringify(master, null, 2)}\n`);
-console.log(JSON.stringify({ success: true, appliedUpdates: updateSet.updates || [] }, null, 2));
+
+const contractReplacements = [
+  {
+    path: 'scripts/validate.mjs',
+    from: 'Französisch:B1',
+    to: 'Französisch:B2',
+  },
+  {
+    path: 'tests/data.test.mjs',
+    from: "['Französisch','B1']",
+    to: "['Französisch','B2']",
+  },
+];
+
+for (const replacement of contractReplacements) {
+  const current = readFileSync(replacement.path, 'utf8');
+  if (!current.includes(replacement.from)) throw new Error(`Expected profile contract not found in ${replacement.path}`);
+  writeFileSync(replacement.path, current.replace(replacement.from, replacement.to));
+}
+
+console.log(JSON.stringify({ success: true, appliedUpdates: updateSet.updates || [], alignedContracts: contractReplacements.map(({ path }) => path) }, null, 2));
