@@ -4,10 +4,13 @@ import { existsSync, readFileSync } from 'node:fs';
 
 test('motivation-letter CSS is bound to the approved golden geometry', () => {
   const css = readFileSync('modules/motivation-letter/styles/motivation-letter.css', 'utf8');
+  assert.match(css, /font-family:'Arimo';font-style:normal;font-weight:400/);
+  assert.match(css, /font-family:'Arimo';font-style:normal;font-weight:700/);
   assert.match(css, /left:10mm;right:10mm;top:15\.525mm;bottom:0/);
   assert.match(css, /left:19\.8mm;right:19\.8mm;top:23\.5mm;bottom:0/);
   assert.match(css, /font:700 18pt\/19pt 'Roboto Slab'/);
   assert.match(css, /font:400 11pt\/14pt Arial/);
+  assert.match(css, /font:400 11pt\/14pt Arial,'Arimo','Liberation Sans'/);
   assert.match(css, /left:10\.182mm;top:18\.955mm;width:25\.12mm;height:19\.85mm/);
   assert.match(css, /background:transparent;border:0;outline:0;box-shadow:none;padding:0/);
   assert.doesNotMatch(css, /scaleX|font-stretch|letter-spacing:\s*-/);

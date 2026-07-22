@@ -19,7 +19,7 @@
     "scripts/render.mjs": "3cbd81544dbb592ddc7ff3b02ae00c04b5bbcffb391b4450c190c63bea41d0a6",
     "modules/motivation-letter/layout-reference.json": "291f965b647bb8d0a2dbaf104538a4ca384aa8d446a4d2759c73dbb6aa0220f1",
     "modules/motivation-letter/references/ad_logo.png": "8a0381353dc1bb47763c96ade594015c8737aae30571a741706e6e66f6997c01",
-    "modules/motivation-letter/styles/motivation-letter.css": "7f53b84fac616111b249b167d4a6a16f3e87dd2c8b40fbd652a1e5946e632e24",
+    "modules/motivation-letter/styles/motivation-letter.css": "3f06f4dd41b3291f24f778f4b0ca96e8c029ab80b5afe89b4184b65876bc85b2",
     "modules/motivation-letter/src/template.mjs": "eccf0958b5ed845916d416e326443d5fe174f4cf1ac532fa364d6981bedf264f",
     "modules/motivation-letter/src/renderer.mjs": "c2147bdf88d721bf9cded77c9a4403325a7b2aaf43dca431dfc3e494c388da7c",
     "modules/rav-recap/mobile-template.html": "7c9e449bb5d44b13d8ed2117c294224a1d5b05ffc2088405c5ad1e0e117d3ade",
