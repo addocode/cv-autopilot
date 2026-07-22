@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
+import { wordCount } from '../modules/application-core/src/utils.mjs';
 
 test('motivation-letter CSS is bound to the approved golden geometry', () => {
   const css = readFileSync('modules/motivation-letter/styles/motivation-letter.css', 'utf8');
@@ -23,6 +24,18 @@ test('motivation-letter CSS is bound to the approved golden geometry', () => {
   assert.match(css, /left:10\.182mm;top:18\.955mm;width:25\.12mm;height:19\.85mm/);
   assert.match(css, /background:transparent;border:0;outline:0;box-shadow:none;padding:0/);
   assert.doesNotMatch(css, /scaleX|font-stretch|letter-spacing:\s*-/);
+});
+
+test('Transgourmet approved copy keeps its measured content budget in sync', () => {
+  const fixture = JSON.parse(readFileSync('modules/motivation-letter/tests/fixtures/transgourmet-letter.json', 'utf8'));
+  const plainText = [
+    fixture.salutation,
+    ...fixture.paragraphs.map((item) => item.runs.map((entry) => entry.text).join('')),
+    'Freundliche Grüsse',
+    'Adam Dolinsky',
+  ].join('\n\n');
+  assert.equal(fixture.wordCount, wordCount(plainText));
+  assert.ok(fixture.wordCount >= 260 && fixture.wordCount <= 340);
 });
 
 for (const outputId of ['admin-sachbearbeiter-fk', 'transgourmet-digital-marketing']) {
