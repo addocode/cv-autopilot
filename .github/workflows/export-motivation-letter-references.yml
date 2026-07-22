@@ -14,3 +14,5 @@ jobs:
           path: |
             modules/motivation-letter/references/ad_logo.png
             modules/motivation-letter/references/logo-alignment-reference.png
+            modules/motivation-letter/references/Motivationsschreiben_Vorlage.idml
+            modules/motivation-letter/references/Motivationsschreiben_Vorlage.pdf
