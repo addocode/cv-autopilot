@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "updates": [
+    {
+      "type": "language-level",
+      "id": "lang-fr",
+      "name": "Französisch",
+      "level": "B2",
+      "evidenceStatus": "user-confirmed",
+      "sourceId": "user-confirmed-fr-b2-2026-07-22",
+      "note": "Durch längere Aufenthalte und berufliche Praxis im französischsprachigen Neukaledonien vertieft."
+    }
+  ]
+}
