@@ -1,0 +1,63 @@
+{
+  "id": "bsm-records-manager",
+  "titleLines": [
+    "Bewerbung als Records Managerin /",
+    "Records Manager (50–60%)"
+  ],
+  "salutation": "Sehr geehrte Frau Bossart",
+  "maxWords": 300,
+  "paragraphs": [
+    {
+      "runs": [
+        { "text": "Die Funktion verbindet " },
+        { "text": "Records Management, GEVER, Prozess- und Wissensmanagement", "bold": true },
+        { "text": " sowie technische Unterstützung in einem sicherheitsnahen Umfeld. Als Mediamatiker EFZ mit Berufsmaturität bringe ich praktische Erfahrung an genau dieser Schnittstelle mit." }
+      ]
+    },
+    {
+      "runs": [
+        { "text": "Während meines Führungsdienstes im Stab Personelles der Armee bearbeitete und verteilte ich Geschäftsvorgänge im " },
+        { "text": "GEVER-System ACTA NOVA", "bold": true },
+        { "text": ". Zudem prüfte ich Schriftverkehr und Entscheidungsgrundlagen, führte Dokumente strukturiert und koordinierte interne Stellen. Dadurch kenne ich verlässliche Aktenführung und klare Abläufe aus der Praxis." }
+      ]
+    },
+    {
+      "runs": [
+        { "text": "Bei der Kunz Kunath AG betreute ich digitale Systeme, koordinierte externe Partner und dokumentierte Prozesse für eine nachhaltige Wissenssicherung und saubere Übergaben. Neue Anwendungen erschliesse ich rasch und technische wie organisatorische Aufgaben löse ich pragmatisch." }
+      ]
+    },
+    {
+      "runs": [
+        { "text": "Meine Mediamatiker-Ausbildung und Einsätze am Internationalen Schachfestival Biel ergänzen dieses Profil. Dort richtete ich PCs, Kameras und Audioequipment ein und betreute " },
+        { "text": "Livestreams mit Wirecast Pro", "bold": true },
+        { "text": ". Diese Erfahrung kann ich bei Anlässen und der Multimedia-Infrastruktur einbringen." }
+      ]
+    },
+    {
+      "runs": [
+        { "text": "Besonders motiviert mich, das Records Management im BSM zuverlässig zu betreuen und weiterzuentwickeln. Mit ACTA NOVA, Prozessdokumentation, ICT-Verständnis und Multimedia kann ich die Führungsunterstützung breit entlasten. Meine Französischkenntnisse habe ich durch längere Aufenthalte und berufliche Praxis in Neukaledonien auf " },
+        { "text": "Niveau B2", "bold": true },
+        { "text": " vertieft." }
+      ]
+    },
+    {
+      "runs": [
+        { "text": "Ich freue mich darauf, Sie persönlich kennenzulernen und mehr über Ihr Team zu erfahren." }
+      ]
+    }
+  ],
+  "signature": {
+    "firstName": "Adam",
+    "lastName": "Dolinsky",
+    "domainSuffix": ".ch",
+    "url": "https://dolinsky.ch"
+  },
+  "requiredTerms": [
+    "Records Management",
+    "GEVER",
+    "ACTA NOVA",
+    "Wirecast Pro",
+    "Niveau B2",
+    "BSM"
+  ]
+}

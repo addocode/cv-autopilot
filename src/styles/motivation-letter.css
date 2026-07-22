@@ -4,6 +4,7 @@
 html,body{margin:0;width:210mm;height:297mm}
 body{font-family:Aptos,'Segoe UI',Arial,'Liberation Sans',sans-serif;color:#101010;background:#ddd}
 .motivation-letter{position:relative;width:210mm;height:297mm;overflow:hidden;background-image:url('../../assets/bg_img.jpeg');background-size:cover;background-position:left top;background-repeat:no-repeat}
+.motivation-letter::after{content:'';position:absolute;left:10mm;top:18.905mm;width:25.2mm;height:19.858mm;background-image:url('../../modules/motivation-letter/references/ad_logo.png');background-size:100% 100%;background-position:left top;background-repeat:no-repeat;z-index:2;pointer-events:none}
 .motivation-letter__blue-frame{position:absolute;left:10mm;right:10mm;top:14.5mm;bottom:0;background:#15519f}
 .motivation-letter__paper{position:absolute;left:20mm;right:20mm;top:24.5mm;bottom:0;background:#fff}
 .motivation-letter__side-label{position:absolute;left:15mm;top:92mm;transform:translate(-50%,-50%) rotate(-90deg);transform-origin:center;white-space:nowrap;color:#fff;font-family:'Roboto Slab',Rockwell,Georgia,serif;font-size:10.5pt;font-weight:700;line-height:1;letter-spacing:0}

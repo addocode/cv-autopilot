@@ -24,6 +24,8 @@ jobs:
           fc-cache -f -v
           fc-match Arial
           fc-match "Liberation Sans"
+      - name: Apply verified profile updates
+        run: node scripts/apply-profile-updates.mjs
       - run: npm run build
       - run: npm run validate
       - run: npm run test:data
@@ -92,6 +94,25 @@ jobs:
           echo "exit_code=${code}" >> "$GITHUB_OUTPUT"
           echo "application live exit code: ${code}"
           exit 0
+      - name: Run BSM Records Manager live application with captured exit code
+        id: application_bsm
+        shell: bash
+        run: |
+          mkdir -p dist applications exports
+          set +e
+          set -o pipefail
+          npm run create:application -- \
+            --job-ad tests/fixtures/live-bsm-records-manager-job-ad.txt \
+            --extracted-context tests/fixtures/live-bsm-records-manager-context.json \
+            --source-url "https://www.jobs.apps.be.ch/offene-stellen/records-managerin-records-manager/984261a0-8d92-4d80-846c-39bf60a941af" \
+            --source-type url \
+            --application-date 2026-07-22 \
+            --timestamp 2026-07-22T10:00:00+02:00 \
+            2>&1 | tee dist/application-bsm-command.log
+          code=${PIPESTATUS[0]}
+          echo "exit_code=${code}" >> "$GITHUB_OUTPUT"
+          echo "BSM application exit code: ${code}"
+          exit 0
       - name: Render canonical Transgourmet motivation letter
         id: motivation_letter
         shell: bash
@@ -105,6 +126,20 @@ jobs:
           code=${PIPESTATUS[0]}
           echo "exit_code=${code}" >> "$GITHUB_OUTPUT"
           echo "motivation letter render exit code: ${code}"
+          exit 0
+      - name: Render BSM Records Manager motivation letter
+        id: motivation_letter_bsm
+        shell: bash
+        run: |
+          mkdir -p dist
+          set +e
+          set -o pipefail
+          npm run render:motivation-letter -- \
+            --input tests/fixtures/live-bsm-records-manager-motivation-letter.json \
+            2>&1 | tee dist/motivation-letter-bsm-command.log
+          code=${PIPESTATUS[0]}
+          echo "exit_code=${code}" >> "$GITHUB_OUTPUT"
+          echo "BSM motivation letter render exit code: ${code}"
           exit 0
       - name: Test motivation letter layout contract
         id: motivation_letter_tests
@@ -150,7 +185,9 @@ jobs:
             dist/render-all-exit-diagnostic.json
             dist/application-e2e-command.log
             dist/application-live-command.log
+            dist/application-bsm-command.log
             dist/motivation-letter-command.log
+            dist/motivation-letter-bsm-command.log
             dist/motivation-letter-tests-command.log
             applications/**
             exports/**
@@ -162,7 +199,9 @@ jobs:
             steps.render_tests.outputs.exit_code != '0' ||
             steps.application_e2e.outputs.exit_code != '0' ||
             steps.application_live.outputs.exit_code != '0' ||
+            steps.application_bsm.outputs.exit_code != '0' ||
             steps.motivation_letter.outputs.exit_code != '0' ||
+            steps.motivation_letter_bsm.outputs.exit_code != '0' ||
             steps.motivation_letter_tests.outputs.exit_code != '0'
           )
         shell: bash
@@ -170,8 +209,10 @@ jobs:
           echo "render:all exit code: ${{ steps.render_all.outputs.exit_code }}"
           echo "test:render exit code: ${{ steps.render_tests.outputs.exit_code }}"
           echo "application E2E exit code: ${{ steps.application_e2e.outputs.exit_code }}"
-          echo "application live exit code: ${{ steps.application_live.outputs.exit_code }}"
-          echo "motivation letter render exit code: ${{ steps.motivation_letter.outputs.exit_code }}"
+          echo "Transgourmet application exit code: ${{ steps.application_live.outputs.exit_code }}"
+          echo "BSM application exit code: ${{ steps.application_bsm.outputs.exit_code }}"
+          echo "Transgourmet motivation letter exit code: ${{ steps.motivation_letter.outputs.exit_code }}"
+          echo "BSM motivation letter exit code: ${{ steps.motivation_letter_bsm.outputs.exit_code }}"
           echo "motivation letter tests exit code: ${{ steps.motivation_letter_tests.outputs.exit_code }}"
           echo "Last render-all output:"
           tail -n 100 dist/render-all-command.log || true
@@ -179,10 +220,14 @@ jobs:
           tail -n 200 dist/render-tests-command.log || true
           echo "Last application E2E output:"
           tail -n 200 dist/application-e2e-command.log || true
-          echo "Last live application output:"
+          echo "Last Transgourmet application output:"
           tail -n 200 dist/application-live-command.log || true
-          echo "Last motivation-letter output:"
+          echo "Last BSM application output:"
+          tail -n 200 dist/application-bsm-command.log || true
+          echo "Last Transgourmet motivation-letter output:"
           tail -n 200 dist/motivation-letter-command.log || true
+          echo "Last BSM motivation-letter output:"
+          tail -n 200 dist/motivation-letter-bsm-command.log || true
           echo "Last motivation-letter test output:"
           tail -n 200 dist/motivation-letter-tests-command.log || true
           exit 1
