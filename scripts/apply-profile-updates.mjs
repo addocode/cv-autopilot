@@ -26,12 +26,17 @@ const contractReplacements = [
     from: "['Französisch','B1']",
     to: "['Französisch','B2']",
   },
+  {
+    path: 'tests/render.test.mjs',
+    from: 'Französisch B1',
+    to: 'Französisch B2',
+  },
 ];
 
 for (const replacement of contractReplacements) {
   const current = readFileSync(replacement.path, 'utf8');
   if (!current.includes(replacement.from)) throw new Error(`Expected profile contract not found in ${replacement.path}`);
-  writeFileSync(replacement.path, current.replace(replacement.from, replacement.to));
+  writeFileSync(replacement.path, current.replaceAll(replacement.from, replacement.to));
 }
 
 console.log(JSON.stringify({ success: true, appliedUpdates: updateSet.updates || [], alignedContracts: contractReplacements.map(({ path }) => path) }, null, 2));
