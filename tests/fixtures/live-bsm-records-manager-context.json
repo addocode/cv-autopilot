@@ -1,0 +1,186 @@
+{
+  "employer": "Amt für Bevölkerungsschutz, Sport und Militär des Kantons Bern",
+  "jobTitle": "Records Managerin / Records Manager",
+  "location": "Bern",
+  "selectedVariant": "administration-gever",
+  "employmentType": "unbefristet",
+  "referenceNumber": "",
+  "applicationDeadline": "",
+  "organisationUnit": "Fachbereich Führungsunterstützung, Abteilung Stab",
+  "homeOffice": "nicht im Inserat beziffert",
+  "applicationProcess": "Onlinebewerbung mit vollständigem Bewerbungsdossier über das Stellenportal des Kantons Bern",
+  "employerDescription": "Das Amt für Bevölkerungsschutz, Sport und Militär der Sicherheitsdirektion erbringt mit rund 110 Mitarbeitenden Dienstleistungen in den Bereichen Bevölkerungsschutz, Sport und Militär.",
+  "additionalNotes": "HR-Kontakt: Anna Pfeiffer, HR-Beraterin BSM / Berufsbildnerin SID, anna.pfeiffer@be.ch, +41 31 636 35 46.",
+  "jobContact": {
+    "fullName": "Eliane Bossart",
+    "firstName": "Eliane",
+    "lastName": "Bossart",
+    "explicitSalutation": "Frau",
+    "role": "Leiterin Führungsunterstützung",
+    "addressMode": "formal",
+    "sourceText": "Fragen zur Stelle: Eliane Bossart, Leiterin Führungsunterstützung",
+    "confidence": 0.99,
+    "isApplicationContact": true
+  },
+  "applicationContact": {
+    "fullName": "Eliane Bossart",
+    "firstName": "Eliane",
+    "lastName": "Bossart",
+    "explicitSalutation": "Frau",
+    "role": "Leiterin Führungsunterstützung",
+    "addressMode": "formal",
+    "sourceText": "Fragen zur Stelle: Eliane Bossart, Leiterin Führungsunterstützung",
+    "confidence": 0.99,
+    "isApplicationContact": true
+  },
+  "jobAd": {
+    "rawText": "Originaltext wird aus der mit --job-ad übergebenen Quelldatei archiviert.",
+    "workload": {
+      "kind": "range",
+      "minPercent": 50,
+      "maxPercent": 60,
+      "sourceText": "50–60%",
+      "confidence": 0.99
+    },
+    "start": {
+      "kind": "date",
+      "isoDate": "2026-10-01",
+      "sourceText": "1. Oktober 2026 oder nach Vereinbarung",
+      "confidence": 0.99
+    },
+    "contact": {
+      "fullName": "Eliane Bossart",
+      "firstName": "Eliane",
+      "lastName": "Bossart",
+      "explicitSalutation": "Frau",
+      "role": "Leiterin Führungsunterstützung",
+      "addressMode": "formal",
+      "sourceText": "Fragen zur Stelle: Eliane Bossart, Leiterin Führungsunterstützung",
+      "confidence": 0.99,
+      "isApplicationContact": true
+    }
+  },
+  "requirements": {
+    "tasks": [
+      "Gesamtverantwortung für das Records Management im BSM übernehmen",
+      "Mitarbeitende bei GEVER-Belangen und Prozessen operativ unterstützen",
+      "Benutzerrechte und Ordnungssystem verwalten sowie Änderungsanträge pflegen",
+      "Smoketests und Release-Tests gemeinsam mit dem GEVER-Verantwortlichen durchführen",
+      "Prozesse aktualisieren und erfassen sowie Schulungen inhaltlich unterstützen",
+      "ICT-, Sitzungszimmer- und Multimedia-Infrastruktur betreuen",
+      "Informations- und Grossanlässe technisch inklusive Video und Streaming betreuen",
+      "Externe Dienstleistende koordinieren",
+      "Strukturiertes Wissensmanagement aufbauen, weiterentwickeln und pflegen"
+    ],
+    "must": [
+      {
+        "text": "Abgeschlossene Ausbildung als Mediamatiker/in EFZ, Informatiker/in EFZ oder kaufmännische Ausbildung mit Fachausweis",
+        "classification": "must",
+        "profileEvidence": "Abgeschlossener Mediamatiker EFZ mit Berufsmaturität.",
+        "sourceIds": ["cv-2d-p1", "cv-2d-p2"],
+        "evidenceStatus": "verified",
+        "cvUsage": "Qualifikation und Ausbildungsstation"
+      },
+      {
+        "text": "Erfahrung mit Geschäftsverwaltungssystemen, idealerweise ACTA NOVA oder CMI",
+        "classification": "must",
+        "profileEvidence": "Praktische Geschäftsvorgangsbearbeitung und Dokumentenmanagement im GEVER-System ACTA NOVA während des Führungsdienstes im Stab Personelles der Armee; keine CMI-Erfahrung behauptet.",
+        "sourceIds": ["cv-2d-p2", "linkedin-acta-nova"],
+        "evidenceStatus": "verified",
+        "cvUsage": "Kurzprofil, Kompetenzblock, Berufserfahrung und Tools"
+      },
+      {
+        "text": "Kenntnisse im Prozessmanagement",
+        "classification": "must",
+        "profileEvidence": "Mehrjährige Praxis in Prozessdokumentation, Wissenssicherung und strukturierten Übergaben sowie Koordination wiederkehrender digitaler Arbeitsabläufe.",
+        "sourceIds": ["cv-2d-p1", "cv-2d-p2"],
+        "evidenceStatus": "defensible_inference",
+        "cvUsage": "Prozessdokumentation und Wissenssicherung; keine formale Prozessmanagement-Zertifizierung behauptet"
+      },
+      {
+        "text": "Sehr gute Deutschkenntnisse C1 und gute Französischkenntnisse B2",
+        "classification": "must",
+        "profileEvidence": "Deutsch C2; Französisch B2 nach Vertiefung durch längere Aufenthalte und berufliche Praxis im französischsprachigen Neukaledonien.",
+        "sourceIds": ["cv-2d-p1", "cv-2d-p2", "user-confirmed-fr-b2-2026-07-22"],
+        "evidenceStatus": "verified",
+        "cvUsage": "Sprachen und internationale Berufspraxis"
+      },
+      {
+        "text": "Technische Affinität, gutes ICT-Verständnis und Qualitätsbewusstsein",
+        "classification": "must",
+        "profileEvidence": "Mediamatiker-Ausbildung, CMS- und Websysteme, HTML/CSS, technische Streaming-Infrastruktur sowie formale Qualitätsprüfung von Schriftverkehr und Entscheidungsgrundlagen.",
+        "sourceIds": ["cv-2d-p1", "cv-2d-p2", "linkedin-profile"],
+        "evidenceStatus": "verified",
+        "cvUsage": "ICT & Systeme, Qualitätssicherung, Multimedia und Tools"
+      },
+      {
+        "text": "Erfahrung im technischen Unterhalt",
+        "classification": "must",
+        "profileEvidence": "Technische Einrichtung, Bedienung und Überwachung von PCs, Kameras, Audio- und Streaming-Infrastruktur sowie Zusammenarbeit mit Webhostern und externen Dienstleistern. Kein umfassender First-Level-Unterhalt von Druckern oder Sitzungszimmern behauptet.",
+        "sourceIds": ["cv-2d-p2", "linkedin-profile"],
+        "evidenceStatus": "defensible_inference",
+        "cvUsage": "Technische Infrastruktur und Livestreaming"
+      },
+      {
+        "text": "Selbstständige, verantwortungsbewusste und engagierte Arbeitsweise",
+        "classification": "must",
+        "profileEvidence": "Eigenständige Projektorganisation, Verantwortung für Websites, Onlineshop, Firmenmagazin, Medienproduktionen und dokumentierte Übergaben.",
+        "sourceIds": ["cv-2d-p1", "cv-2d-p2"],
+        "evidenceStatus": "verified",
+        "cvUsage": "Kurzprofil, Arbeitsweise und Berufserfahrung"
+      },
+      {
+        "text": "Planungs- und Organisationsfähigkeit sowie Dienstleistungs- und Kundenorientierung",
+        "classification": "must",
+        "profileEvidence": "Koordination interner Organisationseinheiten, externer Dienstleister und Stakeholder sowie strukturierte Umsetzung mehrstufiger Projekte.",
+        "sourceIds": ["cv-2d-p1", "cv-2d-p2"],
+        "evidenceStatus": "verified",
+        "cvUsage": "Koordination, Projektorganisation und Schnittstellenarbeit"
+      }
+    ],
+    "nice": [
+      "Erfahrung mit ACTA NOVA",
+      "Erfahrung mit Videoaufnahmen und Videostreaming",
+      "Erfahrung in Prozessdokumentation und Wissenssicherung",
+      "Erfahrung im Umfeld von Bevölkerungsschutz, Sport oder Militär"
+    ],
+    "systems": [
+      "GEVER",
+      "ACTA NOVA",
+      "Ordnungssystem",
+      "Benutzerrechte",
+      "Smoketests",
+      "Release-Tests",
+      "MS Office",
+      "OneNote",
+      "Wirecast Pro",
+      "CMS"
+    ],
+    "languages": ["Deutsch C1", "Französisch B2"],
+    "softSkills": [
+      "selbstständig",
+      "verantwortungsbewusst",
+      "qualitätsbewusst",
+      "teamfähig",
+      "dienstleistungsorientiert",
+      "organisationsstark",
+      "schnelle Auffassungsgabe"
+    ],
+    "education": ["Mediamatiker/in EFZ, Informatiker/in EFZ oder kaufmännische Ausbildung mit Fachausweis"]
+  },
+  "atsTerms": [
+    "Records Management",
+    "GEVER",
+    "ACTA NOVA",
+    "Dokumentenmanagement",
+    "Geschäftsvorgangsbearbeitung",
+    "Prozessmanagement",
+    "Prozessdokumentation",
+    "Wissensmanagement",
+    "Qualitätssicherung",
+    "ICT",
+    "Videostreaming",
+    "externe Dienstleistende",
+    "Französisch B2"
+  ]
+}
