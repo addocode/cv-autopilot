@@ -1,0 +1,64 @@
+{
+  "id": "transgourmet-digital-marketing",
+  "titleLines": [
+    "Bewerbung als (Junior) Digital Marketing",
+    "Managerin / Manager (80–100%)"
+  ],
+  "salutation": "Guten Tag Frau Röthlisberger",
+  "maxWords": 300,
+  "paragraphs": [
+    {
+      "runs": [
+        { "text": "Die ausgeschriebene Stelle spricht mich an, weil sie " },
+        { "text": "Digital Marketing, Kampagnenmanagement, Daten und technische Prozesse", "bold": true },
+        { "text": " verbindet. Besonders motiviert mich, vernetzte und messbare Kampagnen zu entwickeln und die Marketing Automation von Transgourmet weiterzubringen." }
+      ]
+    },
+    {
+      "runs": [
+        { "text": "Als ausgebildeter " },
+        { "text": "Mediamatiker EFZ mit Berufsmaturität", "bold": true },
+        { "text": " habe ich mehr als vier Jahre Websites, einen Onlineshop, E-Mail-Newsletter, Onlinekampagnen und digitale Kennzahlen mit Google Analytics betreut. Für FORS, Eier Meier und Bruderhahn bereitete ich Lebensmittel- und Landwirtschaftsthemen zielgruppengerecht auf. Gastronomie und Handel sind mir daher vertraut." }
+      ]
+    },
+    {
+      "runs": [
+        { "text": "Die Schnittstellenfunktion passt gut zu mir. Ich koordinierte interne Ansprechpersonen, Agenturen und Webhoster und begleitete Projekte von der Idee bis zur laufenden Pflege. Kampagnen verstehe ich als wiederholbare Prozesse mit klaren Zuständigkeiten, sauberer Umsetzung, Dokumentation und messbaren Ergebnissen." }
+      ]
+    },
+    {
+      "runs": [
+        { "text": "Mit BSI habe ich bisher noch nicht direkt gearbeitet. Die Logik ist mir jedoch aus Newsletter- und Onlinekampagnen, CMS- und Webshop-Systemen, HTML/CSS und Performance-Analysen vertraut. Ich arbeite mich rasch in neue Systeme ein und kann bei Kampagnenaufbau, Content, Qualitätssicherung, Auswertung und Prozessoptimierung mitwirken. Gleichzeitig möchte ich mich gezielt in " },
+        { "text": "Marketing Automation", "bold": true },
+        { "text": " vertiefen." }
+      ]
+    },
+    {
+      "runs": [
+        { "text": "Transgourmet erreicht rund 100’000 Geschäftskunden über Märkte, Aussendienst, Belieferung und digitale Kanäle. Hier schafft " },
+        { "text": "Marketing Automation", "bold": true },
+        { "text": " konkreten Nutzen. In dieser Verbindung aus Umsetzung, Analyse, Technologie und Projektarbeit sehe ich mich langfristig. Ab November 2026 vertiefe ich mein Profil berufsbegleitend im Lehrgang " },
+        { "text": "AI Business Specialist", "bold": true },
+        { "text": "." }
+      ]
+    },
+    {
+      "runs": [
+        { "text": "Ich freue mich darauf, Sie persönlich kennenzulernen und meine Marketingerfahrung, mein technisches Verständnis und meine strukturierte Arbeitsweise bei Transgourmet einzubringen." }
+      ]
+    }
+  ],
+  "signature": {
+    "firstName": "Adam",
+    "lastName": "Dolinsky",
+    "domainSuffix": ".ch",
+    "url": "https://dolinsky.ch"
+  },
+  "requiredTerms": [
+    "Transgourmet",
+    "BSI",
+    "Marketing Automation",
+    "AI Business Specialist",
+    "HTML/CSS"
+  ]
+}

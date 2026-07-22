@@ -1,0 +1,22 @@
+@font-face{font-family:'Roboto Slab';font-style:normal;font-weight:700;font-display:swap;src:url('../../node_modules/@fontsource/roboto-slab/files/roboto-slab-latin-700-normal.woff2') format('woff2')}
+@page{size:A4;margin:0}
+*{box-sizing:border-box}
+html,body{margin:0;width:210mm;height:297mm}
+body{font-family:Aptos,'Segoe UI',Arial,'Liberation Sans',sans-serif;color:#101010;background:#ddd}
+.motivation-letter{position:relative;width:210mm;height:297mm;overflow:hidden;background-image:url('../../assets/bg_img.jpeg');background-size:cover;background-position:left top;background-repeat:no-repeat}
+.motivation-letter__blue-frame{position:absolute;left:10mm;right:10mm;top:14.5mm;bottom:0;background:#15519f}
+.motivation-letter__paper{position:absolute;left:20mm;right:20mm;top:24.5mm;bottom:0;background:#fff}
+.motivation-letter__side-label{position:absolute;left:15mm;top:92mm;transform:translate(-50%,-50%) rotate(-90deg);transform-origin:center;white-space:nowrap;color:#fff;font-family:'Roboto Slab',Rockwell,Georgia,serif;font-size:10.5pt;font-weight:700;line-height:1;letter-spacing:0}
+.motivation-letter__content{position:absolute;left:28mm;right:28mm;top:28.9mm;bottom:14.8mm}
+.motivation-letter__title{font-family:'Roboto Slab',Rockwell,Georgia,serif;font-weight:700;font-size:15.96pt;line-height:1.15;text-align:right;margin:0;min-height:20.4mm}
+.motivation-letter__title-line{display:block}
+.motivation-letter__body{position:absolute;left:0;right:0;top:31.7mm;bottom:17mm;font-family:Aptos,'Segoe UI',Arial,'Liberation Sans',sans-serif;font-size:12pt;line-height:1.41;overflow:hidden}
+.motivation-letter__body p{margin:0 0 2.85mm}
+.motivation-letter__body .motivation-letter__salutation{margin-bottom:8.8mm}
+.motivation-letter__body p:last-child{margin-bottom:0}
+.motivation-letter__body strong{font-weight:700}
+.motivation-letter__signature{position:absolute;left:0;bottom:0;font-family:Aptos,'Segoe UI',Arial,'Liberation Sans',sans-serif;font-size:12pt;line-height:1.41}
+.motivation-letter__signature p{margin:0}
+.motivation-letter__signature a{text-decoration:none}
+.motivation-letter__signature-last-name{color:#101010;font-weight:700;text-decoration:underline;text-decoration-thickness:.35mm;text-underline-offset:.4mm}
+.motivation-letter__signature-domain{color:#15519f;font-weight:400;text-decoration:underline;text-decoration-thickness:.35mm;text-underline-offset:.4mm}

@@ -1,0 +1,153 @@
+{
+  "employer": "Transgourmet Schweiz AG",
+  "jobTitle": "(Junior) Digital Marketing Managerin / Manager",
+  "location": "Moosseedorf",
+  "selectedVariant": "general",
+  "employmentType": "unbefristet",
+  "organisationUnit": "Digital Marketing",
+  "applicationProcess": "Onlinebewerbung über jobs.transgourmet.ch mit vollständigem Bewerbungsdossier",
+  "employerDescription": "Führendes Schweizer Unternehmen im Belieferungs- und Abholgrosshandel mit rund 2'100 Mitarbeitenden und 100'000 Kunden aus Gastronomie, Hotellerie, Gemeinschaftsverpflegung und Detailhandel.",
+  "additionalNotes": "Modernes, dynamisches Arbeitsumfeld mit Fokus auf digitale Kundenkommunikation, Kampagnen und die Weiterentwicklung der Marketing-Automation-Lösung.",
+  "jobAd": {
+    "rawText": "Originaltext wird aus der mit --job-ad übergebenen Quelldatei archiviert.",
+    "workload": {
+      "kind": "range",
+      "minPercent": 80,
+      "maxPercent": 100,
+      "sourceText": "80-100%",
+      "confidence": 0.99
+    },
+    "start": {
+      "kind": "immediately",
+      "isoDate": "",
+      "sourceText": "per sofort oder nach Vereinbarung",
+      "confidence": 0.99
+    },
+    "contact": {
+      "fullName": "Lisa Röthlisberger",
+      "firstName": "Lisa",
+      "lastName": "Röthlisberger",
+      "explicitSalutation": "Frau",
+      "role": "HR Marketing",
+      "addressMode": "formal",
+      "sourceText": "Deine Ansprechperson der Transgourmet Schweiz AG: Lisa Röthlisberger, HR Marketing",
+      "confidence": 0.99,
+      "isApplicationContact": true
+    }
+  },
+  "requirements": {
+    "tasks": [
+      "Marketingmassnahmen und Kampagnen in der Marketing-Automation-Plattform BSI entwickeln, planen und realisieren",
+      "Projekte zur Weiterentwicklung der Marketing-Automation-Lösung leiten und neue Ideen umsetzen",
+      "Interne Stakeholder aus Verkauf, IT und Kommunikation sowie externe Agenturen koordinieren",
+      "Kundenverhalten, Kundendaten und Kampagnenperformance analysieren und Optimierungsmassnahmen ableiten",
+      "Das Digital-Marketing-Team bei Newsletter- und WhatsApp-Marketing beraten und unterstützen"
+    ],
+    "must": [
+      {
+        "text": "Vergleichbare Ausbildung und mehrjährige Berufserfahrung im Marketingumfeld",
+        "classification": "must",
+        "profileEvidence": "Mediamatiker EFZ mit Berufsmaturität und mehr als vier Jahre Verantwortung für Marketing, Web, Newsletter und digitale Kommunikation bei Kunz Kunath AG.",
+        "sourceIds": ["cv-2d-p1", "cv-2d-p2", "linkedin-profile"],
+        "evidenceStatus": "verified",
+        "cvUsage": "Kurzprofil, Qualifikation und Berufserfahrung"
+      },
+      {
+        "text": "Erfahrung im Digital Marketing und Projektmanagement",
+        "classification": "must",
+        "profileEvidence": "Eigenständige Umsetzung von Websites, Landing Pages, Online- und Newsletterkampagnen sowie Koordination externer Partner und mehrstufiger Medienprojekte.",
+        "sourceIds": ["cv-2d-p1", "cv-2d-p2", "linkedin-profile"],
+        "evidenceStatus": "verified",
+        "cvUsage": "Digital Marketing & Web sowie Berufserfahrung"
+      },
+      {
+        "text": "Interesse an Marketing Automation und Kampagnenmanagement",
+        "classification": "must",
+        "profileEvidence": "Praktische Erfahrung mit Newsletter- und Onlinekampagnen, CMS-/Webshop-Systemen, Performance-Analyse und Prozessdokumentation; keine direkte BSI-Erfahrung behauptet.",
+        "sourceIds": ["cv-2d-p1", "cv-2d-p2"],
+        "evidenceStatus": "defensible_inference",
+        "cvUsage": "Kampagnen-, System- und Prozesskompetenz; BSI wird nicht als bestehende Kenntnis ausgewiesen"
+      },
+      {
+        "text": "Technisches Grundverständnis für Web- und E-Mail-Technologien mit HTML und CSS",
+        "classification": "must",
+        "profileEvidence": "HTML/CSS aus der Mediamatiker-Ausbildung sowie langjährige Praxis mit TYPO3, WordPress, Grav, Magento, Websites, Landing Pages und E-Mail-Newslettern.",
+        "sourceIds": ["cv-2d-p1", "linkedin-profile"],
+        "evidenceStatus": "verified",
+        "cvUsage": "Technik & Systeme und Software & Tools"
+      },
+      {
+        "text": "Organisationstalent, Eigeninitiative und sicheres Auftreten",
+        "classification": "must",
+        "profileEvidence": "Eigenständige Verantwortung für Kampagnen, Firmenmagazin, Websites, Shootings und externe Partner; strukturierte Projektorganisation und hohe Eigenverantwortung.",
+        "sourceIds": ["cv-2d-p1", "cv-2d-p2"],
+        "evidenceStatus": "verified",
+        "cvUsage": "Arbeitsweise und Projektverantwortung"
+      },
+      {
+        "text": "Fliessendes Deutsch und Französischkenntnisse von Vorteil",
+        "classification": "must",
+        "profileEvidence": "Deutsch C2, Französisch B1, Englisch C1 und Polnisch C2.",
+        "sourceIds": ["cv-2d-p1"],
+        "evidenceStatus": "verified",
+        "cvUsage": "Sprachen"
+      },
+      {
+        "text": "Selbstständige, pragmatische und lösungsorientierte Arbeitsweise mit schneller Einarbeitung",
+        "classification": "must",
+        "profileEvidence": "Selbstständige Projektumsetzung, rasche Einarbeitung in neue Systeme, Prozessdokumentation und lösungsorientierte Zusammenarbeit mit internen und externen Stellen.",
+        "sourceIds": ["cv-2d-p1", "cv-2d-p2"],
+        "evidenceStatus": "verified",
+        "cvUsage": "Kurzprofil und Arbeitsweise"
+      },
+      {
+        "text": "Analytisches und vernetztes Denken sowie sicherer Austausch mit unterschiedlichen Anspruchsgruppen",
+        "classification": "must",
+        "profileEvidence": "Performance-Analyse mit Google Analytics, Koordination von Druckereien, Agenturen, Webhostern und internen Fachbereichen sowie Schnittstellenerfahrung in der Bundesverwaltung.",
+        "sourceIds": ["cv-2d-p1", "cv-2d-p2"],
+        "evidenceStatus": "verified",
+        "cvUsage": "Digital Marketing, Koordination und Berufserfahrung"
+      }
+    ],
+    "nice": [
+      "Erste praktische Erfahrung mit Marketing Automation",
+      "Französischkenntnisse",
+      "Erfahrung mit Newsletter-Marketing",
+      "Erfahrung in der Analyse von Kampagnenperformance"
+    ],
+    "systems": [
+      "BSI Marketing Automation",
+      "HTML",
+      "CSS",
+      "E-Mail-Technologien",
+      "Newsletter",
+      "Google Analytics",
+      "CMS",
+      "Webshop"
+    ],
+    "languages": ["Deutsch", "Französisch"],
+    "softSkills": [
+      "Organisationstalent",
+      "Eigeninitiative",
+      "sicheres Auftreten",
+      "selbstständig",
+      "pragmatisch",
+      "lösungsorientiert",
+      "analytisch",
+      "vernetzt"
+    ],
+    "education": ["Studium in Betriebswirtschaft oder Marketing oder vergleichbare Ausbildung und/oder Berufserfahrung"]
+  },
+  "atsTerms": [
+    "Digital Marketing",
+    "Kampagnen",
+    "Projektmanagement",
+    "HTML",
+    "CSS",
+    "Newsletter",
+    "Google Analytics",
+    "Prozessoptimierung",
+    "Stakeholder-Koordination",
+    "Französisch"
+  ]
+}

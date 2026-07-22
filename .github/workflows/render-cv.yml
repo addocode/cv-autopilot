@@ -1,4 +1,4 @@
-name: Render CV
+name: Render Application Documents
 
 on:
   pull_request:
@@ -73,6 +73,52 @@ jobs:
           echo "exit_code=${code}" >> "$GITHUB_OUTPUT"
           echo "application E2E exit code: ${code}"
           exit 0
+      - name: Run Transgourmet live application with captured exit code
+        id: application_live
+        shell: bash
+        run: |
+          mkdir -p dist applications exports
+          set +e
+          set -o pipefail
+          npm run create:application -- \
+            --job-ad tests/fixtures/live-transgourmet-digital-marketing-job-ad.txt \
+            --extracted-context tests/fixtures/live-transgourmet-digital-marketing-context.json \
+            --source-url "https://jobs.transgourmet.ch/offene-stellen/junior-digital-marketing-managerin-manager/dbed0af8-0125-40c3-a1b7-7d059995797b" \
+            --source-type url \
+            --application-date 2026-07-21 \
+            --timestamp 2026-07-21T12:00:00+03:00 \
+            2>&1 | tee dist/application-live-command.log
+          code=${PIPESTATUS[0]}
+          echo "exit_code=${code}" >> "$GITHUB_OUTPUT"
+          echo "application live exit code: ${code}"
+          exit 0
+      - name: Render canonical Transgourmet motivation letter
+        id: motivation_letter
+        shell: bash
+        run: |
+          mkdir -p dist
+          set +e
+          set -o pipefail
+          npm run render:motivation-letter -- \
+            --input tests/fixtures/live-transgourmet-motivation-letter.json \
+            2>&1 | tee dist/motivation-letter-command.log
+          code=${PIPESTATUS[0]}
+          echo "exit_code=${code}" >> "$GITHUB_OUTPUT"
+          echo "motivation letter render exit code: ${code}"
+          exit 0
+      - name: Test motivation letter layout contract
+        id: motivation_letter_tests
+        shell: bash
+        run: |
+          mkdir -p dist
+          set +e
+          set -o pipefail
+          npm run test:motivation-letter \
+            2>&1 | tee dist/motivation-letter-tests-command.log
+          code=${PIPESTATUS[0]}
+          echo "exit_code=${code}" >> "$GITHUB_OUTPUT"
+          echo "motivation letter tests exit code: ${code}"
+          exit 0
       - name: Write command status
         if: always()
         env:
@@ -82,12 +128,14 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: cv-render-artifacts
+          name: application-render-artifacts
           path: |
             dist/*.pdf
             dist/*.png
             dist/*-preview.html
             dist/render-report-*.json
+            dist/motivation-letter-report-*.json
+            dist/motivation-letter-text-*.txt
             dist/visual-review-round-*.json
             dist/text-*-poppler-raw.txt
             dist/text-*-poppler-default.txt
@@ -101,28 +149,40 @@ jobs:
             dist/command-status.json
             dist/render-all-exit-diagnostic.json
             dist/application-e2e-command.log
+            dist/application-live-command.log
+            dist/motivation-letter-command.log
+            dist/motivation-letter-tests-command.log
             applications/**
             exports/**
-      - name: Fail if render or render tests failed
+      - name: Fail if a production gate failed
         if: >-
           always() &&
           (
             steps.render_all.outputs.exit_code != '0' ||
             steps.render_tests.outputs.exit_code != '0' ||
-            steps.application_e2e.outputs.exit_code != '0'
+            steps.application_e2e.outputs.exit_code != '0' ||
+            steps.application_live.outputs.exit_code != '0' ||
+            steps.motivation_letter.outputs.exit_code != '0' ||
+            steps.motivation_letter_tests.outputs.exit_code != '0'
           )
         shell: bash
         run: |
-          echo "render:all exit code:"
-          echo "${{ steps.render_all.outputs.exit_code }}"
-          echo "test:render exit code:"
-          echo "${{ steps.render_tests.outputs.exit_code }}"
-          echo "application E2E exit code:"
-          echo "${{ steps.application_e2e.outputs.exit_code }}"
+          echo "render:all exit code: ${{ steps.render_all.outputs.exit_code }}"
+          echo "test:render exit code: ${{ steps.render_tests.outputs.exit_code }}"
+          echo "application E2E exit code: ${{ steps.application_e2e.outputs.exit_code }}"
+          echo "application live exit code: ${{ steps.application_live.outputs.exit_code }}"
+          echo "motivation letter render exit code: ${{ steps.motivation_letter.outputs.exit_code }}"
+          echo "motivation letter tests exit code: ${{ steps.motivation_letter_tests.outputs.exit_code }}"
           echo "Last render-all output:"
           tail -n 100 dist/render-all-command.log || true
           echo "Last render-test output:"
           tail -n 200 dist/render-tests-command.log || true
           echo "Last application E2E output:"
           tail -n 200 dist/application-e2e-command.log || true
+          echo "Last live application output:"
+          tail -n 200 dist/application-live-command.log || true
+          echo "Last motivation-letter output:"
+          tail -n 200 dist/motivation-letter-command.log || true
+          echo "Last motivation-letter test output:"
+          tail -n 200 dist/motivation-letter-tests-command.log || true
           exit 1
