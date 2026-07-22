@@ -11,7 +11,6 @@ for (const update of updateSet.updates || []) {
   if (!language) throw new Error(`Language not found: ${update.id}`);
   if (language.name !== update.name) throw new Error(`Language name mismatch for ${update.id}`);
   language.level = update.level;
-  language.sources = [...new Set([...(language.sources || []), update.sourceId])];
 }
 
 writeFileSync(masterPath, `${JSON.stringify(master, null, 2)}\n`);
