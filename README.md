@@ -1,171 +1,188 @@
 # CV Autopilot
 
-## Produktionsstand
+CV Autopilot erzeugt aus einem Stelleninserat ein konsistentes Bewerbungspaket für Adam Dolinsky. Eine gemeinsame Bewerbungsinstanz steuert CV, Motivationsschreiben, Mailentwurf und RAV-Recap. Gestaltung und Renderer bleiben fix; pro Bewerbung ändern sich nur analysierte Daten, Strategie und strukturierte Texte.
 
-CV Autopilot rendert den zweitseitigen Lebenslauf von Adam Dolinsky datengetrieben aus einer zentralen CV-Datenbank und vier Varianten. Der Produktionsrenderer ist Playwright/Chromium: HTML-Preview, PDF und PNG-Screenshots entstehen aus demselben DOM und denselben CSS-Dateien. Die PDFs bleiben ATS-lesbar und enthalten markierbaren Text sowie klickbare Links.
+## Ergebnis pro Bewerbung
 
-## Sicherheit
+```text
+applications/<applicationId>/
+├── 00_stelleninserat.md
+├── 01_application-context.json
+├── 02_cv_<variant>.pdf
+├── 03_cv_<variant>-preview.html
+├── 04_manifest.json
+├── 05_render-report.json
+├── 06_application-strategy.json
+├── 07_motivationsschreiben.pdf
+├── 08_motivationsschreiben-preview.html
+├── 09_motivationsschreiben-report.json
+├── 10_mailanschreiben.md
+├── 11_application-package-report.json
+├── 12_rav-recap.html
+├── 13_rav-recap.json
+├── 14_rav-recap.txt
+└── 15_rav-recap-report.json
+```
 
-- Niemals speichern: Passwörter, API-Schlüssel, Access Tokens, private SSH-Schlüssel, Session-Cookies oder sonstige technische Zugangsdaten.
+Zusätzlich entsteht unter `exports/` ein deterministisches `tar.gz`-Archiv mit SHA-256-Sidecar.
 
 ## Installation
 
-Benötigt Node.js 22 im CI-Workflow und eine lokale Node-Version, die ES-Module unterstützt.
+Benötigt Node.js 22 und Chromium für Playwright. Die Installation erfolgt einmal pro Umgebung, nicht pro Bewerbung.
 
 ```bash
-npm install --no-audit --no-fund
+npm ci --no-audit --no-fund
 npx playwright install --with-deps chromium
 ```
 
-## Befehle
+## Vollständige Bewerbung erzeugen
 
 ```bash
-npm run build
-npm run validate
-npm run test:data
-npm run render:all
-npm run test:render
-npm test
+npm run create:application -- \
+  --job-ad fixtures/job-ad.txt \
+  --extracted-context fixtures/application-context.json \
+  --package-input fixtures/package-input.json \
+  --source-url "https://example.ch/jobs/123" \
+  --application-date 2026-07-23
 ```
 
-Einzelrender:
+`--extracted-context` und `--package-input` sind die strukturierten Übergabepunkte für ChatGPT beziehungsweise die spätere Web-App:
+
+- `--extracted-context` enthält Inseratsfakten, Anforderungen, Kontakte, Pensum, Eintritt und Quellenstatus.
+- `--package-input` enthält Strategie-Overrides, geprüfte MS-Inhalte und optional vollständig recherchierte RAV-Daten.
+
+Ohne `--package-input` erstellt das System einen sicheren, beleggestützten Entwurf. Best-Effort- und Pflichtfeld-Ersatzwerte werden im RAV-Report markiert und müssen vor der Übertragung geprüft werden.
+
+## Eine Analyse – vier Ausgaben
+
+```mermaid
+flowchart TD
+  A["Stelleninserat"] --> B["Application Context"]
+  B --> C["Gemeinsame Strategie"]
+  C --> D["CV-Renderer"]
+  C --> E["MS-Renderer"]
+  C --> F["Mail-Generator"]
+  B --> G["RAV-Renderer"]
+  D --> H["Paket-Guard"]
+  E --> H
+  F --> H
+  G --> H
+```
+
+Kein Modul führt eine zweite, abweichende Stellenanalyse durch. Arbeitgeber, Stellenbezeichnung, Kontaktperson, Belege und Bewerbungs-ID werden paketweit abgeglichen.
+
+## Fixe und dynamische Bestandteile
+
+| Fix und hash-gesperrt | Pro Bewerbung dynamisch |
+|---|---|
+| CV-/MS-Templates | Stellen- und Arbeitgeberanalyse |
+| CSS, Typografie, Geometrie | CV-Variante und Textprioritäten |
+| Hintergrund, Logo und Icons | Bewerbungsstrategie |
+| RAV-HTML-Framework | MS-Inhalt und Hervorhebungen |
+| Render- und Qualitätsregeln | Mailtext und RAV-Werte |
+
+`layout-lock.json` enthält die SHA-256-Hashes aller kanonischen Layoutdateien. Jeder Produktionslauf führt automatisch `npm run verify:layout` aus. Eine normale Bewerbung bricht sofort ab, wenn CSS, Template, Logo, Hintergrund oder Icons vom freigegebenen Stand abweichen.
+
+Die Sperre wird nur nach einer ausdrücklich beauftragten und visuell freigegebenen Layoutänderung aktualisiert:
 
 ```bash
-npm run render -- --variant general
-npm run render -- --variant communication-content
-npm run render -- --variant administration-gever
-npm run render -- --variant cms-web-process
+node scripts/verify-layout-lock.mjs --write
 ```
 
+## CV
 
-## Bewerbungsakte pro Stelleninserat
+Der bestehende Playwright-Renderer erzeugt einen ATS-lesbaren, zweiseitigen CV aus:
 
-Für ein konkretes, lokal vorliegendes Stelleninserat erzeugt der deterministische Archivierungsworkflow einen lokalen Bewerbungsordner unter `applications/YYYY-MM-DD_<arbeitgeber-slug>_<stellen-slug>/`. Der Ordner enthält die lesbare Stellenakte, den maschinenlesbaren Anwendungskontext, die gerenderte CV-PDF, die HTML-Vorschau, ein Integritätsmanifest und die unveränderte Quelldatei. `applications/` ist absichtlich git-ignoriert, weil dort reale Bewerbungs- und Kontaktdaten liegen können.
+- `data/private/cv.master.json`
+- `data/public/variants/*.json`
+- `src/templates/cv.ts`
+- `src/styles/tokens.css`
+- `src/styles/cv.css`
 
-```bash
-node scripts/create-application.mjs \
-  --job-ad fixtures/real-job-ad.txt \
-  --source-url "https://example.invalid/inserat" \
-  --application-date 2026-07-20
-```
-
-Der Workflow überschreibt keine neutralen Produktionsartefakte wie `dist/Lebenslauf_Adam-Dolinsky_general.pdf`; anwendungsspezifische Render-Zwischenergebnisse verwenden die Bewerbungs-ID als Suffix und werden danach in den lokalen Bewerbungsordner kopiert.
-
-## Varianten
+Verfügbare Varianten:
 
 - `general`
 - `communication-content`
 - `administration-gever`
 - `cms-web-process`
 
-Varianten steuern Headline, Kurzprofil, Skill-Reihenfolge, sichtbare Skillblöcke, Bullet-Auswahl, Bullet-Priorisierung, Tool-Reihenfolge, Maximalzahlen und Längenbudgets.
+Ein Bewerbungslauf rendert ausschliesslich die ausgewählte Variante. `render:all` ist ein Entwicklungs- und CI-Test, kein Bestandteil eines normalen Live-Runs.
 
-## Architektur
+## Motivationsschreiben
 
-- `data/private/cv.master.json`: zentrale reale CV-Datenbank.
-- `data/public/variants/*.json`: Varianten-Overrides.
-- `data/schema/cv.schema.json`: Datenstruktur für Person, Erfahrungen, Skills, Quellen, Tools, Referenzen, Eintritt und Pensum.
-- `data/sources/source-map.json`: Quellenmapping der produktiven Bausteine.
-- `scripts/render.mjs`: Playwright-Produktionsrenderer.
-- `scripts/render-all.mjs`: rendert alle vier Varianten.
-- `scripts/validate.mjs`: Daten- und Variantenvalidierung.
-- `src/styles/tokens.css`: Design-, Font- und Spacing-Tokens.
-- `src/styles/cv.css`: A4-Layout, Print-/Screen-Styles, Hover-/Focus-Zustände.
-- `tests/data.test.mjs`: Daten-, Varianten- und Workflow-Invarianten.
-- `tests/render.test.mjs`: Render-Artefakte, Reports, Fonts, Assets, Hover/Focus.
+Der MS-Generator trennt Inhalt und Gestaltung strikt:
 
-## Ausgaben
+- Das Sprachmodell beziehungsweise die Web-App liefert strukturierte Absätze, Beleg-IDs und Hervorhebungen.
+- Der Renderer bestimmt A4-Geometrie, Hintergrund, Rahmen, Logo, Typografie, Datum, Referenz und Signatur.
+- Die Referenz erscheint nur nach sicherer Erkennung.
+- Der Textblock wächst von unten nach oben; Schriftverkleinerung und Abschneiden sind verboten.
+- Der Bericht prüft eine Seite, ATS-Text, Datumsausrichtung, Body-Start, Hervorhebungsbudget, Überläufe und Kollisionen.
 
-Für jede Variante entstehen:
+Verbindliche Quellen:
 
-```text
-dist/Lebenslauf_Adam-Dolinsky_<variant>.pdf
-dist/cv-<variant>-page-1.png
-dist/cv-<variant>-page-2.png
-dist/cv-<variant>-preview.html
-dist/render-report-<variant>.json
+- `modules/motivation-letter/APPROVED_GOLDEN_STANDARD.md`
+- `modules/motivation-letter/layout-reference.json`
+- `modules/motivation-letter/styles/motivation-letter.css`
+- `modules/motivation-letter/references/ad_logo.png`
+
+## Mail
+
+`10_mailanschreiben.md` bleibt ein kurzer Entwurf mit Frontmatter:
+
+- Betreff und Stellenbezeichnung entsprechen dem MS.
+- Status ist immer `draft`.
+- Es erfolgt kein automatischer Versand.
+- Nicht explizit belegte Empfängeradressen werden als Review-Vorschlag markiert.
+
+## RAV-Recap
+
+Der RAV-Renderer erzeugt aus denselben Daten:
+
+- mobile Offline-HTML mit einer Copy-Box pro Job-Room-Feld,
+- JSON als maschinenlesbare Quelle,
+- TXT als Fallback,
+- Report mit Quellen, Annahmen und Qualitäts-Gates.
+
+Das freigegebene Framework liegt in `modules/rav-recap/mobile-template.html`. Die spätere Web-App verwendet dieselbe Vorlage und keinen zweiten UI-Entwurf.
+
+## Qualität und Tests
+
+Schnelle Daten- und Paketprüfungen:
+
+```bash
+npm run build
+npm run validate
+npm run verify:layout
+npm run test:data
+npm run test:application
+npm run test:application-package
+npm run test:rav-recap
 ```
 
-## Render Report
+Vollständige Renderprüfung vor Änderungen am Generator oder Layout:
 
-Jeder `render-report-<variant>.json` prüft und dokumentiert:
+```bash
+npm run render:all
+npm run test:render
+npm run render:motivation-letter -- \
+  --input modules/motivation-letter/tests/fixtures/admin-sachbearbeiter-fk-letter.json \
+  --output-id admin-sachbearbeiter-fk
+npm run render:motivation-letter -- \
+  --input modules/motivation-letter/tests/fixtures/transgourmet-letter.json \
+  --output-id transgourmet-digital-marketing
+npm run test:motivation-letter
+```
 
-- `success`
-- `renderer`
-- `pageCount`
-- `overflows`
-- `collisions`
-- `warnings`
-- `assets`
-- `images`
-- `links`
-- `fonts`
-- `buttonStates`
-- `ats`
-- `reviewQueue`
-- `supplementary.candidateItems`, `supplementary.renderedItems`, `supplementary.rejectedItems`
-- `fill.baselineGapPx`, `fill.finalGapPx`, `fill.preferredOptionalBulletCount`, `fill.maxOptionalBullets`
+GitHub Actions führt diese vollständige Suite bei Pull Requests und manuellen Workflow-Läufen aus. Normale Bewerbungen starten keine Vier-Varianten-Suite und installieren keine Abhängigkeiten neu.
 
-Ein erfolgreicher Produktionsrender benötigt `renderer: "playwright"`, exakt zwei Seiten, keine Overflows, keine Collisions und keine Warnungen.
+## Sicherheit und Freigabe
 
-## Qualitätsprüfungen
+- Niemals Passwörter, Tokens, private Schlüssel oder Session-Cookies speichern.
+- Reale Bewerbungspakete unter `applications/` bleiben git-ignoriert.
+- Keine unbelegten Kenntnisse oder Arbeitgeberangaben verwenden.
+- Kein automatischer Versand oder automatische Portalübermittlung.
+- Das finale Paket bleibt bis zu Adams manueller Schlusskontrolle im Status `draft`.
 
-Der Playwright-Renderer prüft:
+## Historischer Stand
 
-- tatsächliche PDF-Seitenzahl,
-- `scrollHeight`/`clientHeight`,
-- Elementgrenzen innerhalb Seite und Panel,
-- paarweise Bounding-Box-Kollisionen,
-- Profilbild,
-- CSS-Hintergrundbild,
-- Links,
-- verwendete Schriftfamilien,
-- Times-New-Roman-Fallback-Warnung,
-- Button-Normal-, Hover- und Focus-Zustand,
-- adaptive Fill-Entscheidungen inklusive akzeptierter/abgelehnter Kandidaten,
-- zusätzliche verifizierte Master-Tools und datengetriebene Tool-Hinweise.
-
-## ATS und manuelle Schlusskontrolle
-
-Der Renderer erzeugt echten HTML-Text und Playwright-PDFs mit auswählbarem Text. Der Render Report enthält einen ATS-Block mit Textauslesbarkeit, Lesereihenfolge, Pflichtbegriffen, Keyword-Coverage, Keyword-Stuffing-Risiko und Hidden-Text-Prüfung. Spätere Stellenanalysen dürfen nur `verified` und vertretbare `defensible_inference`-Bausteine nutzen; `inferred_review_required` wird in `reviewQueue` gemeldet und darf nicht automatisch produktiv sichtbar werden. Der Agent erzeugt Bewerbungsartefakte, versendet sie aber niemals automatisch; die Schlusskontrolle bleibt manuell bei Adam.
-
-## GitHub Actions
-
-Der Workflow `.github/workflows/render-cv.yml` läuft nur auf:
-
-- `pull_request`
-- `workflow_dispatch`
-
-Er installiert Node.js 22, npm-Abhängigkeiten und Chromium, führt Build, Validierung, Daten-Tests, Render-All und Render-Tests aus und lädt PDFs, PNGs, HTML-Previews sowie Reports als Artefakt `cv-render-artifacts` hoch. Der finale Guard bleibt aktiv und lässt den Job nur grün werden, wenn Render und Render-Tests intern erfolgreich sind.
-
-## Intelligente Zusatz- und Fill-Logik
-
-Die Varianten zeigen zunächst die definierten Kerninhalte. Danach führt der Playwright-Renderer einen kontrollierten Mess-Fill aus: Er misst den Baseline-Abstand zwischen Berufserfahrung und Bottom-Grid, blendet optionale verifizierte Kandidaten nach `fillPriority` einzeln ein, misst erneut und behält einen Kandidaten nur, wenn keine Overflows/Collisions entstehen, weiterhin exakt zwei Seiten vorhanden sind und die Mindestreserve eingehalten bleibt. Wenn verifizierte Masterdaten wegen Variantenfokus, Tool-Limit oder Platzbudget ausgeblendet werden, ergänzt der Renderer nur datengetriebene Hinweise wie `+ weitere mediamatikbezogene Tools und Systeme` oder priorisierte Erfahrungshinweise bis `maxPerVariant`. Optionale Zusatzpunkte und zusätzliche Tools besitzen stabile IDs, Tags, Evidence-Level, Quellen, ATS-Synonyme, Status, Variantenrelevanz, Priorität und Sichtbarkeitsmetadaten; Entscheidungen werden im Render Report unter `supplementary` und `fill` dokumentiert. `preferredOptionalBulletCount` ist nur ein weicher Richtwert; `maxOptionalBullets` ist die Sicherheitsobergrenze, während der gemessene Freiraum entscheidet.
-
-## Typografie
-
-Die CSS-Font-Stacks orientieren sich an der Referenz:
-
-- Avenir Black bzw. Fallback für Name, Headline und markante sans-serif Überschriften.
-- Avenir Book bzw. Fallback für Fliesstext, Kontaktdaten, Erfahrungen, Tools, Referenzen und Sprachen.
-- Roboto Slab Bold bzw. Fallback für Kurzprofil-Überschrift und Link-Buttons.
-
-Es werden keine proprietären Avenir-Fontdateien committed. Times New Roman ist nicht Bestandteil der Produktions-Font-Stacks.
-
-## Hintergrundbild
-
-`assets/bg_img.jpeg` wird als seitenfüllender Hintergrund mit `background-size: cover`, `background-position: left top`, `background-repeat: no-repeat` und transparenter Seitenfarbe gerendert. Der Render Report prüft zusätzlich `coversFullPage`, `bottomZoneNotGray`, `topLeftLaptopExpected`, die tatsächlich berechnete Position und die Größe.
-
-## CV-Anpassung für Stellen
-
-1. Passende Variante wählen.
-2. In `data/public/variants/<variant>.json` Prioritäts-Tags, Bullet-Auswahl oder Budgets anpassen.
-3. Nur belegte Inhalte aus `data/private/cv.master.json` verwenden.
-4. `npm run validate`, `npm run render:all` und `npm run test:render` ausführen.
-5. Render Reports und PNGs prüfen.
-
-## Verbleibende visuelle Abweichungen
-
-- Systemabhängige Avenir-Verfügbarkeit kann zu Fallbacks wie Nunito Sans, Montserrat oder Arial führen.
-- Der Hintergrund nutzt `background-position: left top` und `background-size: cover`; Laptop/Tastatur bleiben oben links sichtbar, die Referenz kann je nach Chromium-Fontmetrik noch leicht im Bildausschnitt abweichen.
-- Kleine Unterschiede zu InDesign bei Mikrotypografie und exakten Zeilenumbrüchen bleiben möglich.
+Der vollständige Zustand vor dieser Konsolidierung ist auf `archive/pre-cleanup-2026-07-22` gesichert. Alte Branches und Pull Requests sind historische Referenzen; sie dürfen nicht als Produktionsbasis verwendet werden.

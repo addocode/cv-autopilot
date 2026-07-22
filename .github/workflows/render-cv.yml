@@ -1,4 +1,4 @@
-name: Render CV
+name: Validate Application Package
 
 on:
   pull_request:
@@ -12,7 +12,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install --no-audit --no-fund
+          cache: npm
+      - run: npm ci --no-audit --no-fund
       - run: npx playwright install --with-deps chromium
       - name: Install PDF and font tools
         run: |
@@ -26,8 +27,11 @@ jobs:
           fc-match "Liberation Sans"
       - run: npm run build
       - run: npm run validate
+      - run: npm run verify:layout
       - run: npm run test:data
       - run: npm run test:application
+      - run: npm run test:application-package
+      - run: npm run test:rav-recap
       - name: Run render all with captured exit code
         id: render_all
         shell: bash
@@ -68,10 +72,34 @@ jobs:
             --extracted-context tests/fixtures/extracted-context-fictive.json \
             --application-date 2026-07-20 \
             --timestamp 2026-07-20T20:00:00+00:00 \
+            --skip-render-for-tests \
             2>&1 | tee dist/application-e2e-command.log
           code=${PIPESTATUS[0]}
           echo "exit_code=${code}" >> "$GITHUB_OUTPUT"
           echo "application E2E exit code: ${code}"
+          exit 0
+      - name: Render motivation-letter golden cases
+        id: motivation_letters
+        shell: bash
+        run: |
+          set +e
+          set -o pipefail
+          npm run render:motivation-letter -- \
+            --input modules/motivation-letter/tests/fixtures/admin-sachbearbeiter-fk-letter.json \
+            --output-id admin-sachbearbeiter-fk \
+            2>&1 | tee dist/motivation-letter-admin-command.log
+          admin_code=${PIPESTATUS[0]}
+          npm run render:motivation-letter -- \
+            --input modules/motivation-letter/tests/fixtures/transgourmet-letter.json \
+            --output-id transgourmet-digital-marketing \
+            2>&1 | tee dist/motivation-letter-transgourmet-command.log
+          transgourmet_code=${PIPESTATUS[0]}
+          npm run test:motivation-letter \
+            2>&1 | tee dist/motivation-letter-tests-command.log
+          test_code=${PIPESTATUS[0]}
+          if [ "$admin_code" -eq 0 ] && [ "$transgourmet_code" -eq 0 ] && [ "$test_code" -eq 0 ]; then code=0; else code=1; fi
+          echo "exit_code=${code}" >> "$GITHUB_OUTPUT"
+          echo "motivation-letter golden exit code: ${code}"
           exit 0
       - name: Write command status
         if: always()
@@ -82,12 +110,14 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: cv-render-artifacts
+          name: application-render-artifacts
           path: |
             dist/*.pdf
             dist/*.png
             dist/*-preview.html
             dist/render-report-*.json
+            dist/motivation-letter-report-*.json
+            dist/motivation-letter-text-*.txt
             dist/visual-review-round-*.json
             dist/text-*-poppler-raw.txt
             dist/text-*-poppler-default.txt
@@ -101,6 +131,8 @@ jobs:
             dist/command-status.json
             dist/render-all-exit-diagnostic.json
             dist/application-e2e-command.log
+            dist/motivation-letter-*-command.log
+            dist/motivation-letter-tests-command.log
             applications/**
             exports/**
       - name: Fail if render or render tests failed
@@ -109,7 +141,8 @@ jobs:
           (
             steps.render_all.outputs.exit_code != '0' ||
             steps.render_tests.outputs.exit_code != '0' ||
-            steps.application_e2e.outputs.exit_code != '0'
+            steps.application_e2e.outputs.exit_code != '0' ||
+            steps.motivation_letters.outputs.exit_code != '0'
           )
         shell: bash
         run: |
@@ -119,10 +152,16 @@ jobs:
           echo "${{ steps.render_tests.outputs.exit_code }}"
           echo "application E2E exit code:"
           echo "${{ steps.application_e2e.outputs.exit_code }}"
+          echo "motivation-letter golden exit code:"
+          echo "${{ steps.motivation_letters.outputs.exit_code }}"
           echo "Last render-all output:"
           tail -n 100 dist/render-all-command.log || true
           echo "Last render-test output:"
           tail -n 200 dist/render-tests-command.log || true
           echo "Last application E2E output:"
           tail -n 200 dist/application-e2e-command.log || true
+          echo "Last motivation-letter outputs:"
+          tail -n 200 dist/motivation-letter-admin-command.log || true
+          tail -n 200 dist/motivation-letter-transgourmet-command.log || true
+          tail -n 200 dist/motivation-letter-tests-command.log || true
           exit 1

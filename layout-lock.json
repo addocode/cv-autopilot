@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "algorithm": "sha256",
+  "policy": "Application data runs must not modify these files. Update hashes only in an explicitly approved layout-change task.",
+  "files": {
+    "assets/bg_img.jpeg": "8f1efa368555c7727cd879088b3f95120fa08a2f2c393633e4b7b366c3fe3978",
+    "assets/profile_img.png": "e8f12ed9d55e2eb0ba1126456aed8daec4436da7bf878d66b9f0184c46dcc6b1",
+    "assets/icons/footer/eintritt.svg": "6243ad248645b69df30d5e7d30f70f8bf10d04cb99b9f25b53ed687005a9b364",
+    "assets/icons/footer/pensum.svg": "5ff86dfb76d39e0b0cf59d78408e28478e67d3dffc051fc7bffa0d9817d808e0",
+    "assets/icons/footer/referenzen.svg": "7bc06637cf7ac6b865987eed9f29da335213d58f18190b7700ee50e5063988ac",
+    "assets/icons/footer/software-tools.svg": "187034f66e09158a73dcb952a744d1771f13b50faf5bad12955df5b995973921",
+    "assets/icons/skills/skill-content-media.svg": "3147d94a09ae5f36b6650d6cb7bb9c171dc234c244172f8b2a5a4001ce52e5aa",
+    "assets/icons/skills/skill-digital-web.svg": "44a374d159f04c18ea196245403bd9883e26e0ab3433e7c3296c69c20ab36ea2",
+    "assets/icons/skills/skill-systems-processes.svg": "7fd7006a26b271e914f219e4e2382160b21faeba4b79751f97f16d2009d718da",
+    "assets/icons/skills/skill-workstyle-organization.svg": "b9df2bd6aa40e6bde02500af684e38be7d8367e438e5fc38d1496a6604c7f9ce",
+    "src/styles/tokens.css": "03a51bf772ad5c62e037314f837bdd929cc201b0166ec0d53d2ea3302c4b7e56",
+    "src/styles/cv.css": "e6c0a7a471c657105a2ad9d1031e0d6f1f0ea911d357b473ed7f947bb198c0bc",
+    "src/templates/cv.ts": "8bef0e6efdd24e898b28a2998ad81c06dc29f3e72a63292f54eed7999e5bdac0",
+    "scripts/render.mjs": "3cbd81544dbb592ddc7ff3b02ae00c04b5bbcffb391b4450c190c63bea41d0a6",
+    "modules/motivation-letter/layout-reference.json": "291f965b647bb8d0a2dbaf104538a4ca384aa8d446a4d2759c73dbb6aa0220f1",
+    "modules/motivation-letter/references/ad_logo.png": "8a0381353dc1bb47763c96ade594015c8737aae30571a741706e6e66f6997c01",
+    "modules/motivation-letter/styles/motivation-letter.css": "7f53b84fac616111b249b167d4a6a16f3e87dd2c8b40fbd652a1e5946e632e24",
+    "modules/motivation-letter/src/template.mjs": "eccf0958b5ed845916d416e326443d5fe174f4cf1ac532fa364d6981bedf264f",
+    "modules/motivation-letter/src/renderer.mjs": "c2147bdf88d721bf9cded77c9a4403325a7b2aaf43dca431dfc3e494c388da7c",
+    "modules/rav-recap/mobile-template.html": "7c9e449bb5d44b13d8ed2117c294224a1d5b05ffc2088405c5ad1e0e117d3ade",
+    "modules/rav-recap/src/render.mjs": "64c0c7435d998a8c7cd6e838bbca59a6f29583555cbd23ba29365fd76a99d505"
+  }
+}

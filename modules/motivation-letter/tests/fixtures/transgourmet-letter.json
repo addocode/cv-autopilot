@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "applicationId": "2026-07-21_transgourmet-schweiz-ag_junior-digital-marketing-manager",
+  "generationDate": "2026-07-21",
+  "place": "Bern",
+  "employer": "Transgourmet Schweiz AG",
+  "jobTitleOriginal": "(Junior) Digital Marketing Managerin / Manager 80–100%",
+  "jobTitleRendered": "Junior Digital Marketing Manager",
+  "titleLines": ["Bewerbung als Junior", "Digital Marketing Manager"],
+  "salutation": "Guten Tag Frau Röthlisberger",
+  "reference": {"label": "Referenz", "value": "", "visible": false},
+  "paragraphs": [
+    {
+      "purpose": "role-and-employer-motivation",
+      "evidenceIds": ["job-ad:transgourmet"],
+      "runs": [
+        {"text": "Transgourmet verbindet den Grosshandel mit einer zunehmend digitalen Kundenansprache. Genau das spricht mich an: Marketingmassnahmen sollen nicht nur kreativ wirken, sondern auf Kundendaten aufbauen, messbar sein und Verkauf, Kommunikation sowie digitale Services sinnvoll verknüpfen. Deshalb bewerbe ich mich als "},
+        {"text": "Junior Digital Marketing Manager", "emphasis": true},
+        {"text": "."}
+      ]
+    },
+    {
+      "purpose": "positioning",
+      "evidenceIds": ["education-mediamatiker-efz-berufsmaturitaet", "bullet-kunz-campaigns"],
+      "runs": [
+        {"text": "Als "},
+        {"text": "Mediamatiker EFZ mit Berufsmaturität", "emphasis": true},
+        {"text": " bringe ich mehrjährige Praxiserfahrung im digitalen Marketing mit. Bei Kunz Kunath AG betreute ich Websites und Onlineshops, konzipierte Newsletter und Kampagnen, erstellte kanalübergreifende Inhalte und analysierte digitale Kennzahlen. Projekte begleitete ich bis zur Veröffentlichung und koordinierte interne Ansprechpersonen sowie externe Partner."}
+      ]
+    },
+    {
+      "purpose": "honest-gap-bridge",
+      "evidenceIds": ["job-ad:transgourmet", "tool-html-css", "bullet-kunz-websites-landing"],
+      "runs": [
+        {"text": "Besonders reizt mich, Kampagnen künftig systematischer über Marketing Automation zu steuern. Mit BSI habe ich bisher noch nicht gearbeitet. Ich eigne mir neue Systeme jedoch rasch und strukturiert an und bringe mit "},
+        {"text": "HTML und CSS", "emphasis": true},
+        {"text": ", CMS- und Webshop-Erfahrung sowie einem guten Verständnis für E-Mail- und Webtechnologien eine solide technische Grundlage mit. Saubere Daten, nachvollziehbare Prozesse und zuverlässige Umsetzung waren bereits in meiner bisherigen Arbeit entscheidend."}
+      ]
+    },
+    {
+      "purpose": "value-proposition",
+      "evidenceIds": ["skill-google-analytics", "bullet-kunz-online-campaigns-monitoring", "bullet-kunz-process-handover"],
+      "runs": [
+        {"text": "Auch die analytische Seite der Position entspricht meiner Arbeitsweise. Ich möchte Kundenverhalten und Kampagnenperformance nicht nur beobachten, sondern daraus konkrete Optimierungen ableiten, Tests dokumentieren und wiederverwendbare Abläufe entwickeln. Mit meiner Erfahrung in Newslettern, Websites, Google Analytics und Content-Produktion kann ich das Digital-Marketing-Team operativ unterstützen und bei der Prozessentwicklung mitdenken."}
+      ]
+    },
+    {
+      "purpose": "employer-context",
+      "evidenceIds": ["job-ad:transgourmet", "bullet-kunz-campaigns"],
+      "runs": [
+        {"text": "Das Umfeld von Transgourmet ist für mich zusätzlich attraktiv, weil die Ergebnisse der Arbeit unmittelbar im Alltag der Gastronomie sichtbar werden. Aus meiner bisherigen Tätigkeit in einem lebensmittel- und landwirtschaftsnahen Umfeld kenne ich die Herausforderung, Produkte und Dienstleistungen für unterschiedliche Zielgruppen verständlich und praxisnah zu kommunizieren."}
+      ]
+    },
+    {
+      "purpose": "long-term-signal",
+      "evidenceIds": ["job-ad:transgourmet"],
+      "runs": [
+        {"text": "Ich sehe diese Position nicht als kurzfristige Zwischenstation, sondern als "},
+        {"text": "bewussten langfristigen Entwicklungsschritt", "emphasis": true},
+        {"text": " in Richtung Marketing Automation, Kampagnenmanagement und datenbasierter Kundenkommunikation. Ab November 2026 vertiefe ich dieses Profil berufsbegleitend im Lehrgang AI Business Specialist, ohne meine Verfügbarkeit für eine Festanstellung einzuschränken."}
+      ]
+    },
+    {
+      "purpose": "closing",
+      "evidenceIds": ["job-ad:transgourmet"],
+      "runs": [
+        {"text": "Gerne erläutere ich Ihnen persönlich, wie ich meine Digital-Marketing-Erfahrung, mein technisches Verständnis und meine strukturierte Arbeitsweise bei Transgourmet einbringen und weiterentwickeln möchte."}
+      ]
+    }
+  ],
+  "signature": {"firstName": "Adam", "lastName": "Dolinsky", "domainSuffix": ".ch", "url": "https://dolinsky.ch"},
+  "selectedEvidenceIds": ["education-mediamatiker-efz-berufsmaturitaet", "bullet-kunz-campaigns", "tool-html-css", "bullet-kunz-websites-landing", "skill-google-analytics", "bullet-kunz-online-campaigns-monitoring", "bullet-kunz-process-handover"],
+  "contentMode": "approved-golden-fixture",
+  "genericPhrases": [],
+  "wordCount": 319,
+  "emphasisGroups": ["Junior Digital Marketing Manager", "Mediamatiker EFZ mit Berufsmaturität", "HTML und CSS", "bewussten langfristigen Entwicklungsschritt"]
+}

@@ -1,0 +1,24 @@
+@font-face{font-family:'Roboto Slab';font-style:normal;font-weight:700;font-display:swap;src:url('../../node_modules/@fontsource/roboto-slab/files/roboto-slab-latin-700-normal.woff2') format('woff2')}
+@page{size:A4;margin:0}
+*{box-sizing:border-box}
+html,body{margin:0;width:210mm;height:297mm}
+body{font-family:Arial,'Liberation Sans',sans-serif;color:#000;background:#ddd}
+.letter{position:relative;width:210mm;height:297mm;overflow:hidden;background-image:url('__BACKGROUND_DATA_URL__');background-size:cover;background-position:left top;background-repeat:no-repeat}
+.letter__frame{position:absolute;left:10mm;right:10mm;top:15.525mm;bottom:0;background:#15519f}
+.letter__paper{position:absolute;left:19.8mm;right:19.8mm;top:23.5mm;bottom:0;background:#fff}
+.letter__logo{position:absolute;left:10.182mm;top:18.955mm;width:25.12mm;height:19.85mm;object-fit:fill;z-index:2}
+.letter__reference{position:absolute;top:18.168mm;right:27mm;font:700 8pt/1 'Roboto Slab',Rockwell,serif;color:#fff;text-align:right;background:transparent;border:0;outline:0;box-shadow:none;padding:0;z-index:3}
+.letter__title{position:absolute;top:31.997mm;left:27mm;right:27mm;margin:0;font:700 18pt/19pt 'Roboto Slab',Rockwell,serif;text-align:right;color:#000}
+.letter__title span{display:block}
+.letter__stack{position:absolute;left:27mm;right:28.5mm;bottom:15.907mm;font:400 11pt/14pt Arial,'Liberation Sans',sans-serif}
+.letter__body p{margin:0 0 4.8mm}
+.letter__body .letter__salutation{margin-bottom:7mm}
+.letter__body p:last-child{margin-bottom:0}
+.letter__body strong{font-weight:700;color:#15519f}
+.letter__signature{margin-top:5.2mm;font:400 11pt/14pt Arial,'Liberation Sans',sans-serif}
+.letter__signature p{margin:0}
+.letter__signature a{text-decoration:none}
+.letter__signature a span{color:#000;font-weight:700;text-decoration:underline;text-decoration-thickness:.3mm;text-underline-offset:.35mm}
+.letter__signature a b{color:#15519f;font-weight:700;text-decoration:underline;text-decoration-thickness:.3mm;text-underline-offset:.35mm}
+.letter__date{position:absolute;left:13.406mm;font:700 8pt/1 'Roboto Slab',Rockwell,serif;color:#fff;writing-mode:vertical-rl;transform:rotate(180deg);transform-origin:center;background:transparent;border:0;outline:0;box-shadow:none;padding:0;white-space:nowrap;z-index:3}
+@media print{body{background:transparent}}

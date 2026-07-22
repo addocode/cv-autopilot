@@ -11,9 +11,14 @@
     "test:render": "node --test tests/render.test.mjs",
     "render": "node scripts/render.mjs",
     "render:all": "node scripts/render-all.mjs",
+    "render:motivation-letter": "node scripts/render-motivation-letter.mjs",
     "dev": "node scripts/render.mjs -- --variant general",
     "create:application": "node scripts/create-application.mjs",
-    "test:application": "node --test tests/application-workflow.test.mjs"
+    "test:application": "node --test tests/application-workflow.test.mjs",
+    "test:application-package": "node --test tests/application-package.test.mjs",
+    "test:motivation-letter": "node --test tests/motivation-letter.test.mjs",
+    "test:rav-recap": "node --test tests/rav-recap.test.mjs",
+    "verify:layout": "node scripts/verify-layout-lock.mjs"
   },
   "dependencies": {
     "@fontsource/roboto-slab": "^5.2.6",

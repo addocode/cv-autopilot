@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "applicationId": "2026-07-21_parlamentsdienste-pd_admin-sachbearbeiter-fk",
+  "generationDate": "2026-07-21",
+  "place": "Bern",
+  "employer": "Parlamentsdienste PD",
+  "jobTitleOriginal": "Admin. Sachbearbeiter/-in FK",
+  "jobTitleRendered": "Admin. Sachbearbeiter FK",
+  "titleLines": ["Bewerbung als", "Admin. Sachbearbeiter FK"],
+  "salutation": "Sehr geehrte Frau Probst",
+  "reference": {"label": "Referenz", "value": "JRQ$540-19713", "visible": true},
+  "paragraphs": [
+    {
+      "purpose": "role-and-employer-motivation",
+      "evidenceIds": ["job-ad:admin-sachbearbeiter-fk"],
+      "runs": [
+        {"text": "Die Arbeit der Finanzkommissionen braucht eine Administration, auf die sich Fachpersonen auch bei hoher Taktung verlassen können. Genau diese Verbindung aus sorgfältiger Geschäftsbearbeitung, Koordination und einem gesellschaftlich relevanten Bundesumfeld spricht mich an. Deshalb bewerbe ich mich als "},
+        {"text": "Admin. Sachbearbeiter FK", "emphasis": true},
+        {"text": "."}
+      ]
+    },
+    {
+      "purpose": "positioning",
+      "evidenceIds": ["education-mediamatiker-efz-berufsmaturitaet"],
+      "runs": [
+        {"text": "Als "},
+        {"text": "Mediamatiker EFZ mit Berufsmaturität", "emphasis": true},
+        {"text": " bringe ich digitale, organisatorische und kaufmännische Grundlagen mit. Ich arbeite strukturiert, bereite Informationen adressatengerecht auf und halte Abläufe nachvollziehbar fest. Diese Breite möchte ich gezielt in eine langfristige administrative Funktion übertragen."}
+      ]
+    },
+    {
+      "purpose": "primary-evidence",
+      "evidenceIds": ["bullet-rs-acta-nova", "bullet-rs-coordination"],
+      "runs": [
+        {"text": "Während meines Führungsdienstes im Stab Personelles der Armee bearbeitete und verteilte ich Geschäftsvorgänge im "},
+        {"text": "GEVER-System ACTA NOVA", "emphasis": true},
+        {"text": ". Dabei führte ich Dokumente strukturiert, koordinierte interne Stellen und stellte sicher, dass Informationen vollständig und bei der richtigen Fachstelle ankamen. Verlässliche Aktenführung kenne ich damit aus praktischer Anwendung."}
+      ]
+    },
+    {
+      "purpose": "secondary-evidence",
+      "evidenceIds": ["bullet-rs-quality", "bullet-kunz-process-handover"],
+      "runs": [
+        {"text": "Zur Arbeit gehörten auch die Qualitätsprüfung von Schriftverkehr und Entscheidungsgrundlagen sowie die formale Kontrolle von Dokumenten. Bei Kunz Kunath AG dokumentierte ich zusätzlich wiederkehrende Prozesse, sicherte Wissen für Übergaben und koordinierte interne Ansprechpersonen sowie externe Partner. Diese Erfahrung hilft mir, auch vielseitige Sekretariatsaufgaben ruhig und sauber zu bearbeiten."}
+      ]
+    },
+    {
+      "purpose": "honest-gap-bridge",
+      "evidenceIds": ["job-ad:admin-sachbearbeiter-fk", "bm-bullet-business-law-accounting-civics"],
+      "runs": [
+        {"text": "Ich komme nicht aus einer klassischen KV-Laufbahn und behaupte keine Erfahrung, die ich nicht habe. Mit Berufsmaturität, Bundeserfahrung, ACTA NOVA, Dokumentenmanagement und MS Office bringe ich jedoch eine belastbare Grundlage mit. Neue Fachabläufe erschliesse ich über klare Dokumentation, gezielte Rückfragen und konsequente praktische Anwendung."}
+      ]
+    },
+    {
+      "purpose": "long-term-signal",
+      "evidenceIds": ["job-ad:admin-sachbearbeiter-fk"],
+      "runs": [
+        {"text": "Die Stelle ist für mich keine Übergangslösung, sondern eine "},
+        {"text": "bewusste langfristige Entwicklung", "emphasis": true},
+        {"text": " in Richtung strukturierter Verwaltungsarbeit. Ich möchte mich in die Abläufe der Kommissionssekretariate vertiefen, Verantwortung aufbauen und dauerhaft zu einer zuverlässigen Arbeitsgrundlage beitragen."}
+      ]
+    },
+    {
+      "purpose": "closing",
+      "evidenceIds": ["job-ad:admin-sachbearbeiter-fk"],
+      "runs": [
+        {"text": "Gerne erläutere ich Ihnen persönlich, wie ich meine digitale Verwaltungspraxis, meine sorgfältige Arbeitsweise und meine Motivation in Ihr Team einbringen kann."}
+      ]
+    }
+  ],
+  "signature": {"firstName": "Adam", "lastName": "Dolinsky", "domainSuffix": ".ch", "url": "https://dolinsky.ch"},
+  "selectedEvidenceIds": ["education-mediamatiker-efz-berufsmaturitaet", "bullet-rs-acta-nova", "bullet-rs-coordination", "bullet-rs-quality", "bullet-kunz-process-handover", "bm-bullet-business-law-accounting-civics"],
+  "contentMode": "approved-golden-fixture",
+  "genericPhrases": [],
+  "wordCount": 306,
+  "emphasisGroups": ["Admin. Sachbearbeiter FK", "Mediamatiker EFZ mit Berufsmaturität", "GEVER-System ACTA NOVA", "bewusste langfristige Entwicklung"]
+}
