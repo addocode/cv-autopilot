@@ -1,16 +1,11 @@
 # CV Autopilot
 
-Dieses Repository enthält vertrauliche Bewerbungs- und Kontaktdaten und muss privat bleiben. Vor einer Änderung auf öffentliche Sichtbarkeit müssen sämtliche personenbezogenen Daten, Referenzkontakte und privaten Bewerbungsunterlagen entfernt oder anonymisiert werden.
-
 ## Produktionsstand
 
 CV Autopilot rendert den zweitseitigen Lebenslauf von Adam Dolinsky datengetrieben aus einer zentralen CV-Datenbank und vier Varianten. Der Produktionsrenderer ist Playwright/Chromium: HTML-Preview, PDF und PNG-Screenshots entstehen aus demselben DOM und denselben CSS-Dateien. Die PDFs bleiben ATS-lesbar und enthalten markierbaren Text sowie klickbare Links.
 
-## Datenschutz und Public-/Demo-Modus
+## Sicherheit
 
-- Das Repository darf nicht öffentlich gemacht werden.
-- Der normale Produktionsmodus verwendet die vollständigen realen Daten aus `data/private/cv.master.json`.
-- Ein späterer Public- oder Demo-Modus muss ausdrücklich anonymisierte Beispieldaten verwenden.
 - Niemals speichern: Passwörter, API-Schlüssel, Access Tokens, private SSH-Schlüssel, Session-Cookies oder sonstige technische Zugangsdaten.
 
 ## Installation
@@ -45,7 +40,7 @@ npm run render -- --variant cms-web-process
 
 ## Bewerbungsakte pro Stelleninserat
 
-Für ein konkretes, lokal vorliegendes Stelleninserat erzeugt der deterministische Archivierungsworkflow einen privaten Bewerbungsordner unter `applications/YYYY-MM-DD_<arbeitgeber-slug>_<stellen-slug>/`. Der Ordner enthält die lesbare Stellenakte, den maschinenlesbaren Anwendungskontext, die gerenderte CV-PDF, die HTML-Vorschau, ein Integritätsmanifest und die unveränderte Quelldatei. `applications/` ist absichtlich git-ignoriert, weil dort reale Bewerbungs- und Kontaktdaten liegen können.
+Für ein konkretes, lokal vorliegendes Stelleninserat erzeugt der deterministische Archivierungsworkflow einen lokalen Bewerbungsordner unter `applications/YYYY-MM-DD_<arbeitgeber-slug>_<stellen-slug>/`. Der Ordner enthält die lesbare Stellenakte, den maschinenlesbaren Anwendungskontext, die gerenderte CV-PDF, die HTML-Vorschau, ein Integritätsmanifest und die unveränderte Quelldatei. `applications/` ist absichtlich git-ignoriert, weil dort reale Bewerbungs- und Kontaktdaten liegen können.
 
 ```bash
 node scripts/create-application.mjs \
@@ -54,7 +49,7 @@ node scripts/create-application.mjs \
   --application-date 2026-07-20
 ```
 
-Der Workflow überschreibt keine neutralen Produktionsartefakte wie `dist/Lebenslauf_Adam-Dolinsky_general.pdf`; anwendungsspezifische Render-Zwischenergebnisse verwenden die Bewerbungs-ID als Suffix und werden danach in den privaten Bewerbungsordner kopiert.
+Der Workflow überschreibt keine neutralen Produktionsartefakte wie `dist/Lebenslauf_Adam-Dolinsky_general.pdf`; anwendungsspezifische Render-Zwischenergebnisse verwenden die Bewerbungs-ID als Suffix und werden danach in den lokalen Bewerbungsordner kopiert.
 
 ## Varianten
 
