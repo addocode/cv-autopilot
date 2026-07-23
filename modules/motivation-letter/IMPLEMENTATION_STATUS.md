@@ -1,8 +1,8 @@
 # Motivation-Letter Creator - Implementation Status
 
-## 2026-07-21
+## 2026-07-23
 
-The approved specification, golden layout, two golden fixtures and approved Transgourmet copy are now stored on `main`.
+The approved specification, golden layout, two golden fixtures and approved Transgourmet copy are stored in the repository.
 
 Authoritative files:
 
@@ -13,4 +13,8 @@ Authoritative files:
 - `tests/fixtures/transgourmet-junior-digital-marketing-manager.json`
 - `tests/fixtures/transgourmet-approved-copy.md`
 
-The deterministic renderer and combined web-app workflow still need to implement these contracts. Until then, any manually generated motivation letter must be checked against the same golden standard.
+The deterministic Playwright renderer, structured content contract, shared application strategy and combined package workflow are implemented on `integration/application-package-v1`.
+
+`scripts/create-application.mjs` now creates the motivation-letter PDF, portable HTML preview and report from the same application context as the CV, email and RAV recap. Layout files and the approved `ad_logo.png` are protected by `layout-lock.json`.
+
+The future web app must call this existing generator. It must not introduce another motivation-letter template.

@@ -26,7 +26,7 @@ test('creates deterministic complete application archive with consistent markdow
   const result = runCreate();
   assert.equal(result.status, 0, result.stderr || result.stdout);
   assert.match(result.stdout, new RegExp(appId));
-  for (const file of ['00_stelleninserat.md', '01_application-context.json', '02_cv_administration-gever.pdf', '03_cv_administration-gever-preview.html', '04_manifest.json', '05_render-report.json', 'fictive-job-ad.txt']) assert.equal(existsSync(`${appDir}/${file}`), true, file);
+  for (const file of ['00_stelleninserat.md', '01_application-context.json', '02_cv_administration-gever.pdf', '03_cv_administration-gever-preview.html', '04_manifest.json', '05_render-report.json', '06_application-strategy.json', '07_motivationsschreiben.pdf', '08_motivationsschreiben-preview.html', '09_motivationsschreiben-report.json', '10_mailanschreiben.md', '11_application-package-report.json', '12_rav-recap.html', '13_rav-recap.json', '14_rav-recap.txt', '15_rav-recap-report.json', 'fictive-job-ad.txt']) assert.equal(existsSync(`${appDir}/${file}`), true, file);
   const md = readFileSync(`${appDir}/00_stelleninserat.md`, 'utf8');
   const requiredSections = ['Bewerbungsübersicht','Eckdaten','Kontakte und Ansprache','Aufgaben und Verantwortlichkeiten','Muss-Anforderungen','Wunsch-Anforderungen','Systeme, Methoden und Fachbegriffe','Arbeitgeber, Umfeld und Benefits','Bewerbungsprozess und Fristen','CV-Personalisierung','Belegmatrix: Inserat ↔ Profil','Offene Punkte und Unsicherheiten','Vollständiger Originaltext'];
   for (const section of requiredSections) assert.match(md, new RegExp(`^## ${section.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'm'));
@@ -47,7 +47,9 @@ test('creates deterministic complete application archive with consistent markdow
   assert.equal(ctx.workload, fm.workload);
   assert.equal(ctx.start, fm.start_date);
   assert.equal(ctx.contact.fullName, '');
-  assert.equal(ctx.schemaVersion, 2);
+  assert.equal(ctx.schemaVersion, 3);
+  assert.equal(ctx.jobTitleRendered, 'Sachbearbeitung GEVER');
+  assert.equal(ctx.applicationDate, '2026-07-20');
   assert.equal(ctx.jobAd.rawText.includes('Arbeitgeber: Beispiel Amt'), true);
   assert.equal(ctx.jobAd.workload.kind, 'range');
   assert.equal(ctx.selectedVariant, fm.selected_cv_variant);
@@ -59,6 +61,9 @@ test('creates deterministic complete application archive with consistent markdow
   assert.equal(manifest.archive, undefined);
   assert.equal(manifest.validation.applicationContextContractValid, true);
   assert.equal(manifest.validation.rendererSuccess, true);
+  assert.equal(manifest.validation.packageGuardSuccess, true);
+  assert.equal(manifest.validation.ravRecapSuccess, true);
+  assert.equal(manifest.schemaVersion, 3);
   const out = JSON.parse(result.stdout);
   assert.equal(existsSync(out.archive), true);
   assert.equal(existsSync(out.sidecar), true);
@@ -81,7 +86,7 @@ test('accepts validated structured extracted context and preserves evidence stat
   const result = spawnSync(process.execPath, ['scripts/create-application.mjs', '--job-ad', 'tests/fixtures/fictive-job-ad.txt', '--extracted-context', 'tests/fixtures/extracted-context-fictive.json', '--application-date', '2026-07-20', '--timestamp', '2026-07-20T20:00:00+03:00', '--skip-render-for-tests'], { encoding: 'utf8' });
   assert.equal(result.status, 0, result.stderr || result.stdout);
   const ctx = JSON.parse(readFileSync(`${appDir}/01_application-context.json`, 'utf8'));
-  assert.equal(ctx.schemaVersion, 2);
+  assert.equal(ctx.schemaVersion, 3);
   assert.equal(ctx.jobAd.workload.kind, 'single');
   assert.equal(ctx.jobAd.start.isoDate, '2026-09-01');
   assert.equal(ctx.jobAd.contact.lastName, 'Meier');

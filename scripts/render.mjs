@@ -2,6 +2,7 @@ import { mkdirSync, writeFileSync, readFileSync, existsSync, unlinkSync } from '
 import { performance } from 'node:perf_hooks';
 import { spawnSync } from 'node:child_process';
 import { normalizeAtsText, atsNormalizationConfig, joinPdfTextItems } from '../src/lib/ats-normalize.mjs';
+import { buildCvSummaryGreeting, composePersonalizedSummary } from '../modules/application-core/src/utils.mjs';
 
 const load = (path) => JSON.parse(readFileSync(path, 'utf8'));
 const esc = (value) => String(value).replace(/[&<>]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[char]);
@@ -477,32 +478,14 @@ function normalizeStart(jobAd = {}) {
   const usedFallback = !parsedValue || confidence < 0.8;
   return { sourceText: start.sourceText || '', parsedValue: usedFallback ? '' : parsedValue, renderedText: usedFallback ? 'Per sofort oder nach Vereinbarung' : (start.kind === 'negotiable' ? 'Nach Vereinbarung' : `${parsedValue} gemäss Inserat, alternativ nach Vereinbarung`), usedFallback, confidence, visible: true, atsExtractable: true };
 }
-function normalizeGreeting(jobAd = {}) {
-  const c = jobAd.contact || {};
-  const confident = c.isApplicationContact === true && Number(c.confidence || 0) >= 0.85 && c.fullName && !/hr|team|damen|herren/i.test(c.fullName);
-  if (!confident || c.addressMode === 'unknown') return { candidateFound: Boolean(c.fullName), rendered: false, text: '', addressMode: c.addressMode || 'unknown', sourceText: c.sourceText || '', confidence: Number(c.confidence || 0), omissionReason: 'no-safe-application-contact', visible: false, atsExtractable: false, summaryTargetLines: 4, summaryActualLines: 4 };
-  let text = `Guten Tag ${c.fullName},`, mode = 'neutral';
-  if (c.addressMode === 'informal' && c.firstName) { text = `Hallo ${c.firstName},`; mode = 'informal'; }
-  else if (c.explicitSalutation && c.lastName) { text = `Guten Tag ${c.explicitSalutation} ${c.lastName},`; mode = 'formal'; }
-  return { candidateFound: true, rendered: true, text, addressMode: mode, sourceText: c.sourceText || '', confidence: Number(c.confidence || 0), omissionReason: null, visible: true, atsExtractable: true, summaryTargetLines: 4, summaryActualLines: 4 };
-}
-
-function composePersonalizedSummary(greeting, summaryText) {
-  const cleanGreeting = String(greeting || '').trim().replace(/,+$/, '') + ',';
-  const text = String(summaryText || '').trim().replace(/^,+\s*/, '');
-  if (/^Ich\s+bin\s+/u.test(text)) return { text: `${cleanGreeting} ich bin ${text.replace(/^Ich\s+bin\s+/u, '')}`, connectorMode: 'lowercase-continuation', connectorText: 'ich bin' };
-  if (/^Ich\s+/u.test(text)) return { text: `${cleanGreeting} ich ${text.replace(/^Ich\s+/u, '')}`, connectorMode: 'lowercase-continuation', connectorText: 'ich' };
-  const lowercaseContinuation = ['Als ', 'Mit ', 'Durch ', 'Gerne '].find((prefix) => text.startsWith(prefix));
-  if (lowercaseContinuation) {
-    const firstWord = lowercaseContinuation.trim();
-    const connectorText = firstWord.toLocaleLowerCase('de-CH');
-    return { text: `${cleanGreeting} ${connectorText}${text.slice(firstWord.length)}`, connectorMode: 'lowercase-continuation', connectorText };
-  }
-  return { text: `${cleanGreeting} ich bin ${text}`, connectorMode: 'bridge', connectorText: 'ich bin' };
-}
-
 const cv = applyVariant();
-const jobAdPersonalization = { workload: normalizeWorkload(cv.applicationContext?.jobAd), start: normalizeStart(cv.applicationContext?.jobAd), greeting: normalizeGreeting(cv.applicationContext?.jobAd) };
+const applicationJobAd = cv.applicationContext?.jobAd || {};
+const applicationContact = cv.applicationContext?.applicationContact || applicationJobAd.contact || {};
+const jobAdPersonalization = {
+  workload: normalizeWorkload(applicationJobAd),
+  start: normalizeStart(applicationJobAd),
+  greeting: buildCvSummaryGreeting(applicationContact, applicationJobAd.rawText),
+};
 if (jobAdPersonalization.greeting.rendered) cv.summaryText = composePersonalizedSummary(jobAdPersonalization.greeting.text, cv.summaryText).text;
 cv.workload = { ...cv.workload, text: jobAdPersonalization.workload.renderedText };
 cv.availability = { ...cv.availability, text: jobAdPersonalization.start.renderedText };

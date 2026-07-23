@@ -2,6 +2,12 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from
 import { basename, join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
+import { normalizeJobTitle } from '../modules/application-core/src/utils.mjs';
+import { assertStrategyEvidence, buildApplicationStrategy } from '../modules/application-core/src/strategy.mjs';
+import { composeMotivationLetter } from '../modules/motivation-letter/src/compose.mjs';
+import { renderMotivationLetter } from '../modules/motivation-letter/src/renderer.mjs';
+import { generateApplicationEmail } from '../modules/application-email/src/generate.mjs';
+import { buildRavRecapData, renderRavRecap } from '../modules/rav-recap/src/render.mjs';
 
 const args = new Map();
 for (let i = 2; i < process.argv.length; i += 1) if (process.argv[i].startsWith('--')) args.set(process.argv[i].slice(2), process.argv[i + 1]);
@@ -12,6 +18,12 @@ const sourceUrl = args.get('source-url') || '';
 const applicationDate = args.get('application-date') || new Date().toISOString().slice(0, 10);
 const sourceType = args.get('source-type') || (sourceUrl ? 'url' : 'text');
 const now = args.get('timestamp') || `${applicationDate}T00:00:00+00:00`;
+const packageInputPath = args.get('package-input');
+const packageInput = packageInputPath ? JSON.parse(readFileSync(packageInputPath, 'utf8')) : {};
+if (!process.argv.includes('--skip-layout-lock')) {
+  const layoutLock = spawnSync(process.execPath, ['scripts/verify-layout-lock.mjs'], { encoding: 'utf8' });
+  if (layoutLock.status !== 0) throw new Error(`Layout lock failed. This application run must not change design files.\n${layoutLock.stdout}\n${layoutLock.stderr}`);
+}
 const rawSource = readFileSync(jobAdPath);
 const text = rawSource.toString('utf8').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
 const sourceHash = sha(rawSource);
@@ -51,6 +63,12 @@ function parseContact() {
   const fullName = (m?.[2] || line).trim();
   const names = splitName(fullName);
   return { fullName, ...names, explicitSalutation: m?.[1] || matchLine('Anrede') || '', role: matchLine('Funktion') || m?.[3] || '', addressMode: matchLine('Ansprache') || (m?.[1] ? 'formal' : 'unknown'), sourceText: line ? `Ansprechperson: ${line}` : '', confidence: line ? 0.9 : 0, isApplicationContact: Boolean(line) };
+}
+
+function parseReference(raw = text) {
+  const match = raw.match(/\b(Referenznummer|Referenz|Job-ID|Stellen-ID|Vakanznummer|Ausschreibungsnummer|Kennziffer|Requisition ID)\s*:?\s*([A-Z0-9][A-Z0-9$._/-]{3,})/i);
+  if (!match) return { value: '', label: 'Referenz', sourceText: '', confidence: 0, visible: false };
+  return { value: match[2], label: match[1], sourceText: match[0], confidence: 0.99, visible: true };
 }
 
 
@@ -121,10 +139,55 @@ const dir = join('applications', applicationId);
 mkdirSync(dir, { recursive: true });
 const originalName = basename(jobAdPath);
 copyFileSync(jobAdPath, join(dir, originalName));
-const optionalFields = Object.fromEntries(['employmentType','referenceNumber','applicationDeadline','organisationUnit','homeOffice','jobContact','applicationContact','benefits','employerDescription','applicationProcess','additionalNotes'].map((key) => [key, h[key] ?? h.jobAd?.[key] ?? '']));
+const optionalFields = Object.fromEntries(['employmentType','referenceNumber','applicationDeadline','organisationUnit','homeOffice','jobContact','applicationContact','benefits','employerDescription','applicationProcess','additionalNotes','companyResearch'].map((key) => [key, h[key] ?? h.jobAd?.[key] ?? '']));
 const applicationContact = optionalFields.applicationContact && typeof optionalFields.applicationContact === 'object' ? optionalFields.applicationContact : contact;
 const jobContact = optionalFields.jobContact && typeof optionalFields.jobContact === 'object' ? optionalFields.jobContact : null;
-const ctx = { schemaVersion: 2, applicationId, markdownFile: '00_stelleninserat.md', employer, jobTitle, source: { type: sourceType, url: sourceUrl, filename: originalName, sha256: sourceHash }, workload: workloadObj.sourceText, start: startObj.sourceText, contact: applicationContact, addressMode: applicationContact.addressMode, ...optionalFields, applicationContact, jobContact, requirements: { ...requirements, must }, atsTerms, selectedVariant, jobAd: { rawText: text, sourceId: `job-ad:${applicationId}`, workload: workloadObj, start: startObj, contact: applicationContact, applicationContact, jobContact } };
+const normalizedTitle = normalizeJobTitle(h.jobTitleOriginal || jobTitle);
+const reference = h.jobAd?.reference || (optionalFields.referenceNumber ? { value: optionalFields.referenceNumber, label: 'Referenz', sourceText: `Referenz: ${optionalFields.referenceNumber}`, confidence: 1, visible: true } : parseReference());
+const companyResearch = optionalFields.companyResearch && typeof optionalFields.companyResearch === 'object' ? optionalFields.companyResearch : {};
+const ctx = {
+  schemaVersion: 3,
+  applicationId,
+  applicationDate,
+  generationDate: applicationDate,
+  createdAt: now,
+  markdownFile: '00_stelleninserat.md',
+  employer,
+  location,
+  jobTitle,
+  jobTitleOriginal: normalizedTitle.original,
+  jobTitleRendered: normalizedTitle.rendered,
+  language: 'de-CH',
+  applicationMethod: h.applicationMethod || 'Elektronisch',
+  applicationResult: h.applicationResult || 'Noch offen',
+  ravAssignment: h.ravAssignment || 'Nein',
+  source: { type: sourceType, url: sourceUrl, filename: originalName, sha256: sourceHash },
+  workload: workloadObj.sourceText,
+  start: startObj.sourceText,
+  contact: applicationContact,
+  addressMode: applicationContact.addressMode,
+  ...optionalFields,
+  applicationContact,
+  jobContact,
+  companyResearch,
+  requirements: { ...requirements, must },
+  atsTerms,
+  selectedVariant,
+  jobAd: {
+    rawText: text,
+    sourceId: `job-ad:${applicationId}`,
+    applicationUrl: sourceUrl,
+    jobTitleOriginal: normalizedTitle.original,
+    jobTitleRendered: normalizedTitle.rendered,
+    reference,
+    companyResearch,
+    workload: workloadObj,
+    start: startObj,
+    contact: applicationContact,
+    applicationContact,
+    jobContact,
+  },
+};
 const reqLines = (items) => items.length ? items.map((x) => `- ${typeof x === 'string' ? x : x.text} — Quelle: Inserat`).join('\n') : '-';
 const facts = { Arbeitgeber: employer, Stellenbezeichnung: jobTitle, Arbeitsort: location, Pensum: workloadObj.sourceText, Eintritt: startObj.sourceText, Anstellungsart: optionalFields.employmentType, Referenznummer: optionalFields.referenceNumber, Bewerbungsfrist: optionalFields.applicationDeadline, Organisationseinheit: optionalFields.organisationUnit, Homeoffice: optionalFields.homeOffice, Inseratsprache: 'de', 'Quelle und Abrufdatum': sourceUrl ? `${sourceUrl} (${applicationDate})` : `${originalName} (${applicationDate})` };
 let body = `---\nschema_version: 2\napplication_id: "${applicationId}"\ncreated_at: "${now}"\nupdated_at: "${now}"\nsource_type: "${sourceType}"\nsource_url: "${sourceUrl}"\nsource_filename: "${originalName}"\nsource_content_sha256: "${sourceHash}"\nemployer: "${employer}"\njob_title: "${jobTitle}"\nlocation: "${location}"\nworkload: "${workloadObj.sourceText}"\nstart_date: "${startObj.sourceText}"\nlanguage: "de"\nselected_cv_variant: "${selectedVariant}"\napplication_status: "draft"\ncontext_file: "01_application-context.json"\n---\n\n# Stelleninserat: ${jobTitle}\n\n> ${employer} · ${location} · ${workloadObj.sourceText} · ${startObj.sourceText}\n\n## Bewerbungsübersicht\n\nBewerbungs-ID: ${applicationId}\nStatus: draft\nGewählte CV-Variante: ${selectedVariant}\n\n## Eckdaten\n\n| Feld | Wert |\n|---|---|\n${Object.entries(facts).map(([k,v]) => `| ${k} | ${v || ''} |`).join('\n')}\n\n## Ansprechperson und Ansprache\n\n| Feld | Wert |\n|---|---|\n| Vollständiger Name | ${contact.fullName} |\n| Funktion | ${contact.role || ''} |\n| Explizite Anrede | ${contact.explicitSalutation || ''} |\n| Du-/Sie-/neutral-Modus | ${contact.addressMode} |\n| Quelle im Inserat | ${contact.sourceText} |\n| Konfidenz | ${contact.confidence} |\n\n## Aufgaben und Verantwortlichkeiten\n\n${reqLines(tasks)}\n\n## Muss-Anforderungen\n\n${reqLines(must)}\n\n## Wunsch-Anforderungen\n\n${reqLines(nice)}\n\n## Systeme, Methoden und Fachbegriffe\n\n${reqLines(systems)}\n\n## Arbeitgeber, Umfeld und Benefits\n\n-\n\n## Bewerbungsprozess und Fristen\n\nEintritt: ${startObj.sourceText}\n\n## CV-Personalisierung\n\n- Ausgewählte CV-Variante: ${selectedVariant}\n- Erkannte ATS-Schlüsselbegriffe: ${atsTerms.join(', ')}\n- Übernommene Pensum-/Eintrittswerte: ${[workloadObj.sourceText, startObj.sourceText].filter(Boolean).join(' / ')}\n\n## Belegmatrix: Inserat ↔ Profil\n\n| Inseratsanforderung | Profilbeleg | Source-ID | Evidence-Status | CV-Verwendung |\n|---|---|---|---|---|\n${must.map((m) => `| ${m.text} | ${m.profileEvidence || ''} | ${(m.sourceIds || []).join(', ')} | ${m.evidenceStatus || 'unsupported_rejected'} | ${m.cvUsage || 'nicht verwendet'} |`).join('\n')}\n${must.some((m) => (m.evidenceStatus || '') === 'unsupported_rejected') ? '' : '| Nicht belegte Zusatzanforderung | Nicht übernommen | job-ad | unsupported_rejected | nicht verwendet |\\n'}\n## Offene Punkte und Unsicherheiten\n\n${['Eintritt', 'Pensum', 'Bewerbungsfrist', 'direkte Kontakt-E-Mail', 'Homeoffice/Arbeitsmodell'].filter((f) => !({Eintritt:startObj.sourceText, Pensum:workloadObj.sourceText, Bewerbungsfrist:optionalFields.applicationDeadline, 'direkte Kontakt-E-Mail':applicationContact.email, 'Homeoffice/Arbeitsmodell':optionalFields.homeOffice}[f])).map((f) => `- ${f} nicht genannt`).join('\n') || '- Keine offensichtlichen offenen Pflichtpunkte erkannt.'}\n\n## Vollständiger Originaltext\n\n<details>\n<summary>Vollständigen Originaltext anzeigen</summary>\n\n${text}\n\n</details>\n`;
@@ -146,6 +209,7 @@ ${[optionalFields.employerDescription, optionalFields.benefits, optionalFields.a
 Eintritt: ${startObj.sourceText}
 Bewerbungsfrist: ${optionalFields.applicationDeadline || 'nicht genannt'}
 Bewerbungsweg: ${optionalFields.applicationProcess || 'Onlineportal und komplettes Dossier'}`);
+body = body.replace('schema_version: 2', 'schema_version: 3');
 writeFileSync(join(dir, '00_stelleninserat.md'), body);
 writeFileSync(join(dir, '01_application-context.json'), JSON.stringify(ctx, null, 2));
 const skipRender = process.argv.includes('--skip-render-for-tests');
@@ -163,11 +227,77 @@ if (skipRender) {
 const report = JSON.parse(readFileSync(join(dir, '05_render-report.json'), 'utf8'));
 const renderedVariant = report.selectedVariant || report.variant;
 if (report.success !== true || report.pageCount !== 2 || report.overflows?.length || report.collisions?.length || report.warnings?.length || report.ats?.missingTerms?.length || renderedVariant !== selectedVariant) throw new Error('Application render report failed required gates');
-const fileRoles = { '00_stelleninserat.md': 'job-ad-archive', '01_application-context.json': 'application-context', [`02_cv_${selectedVariant}.pdf`]: 'cv-pdf', [`03_cv_${selectedVariant}-preview.html`]: 'cv-preview', '04_manifest.json': 'manifest', [originalName]: 'source-original', '05_render-report.json': 'render-report' };
+
+const strategy = buildApplicationStrategy(ctx, packageInput.strategy || {});
+if (strategy.letterContent) assertStrategyEvidence(strategy);
+writeFileSync(join(dir, '06_application-strategy.json'), `${JSON.stringify(strategy, null, 2)}\n`);
+
+const letter = composeMotivationLetter(ctx, strategy);
+const motivationReport = await renderMotivationLetter(letter, {
+  outputDir: 'dist',
+  outputId: applicationId,
+  testMode: skipRender,
+  throwOnFailure: true,
+});
+copyFileSync(motivationReport.artifacts.pdfPath, join(dir, '07_motivationsschreiben.pdf'));
+copyFileSync(motivationReport.artifacts.previewPath, join(dir, '08_motivationsschreiben-preview.html'));
+writeFileSync(join(dir, '09_motivationsschreiben-report.json'), `${JSON.stringify(motivationReport, null, 2)}\n`);
+
+const email = generateApplicationEmail(ctx, strategy);
+writeFileSync(join(dir, '10_mailanschreiben.md'), email.markdown);
+
+const ravData = buildRavRecapData(ctx, packageInput.rav || null);
+const rav = renderRavRecap(ravData, { outputDir: dir });
+const packageChecks = {
+  applicationIdConsistent: strategy.applicationId === applicationId && rav.data.applicationId === applicationId,
+  employerConsistent: rav.data.company.name === String(employer).trim(),
+  jobTitleConsistent: [strategy.jobTitleRendered, letter.jobTitleRendered, rav.data.job.title].every((value) => value === ctx.jobTitleRendered) && email.subject.includes(ctx.jobTitleRendered),
+  contactConsistent: rav.data.company.contactPerson === (applicationContact.fullName || 'Personalabteilung'),
+  cvPassed: report.success === true && report.pageCount === 2,
+  motivationLetterPassed: motivationReport.success === true && motivationReport.pageCount === 1,
+  emailDraftOnly: email.status === 'draft' && email.automaticSend === false,
+  ravRecapPassed: rav.report.success === true,
+  noUnsupportedLetterClaims: motivationReport.unsupportedClaims.length === 0,
+  manualApprovalRequired: true,
+};
+const packageReport = {
+  schemaVersion: 1,
+  applicationId,
+  success: Object.entries(packageChecks).filter(([key]) => key !== 'manualApprovalRequired').every(([, value]) => value === true),
+  status: 'draft',
+  checks: packageChecks,
+  titles: { original: ctx.jobTitleOriginal, rendered: ctx.jobTitleRendered, emailSubject: email.subject },
+  contacts: { applicationContact: applicationContact.fullName || '', emailRecipient: email.to },
+  evidence: { selectedEvidenceIds: strategy.selectedEvidenceIds, unsupportedClaims: motivationReport.unsupportedClaims },
+  documents: { cv: `02_cv_${selectedVariant}.pdf`, motivationLetter: '07_motivationsschreiben.pdf', email: '10_mailanschreiben.md', ravRecap: '12_rav-recap.html' },
+  manualApprovalRequired: true,
+};
+if (!packageReport.success) throw new Error(`Application package guard failed: ${JSON.stringify(packageChecks)}`);
+writeFileSync(join(dir, '11_application-package-report.json'), `${JSON.stringify(packageReport, null, 2)}\n`);
+
+const fileRoles = {
+  '00_stelleninserat.md': 'job-ad-archive',
+  '01_application-context.json': 'application-context',
+  [`02_cv_${selectedVariant}.pdf`]: 'cv-pdf',
+  [`03_cv_${selectedVariant}-preview.html`]: 'cv-preview',
+  '04_manifest.json': 'manifest',
+  [originalName]: 'source-original',
+  '05_render-report.json': 'cv-render-report',
+  '06_application-strategy.json': 'application-strategy',
+  '07_motivationsschreiben.pdf': 'motivation-letter-pdf',
+  '08_motivationsschreiben-preview.html': 'motivation-letter-preview',
+  '09_motivationsschreiben-report.json': 'motivation-letter-report',
+  '10_mailanschreiben.md': 'application-email',
+  '11_application-package-report.json': 'application-package-report',
+  '12_rav-recap.html': 'rav-recap-html',
+  '13_rav-recap.json': 'rav-recap-json',
+  '14_rav-recap.txt': 'rav-recap-text',
+  '15_rav-recap-report.json': 'rav-recap-report',
+};
 const files = Object.entries(fileRoles).filter(([p]) => p !== '04_manifest.json').map(([path, role]) => ({ path, sha256: sha(readFileSync(join(dir, path))), role }));
 mkdirSync('exports', { recursive: true });
 const archivePath = join('exports', `${applicationId}.tar.gz`);
-const manifest = { schemaVersion: 2, applicationId, generatedAt: now, source: ctx.source, selectedVariant, files, validation: { markdownJsonConsistent: true, allFilesPresent: files.every((f) => existsSync(join(dir, f.path))), rendererSuccess: true, atsSuccess: true, pageCount: 2, applicationContextContractValid: true, unsupportedFacts: must.filter((m) => m.evidenceStatus === 'unsupported_rejected').map((m) => m.text) } };
+const manifest = { schemaVersion: 3, applicationId, generatedAt: now, source: ctx.source, selectedVariant, files, validation: { markdownJsonConsistent: true, allFilesPresent: files.every((f) => existsSync(join(dir, f.path))), rendererSuccess: true, atsSuccess: true, cvPageCount: 2, motivationLetterPageCount: 1, applicationContextContractValid: true, packageGuardSuccess: true, ravRecapSuccess: true, unsupportedFacts: must.filter((m) => m.evidenceStatus === 'unsupported_rejected').map((m) => m.text), manualApprovalRequired: true } };
 writeFileSync(join(dir, '04_manifest.json'), JSON.stringify(manifest, null, 2));
 const tar = spawnSync('tar', ['--sort=name', '--mtime=@0', '--owner=0', '--group=0', '--numeric-owner', '-czf', archivePath, '-C', 'applications', applicationId], { encoding: 'utf8' });
 if (tar.status !== 0) throw new Error(`Export archive failed; tar is required.\n${tar.stderr}`);

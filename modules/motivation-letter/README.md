@@ -2,7 +2,7 @@
 
 ## Status
 
-Spezifikation für den zweiten Dokumentgenerator des CV Autopilot. Dieses Modul wird separat vom CV-Renderer geführt, verwendet jedoch dieselbe Bewerbungsinstanz, dieselbe Faktenbasis und dieselben Beleg-IDs.
+Produktiver zweiter Dokumentgenerator des CV Autopilot. Dieses Modul wird separat vom CV-Renderer geführt, verwendet jedoch dieselbe Bewerbungsinstanz, dieselbe Faktenbasis und dieselben Beleg-IDs.
 
 Der Generator erstellt keine Standardbriefe. Er soll für jedes Stelleninserat eine eigenständige, glaubwürdige Argumentation entwickeln und diese anschliessend rendern, messen, prüfen und bei Bedarf überarbeiten.
 
