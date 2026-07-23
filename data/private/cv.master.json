@@ -906,6 +906,29 @@
             "international"
           ],
           "status": "verified"
+        },
+        {
+          "id": "bullet-freelance-invest-platform",
+          "text": "Eigenprojekt invest.dolinsky.ch: KI-gestützte Plattform für Immobilienrecherche, Investmentanalysen und strukturiertes Wissensmanagement",
+          "tags": [
+            "finance",
+            "investment",
+            "ai",
+            "web",
+            "knowledge-management"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "linkedin"
+          ],
+          "atsSynonyms": [
+            "Finanzthemen",
+            "Investment",
+            "Immobilien",
+            "Künstliche Intelligenz",
+            "Wissensmanagement"
+          ],
+          "status": "verified"
         }
       ],
       "sources": [

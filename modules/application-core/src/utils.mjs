@@ -44,7 +44,7 @@ export function normalizeJobTitle(originalTitle) {
     .replace(/\((?:\s*\d{1,3}\s*(?:[–-]\s*\d{1,3}\s*)?%\s*)\)/g, '')
     .replace(/(?:[,·|/-]?\s*)\d{1,3}\s*[–-]\s*\d{1,3}\s*%\s*$/g, '')
     .replace(/(?:[,·|/-]?\s*)\d{1,3}\s*%\s*$/g, '')
-    .replace(/\((?:m\s*\/\s*w(?:\s*\/\s*d)?|w\s*\/\s*m(?:\s*\/\s*d)?|alle\s+geschlechter)\)/gi, '')
+    .replace(/\((?:m\s*\/\s*w(?:\s*\/\s*d)?|w\s*\/\s*m(?:\s*\/\s*d)?|alle\s+geschlechter|a)\)/gi, '')
     .replace(/^\((Junior|Senior)\)\s*/i, '$1 ')
     .trim();
 
@@ -91,12 +91,15 @@ export function splitTitleLines(heading, maxCharacters = 42) {
 
 export function buildSalutation(contact = {}, addressMode = 'formal') {
   if (contact.salutation) return contact.salutation;
+  const fullName = String(contact.fullName || '').trim();
+  const firstName = String(contact.firstName || fullName.split(/\s+/)[0] || '').trim();
   const lastName = String(contact.lastName || '').trim();
   const explicit = String(contact.explicitSalutation || '').toLowerCase();
-  if (lastName && explicit.includes('frau')) return addressMode === 'informal' ? `Guten Tag Frau ${lastName}` : `Sehr geehrte Frau ${lastName}`;
-  if (lastName && explicit.includes('herr')) return addressMode === 'informal' ? `Guten Tag Herr ${lastName}` : `Sehr geehrter Herr ${lastName}`;
-  if (contact.fullName && addressMode === 'informal') return `Guten Tag ${contact.fullName}`;
-  return addressMode === 'informal' ? 'Guten Tag' : 'Sehr geehrte Damen und Herren';
+  const personalFirstName = firstName && !isGenericContactLabel(fullName || firstName) ? firstName : '';
+  if (addressMode === 'informal') return personalFirstName ? `Hallo ${personalFirstName}` : 'Guten Tag';
+  if (lastName && explicit.includes('frau')) return `Sehr geehrte Frau ${lastName}`;
+  if (lastName && explicit.includes('herr')) return `Sehr geehrter Herr ${lastName}`;
+  return 'Sehr geehrte Damen und Herren';
 }
 
 export function resolveAddressMode(contact = {}, jobAdText = '') {

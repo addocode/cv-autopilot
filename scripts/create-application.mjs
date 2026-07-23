@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { normalizeJobTitle } from '../modules/application-core/src/utils.mjs';
 import { assertStrategyEvidence, buildApplicationStrategy } from '../modules/application-core/src/strategy.mjs';
+import { writeJobAdArchive } from '../modules/application-core/src/job-ad-archive.mjs';
 import { composeMotivationLetter } from '../modules/motivation-letter/src/compose.mjs';
 import { renderMotivationLetter } from '../modules/motivation-letter/src/renderer.mjs';
 import { generateApplicationEmail } from '../modules/application-email/src/generate.mjs';
@@ -211,6 +212,11 @@ Bewerbungsfrist: ${optionalFields.applicationDeadline || 'nicht genannt'}
 Bewerbungsweg: ${optionalFields.applicationProcess || 'Onlineportal und komplettes Dossier'}`);
 body = body.replace('schema_version: 2', 'schema_version: 3');
 writeFileSync(join(dir, '00_stelleninserat.md'), body);
+const jobAdArchivePath = writeJobAdArchive({
+  root: args.get('job-ad-archive-root') || 'job-ad-archive',
+  context: ctx,
+  originalText: text,
+});
 writeFileSync(join(dir, '01_application-context.json'), JSON.stringify(ctx, null, 2));
 const skipRender = process.argv.includes('--skip-render-for-tests');
 if (skipRender) {
@@ -304,4 +310,4 @@ if (tar.status !== 0) throw new Error(`Export archive failed; tar is required.\n
 const archiveSha256 = sha(readFileSync(archivePath));
 const sidecarPath = `${archivePath}.sha256`;
 writeFileSync(sidecarPath, `${archiveSha256}  ${applicationId}.tar.gz\n`);
-console.log(JSON.stringify({ applicationId, directory: dir, archive: archivePath, sidecar: sidecarPath, archiveSha256, selectedVariant }, null, 2));
+console.log(JSON.stringify({ applicationId, directory: dir, archive: archivePath, sidecar: sidecarPath, archiveSha256, jobAdArchive: jobAdArchivePath, selectedVariant }, null, 2));

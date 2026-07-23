@@ -7,10 +7,12 @@ import { spawnSync } from 'node:child_process';
 
 const appId = '2026-07-20_beispiel-amt-fur-digitale-dienste_sachbearbeitung-gever';
 const appDir = `applications/${appId}`;
+const jobAdArchiveRoot = mkdtempSync(`${tmpdir()}/cv-job-ad-archive-`);
+const jobAdArchiveFile = `${jobAdArchiveRoot}/${appId}/00_stelleninserat.md`;
 
 function runCreate() {
   rmSync(appDir, { recursive: true, force: true });
-  return spawnSync(process.execPath, ['scripts/create-application.mjs', '--job-ad', 'tests/fixtures/fictive-job-ad.txt', '--application-date', '2026-07-20', '--timestamp', '2026-07-20T20:00:00+03:00', '--skip-render-for-tests'], { encoding: 'utf8' });
+  return spawnSync(process.execPath, ['scripts/create-application.mjs', '--job-ad', 'tests/fixtures/fictive-job-ad.txt', '--application-date', '2026-07-20', '--timestamp', '2026-07-20T20:00:00+03:00', '--job-ad-archive-root', jobAdArchiveRoot, '--skip-render-for-tests'], { encoding: 'utf8' });
 }
 function frontmatter(md) {
   const raw = md.match(/^---\n([\s\S]*?)\n---/)?.[1] || '';
@@ -65,6 +67,13 @@ test('creates deterministic complete application archive with consistent markdow
   assert.equal(manifest.validation.ravRecapSuccess, true);
   assert.equal(manifest.schemaVersion, 3);
   const out = JSON.parse(result.stdout);
+  assert.equal(out.jobAdArchive, jobAdArchiveFile);
+  assert.equal(existsSync(jobAdArchiveFile), true);
+  const publicArchive = readFileSync(jobAdArchiveFile, 'utf8');
+  assert.match(publicArchive, /archive_scope: "public-job-ad-only"/);
+  assert.match(publicArchive, /Digitale Dossiers im GEVER-System bewirtschaften/);
+  assert.match(publicArchive, new RegExp(sha('tests/fixtures/fictive-job-ad.txt')));
+  assert.doesNotMatch(publicArchive, /Belegmatrix|Profilbeleg|Gap-Analyse/);
   assert.equal(existsSync(out.archive), true);
   assert.equal(existsSync(out.sidecar), true);
   assert.equal(readFileSync(out.sidecar, 'utf8').split(/\s+/)[0], sha(out.archive));
@@ -72,18 +81,20 @@ test('creates deterministic complete application archive with consistent markdow
   assert.equal(spawnSync('tar', ['-xzf', out.archive, '-C', extractDir], { encoding: 'utf8' }).status, 0);
   assert.equal(readFileSync(`${extractDir}/${appId}/04_manifest.json`, 'utf8'), readFileSync(`${appDir}/04_manifest.json`, 'utf8'));
   for (const file of manifest.files) assert.equal(file.sha256, sha(`${appDir}/${file.path}`), file.path);
-  const second = spawnSync(process.execPath, ['scripts/create-application.mjs', '--job-ad', 'tests/fixtures/fictive-job-ad.txt', '--application-date', '2026-07-20', '--timestamp', '2026-07-20T20:00:00+03:00', '--skip-render-for-tests'], { encoding: 'utf8' });
+  const firstPublicArchive = readFileSync(jobAdArchiveFile, 'utf8');
+  const second = spawnSync(process.execPath, ['scripts/create-application.mjs', '--job-ad', 'tests/fixtures/fictive-job-ad.txt', '--application-date', '2026-07-20', '--timestamp', '2026-07-20T20:00:00+03:00', '--job-ad-archive-root', jobAdArchiveRoot, '--skip-render-for-tests'], { encoding: 'utf8' });
   assert.equal(second.status, 0, second.stderr || second.stdout);
   const secondOut = JSON.parse(second.stdout);
   assert.equal(secondOut.applicationId, appId);
   assert.equal(secondOut.archiveSha256, JSON.parse(result.stdout).archiveSha256);
+  assert.equal(readFileSync(jobAdArchiveFile, 'utf8'), firstPublicArchive);
   if (beforeNeutral) assert.equal(sha('dist/Lebenslauf_Adam-Dolinsky_general.pdf'), beforeNeutral);
 });
 
 
 test('accepts validated structured extracted context and preserves evidence statuses', () => {
   rmSync(appDir, { recursive: true, force: true });
-  const result = spawnSync(process.execPath, ['scripts/create-application.mjs', '--job-ad', 'tests/fixtures/fictive-job-ad.txt', '--extracted-context', 'tests/fixtures/extracted-context-fictive.json', '--application-date', '2026-07-20', '--timestamp', '2026-07-20T20:00:00+03:00', '--skip-render-for-tests'], { encoding: 'utf8' });
+  const result = spawnSync(process.execPath, ['scripts/create-application.mjs', '--job-ad', 'tests/fixtures/fictive-job-ad.txt', '--extracted-context', 'tests/fixtures/extracted-context-fictive.json', '--application-date', '2026-07-20', '--timestamp', '2026-07-20T20:00:00+03:00', '--job-ad-archive-root', jobAdArchiveRoot, '--skip-render-for-tests'], { encoding: 'utf8' });
   assert.equal(result.status, 0, result.stderr || result.stdout);
   const ctx = JSON.parse(readFileSync(`${appDir}/01_application-context.json`, 'utf8'));
   assert.equal(ctx.schemaVersion, 3);
