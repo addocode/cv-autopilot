@@ -7,6 +7,16 @@
 - Alte `codex/*`-, `live-run/*`-Branches und alte Pull Requests sind historische Quellen, keine Produktionsbasis.
 - Der gesicherte Ausgangsstand liegt auf `archive/pre-cleanup-2026-07-22`.
 
+## Kanonische Dokumentation
+
+- `AGENTS.md` enthält den verbindlichen Agenten- und Produktionsvertrag.
+- `README.md` beschreibt Architektur, Bedienung und vollständige Testfolge.
+- Moduldetails stehen ausschliesslich in den jeweiligen `modules/*/README.md`,
+  Golden-Standards und Chat-/Web-App-Verträgen.
+- Abgeschlossene Implementierungsaufträge, Status-Snapshots und temporäre
+  `README_CURRENT`-Einstiegspunkte gehören in die Git-Historie, nicht als
+  parallele Wahrheitsquellen in den aktuellen Produktionsbaum.
+
 ## Bewerbungsmodus
 
 Eine normale Bewerbung ist ausschliesslich ein Datenlauf:

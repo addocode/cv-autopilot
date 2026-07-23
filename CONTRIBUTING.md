@@ -11,4 +11,5 @@
 
 - CV-Fakten nicht erfinden.
 - LinkedIn-Skills gemäss belegbarer Erfahrungsstufe klassifizieren.
-- Nach Änderungen die in `CODEX_TASK.md` aufgeführten Daten-, Paket- und Renderprüfungen ausführen.
+- Nach Änderungen die in `README.md` unter «Qualität und Tests» aufgeführten
+  Daten-, Paket- und Renderprüfungen ausführen.

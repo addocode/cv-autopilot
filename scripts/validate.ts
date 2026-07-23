@@ -1,1 +1,0 @@
-import{loadCvData}from'../src/lib/load-data.js';import{validateData}from'../src/lib/validate-data.js';const errors=validateData(loadCvData());if(errors.length){console.error(errors.join('\n'));process.exit(1)}console.log('CV data valid');

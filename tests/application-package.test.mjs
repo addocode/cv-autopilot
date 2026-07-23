@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { buildCvSummaryGreeting, buildSalutation, composePersonalizedSummary, normalizeJobTitle, resolveAddressMode } from '../modules/application-core/src/utils.mjs';
 import { buildJobAdArchiveMarkdown } from '../modules/application-core/src/job-ad-archive.mjs';
@@ -141,8 +141,18 @@ test('layout lock protects all canonical design files', () => {
 
 test('root instructions point only to the consolidated production workflow', () => {
   const agents = readFileSync('AGENTS.md', 'utf8');
-  const task = readFileSync('CODEX_TASK.md', 'utf8');
+  const readme = readFileSync('README.md', 'utf8');
   assert.match(agents, /main.*einzige Produktionsquelle/);
-  assert.match(task, /integration\/application-package-v1/);
-  assert.doesNotMatch(task, /PR #6|verifiziere-icon-hashes|Review Runde 43/);
+  assert.match(agents, /Abgeschlossene Implementierungsaufträge.*Git-Historie/s);
+  assert.match(readme, /npm run create:application/);
+  for (const obsoletePath of [
+    'CODEX_TASK.md',
+    'scripts/preview.ts',
+    'scripts/validate.ts',
+    'modules/motivation-letter/CODEX_IMPLEMENTATION_TASK.md',
+    'modules/motivation-letter/IMPLEMENTATION_STATUS.md',
+    'modules/motivation-letter/README_CURRENT.md',
+    'modules/rav-recap/CODEX_IMPLEMENTATION_TASK.md',
+    'modules/rav-recap/README_CURRENT.md',
+  ]) assert.equal(existsSync(obsoletePath), false, `${obsoletePath} must stay in git history only`);
 });
