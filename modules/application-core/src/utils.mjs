@@ -99,6 +99,109 @@ export function buildSalutation(contact = {}, addressMode = 'formal') {
   return addressMode === 'informal' ? 'Guten Tag' : 'Sehr geehrte Damen und Herren';
 }
 
+export function resolveAddressMode(contact = {}, jobAdText = '') {
+  const declaredMode = String(contact.addressMode || '').toLowerCase();
+  if (['formal', 'informal'].includes(declaredMode)) {
+    return { addressMode: declaredMode, source: 'contact-explicit' };
+  }
+
+  const sourceText = `${contact.sourceText || ''}\n${jobAdText || ''}`;
+  const informalDetected = /\b(?:du|dich|dir|dein(?:e|en|er|es|em)?|kommst|bringst|möchtest|willst)\b/iu.test(sourceText);
+  const formalDetected = /\b(?:Sie|Ihnen|Ihr(?:e|en|er|es|em)?)\b/u.test(sourceText);
+  if (informalDetected && !formalDetected) return { addressMode: 'informal', source: 'job-ad-informal-signal' };
+  if (formalDetected && !informalDetected) return { addressMode: 'formal', source: 'job-ad-formal-signal' };
+  return { addressMode: 'formal', source: 'safe-formal-default' };
+}
+
+function isGenericContactLabel(fullName) {
+  const normalized = normalizeText(fullName);
+  return /^(?:hr|hr team|human resources|recruiting|recruiting team|personal|personalabteilung|personal team|team|damen und herren)$/u.test(normalized);
+}
+
+export function buildCvSummaryGreeting(contact = {}, jobAdText = '') {
+  const fullName = String(contact.fullName || '').trim();
+  const firstName = String(contact.firstName || fullName.split(/\s+/)[0] || '').trim();
+  const lastName = String(contact.lastName || fullName.split(/\s+/).slice(1).join(' ') || '').trim();
+  const confidentPerson = contact.isApplicationContact === true
+    && Number(contact.confidence || 0) >= 0.85
+    && Boolean(fullName)
+    && Boolean(firstName && lastName)
+    && !isGenericContactLabel(fullName);
+  const addressModeResolution = resolveAddressMode(contact, jobAdText);
+
+  if (!confidentPerson) {
+    return {
+      candidateFound: Boolean(fullName),
+      rendered: false,
+      text: '',
+      contactName: fullName,
+      addressMode: addressModeResolution.addressMode,
+      addressModeSource: addressModeResolution.source,
+      sourceText: contact.sourceText || '',
+      confidence: Number(contact.confidence || 0),
+      omissionReason: 'no-safe-personal-application-contact',
+      visible: false,
+      atsExtractable: false,
+      summaryTargetLines: 4,
+      summaryActualLines: 4,
+    };
+  }
+
+  if (addressModeResolution.addressMode === 'informal') {
+    return {
+      candidateFound: true,
+      rendered: true,
+      text: `Hallo ${firstName},`,
+      contactName: fullName,
+      addressMode: 'informal',
+      addressModeSource: addressModeResolution.source,
+      sourceText: contact.sourceText || '',
+      confidence: Number(contact.confidence || 0),
+      omissionReason: null,
+      visible: true,
+      atsExtractable: true,
+      summaryTargetLines: 4,
+      summaryActualLines: 4,
+    };
+  }
+
+  const explicit = normalizeText(contact.explicitSalutation);
+  const formalName = explicit.includes('frau')
+    ? `Frau ${lastName}`
+    : explicit.includes('herr')
+      ? `Herr ${lastName}`
+      : fullName;
+  return {
+    candidateFound: true,
+    rendered: true,
+    text: `Guten Tag ${formalName},`,
+    contactName: fullName,
+    addressMode: 'formal',
+    addressModeSource: addressModeResolution.source,
+    sourceText: contact.sourceText || '',
+    confidence: Number(contact.confidence || 0),
+    omissionReason: null,
+    visible: true,
+    atsExtractable: true,
+    summaryTargetLines: 4,
+    summaryActualLines: 4,
+  };
+}
+
+export function composePersonalizedSummary(greeting, summaryText) {
+  const cleanGreeting = String(greeting || '').trim().replace(/,+$/, '') + ',';
+  const text = String(summaryText || '').trim().replace(/^,+\s*/, '');
+  if (/^Ich\s+bin\s+/u.test(text)) return { text: `${cleanGreeting} ich bin ${text.replace(/^Ich\s+bin\s+/u, '')}`, connectorMode: 'lowercase-continuation', connectorText: 'ich bin' };
+  if (/^Ich\s+/u.test(text)) return { text: `${cleanGreeting} ich ${text.replace(/^Ich\s+/u, '')}`, connectorMode: 'lowercase-continuation', connectorText: 'ich' };
+  const lowercaseContinuation = ['Als ', 'Mit ', 'Durch ', 'Gerne '].find((prefix) => text.startsWith(prefix));
+  if (lowercaseContinuation) {
+    const firstWord = lowercaseContinuation.trim();
+    const connectorText = firstWord.toLocaleLowerCase('de-CH');
+    return { text: `${cleanGreeting} ${connectorText}${text.slice(firstWord.length)}`, connectorMode: 'lowercase-continuation', connectorText };
+  }
+  return { text: `${cleanGreeting} ich bin ${text}`, connectorMode: 'bridge', connectorText: 'ich bin' };
+}
+
 export function detectRoleFamily(context) {
   if (context.roleFamily) return context.roleFamily;
   const haystack = [

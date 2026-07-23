@@ -34,6 +34,15 @@ Der einzige Paket-Einstiegspunkt ist `scripts/create-application.mjs`. Er erzeug
 
 Kein Dokument wird automatisch versendet. Der Paketstatus bleibt bis zu Adams manueller Freigabe `draft`.
 
+## Dokumentübergreifende Empfängerregel
+
+- Für CV, Motivationsschreiben, Mail und RAV gilt ausschliesslich der validierte Bewerbungskontakt aus dem gemeinsamen Anwendungskontext.
+- Ist eine persönliche Bewerbungskontaktperson eindeutig identifiziert, beginnt das Kurzprofil im CV direkt im Fliesstext mit einer Anrede derselben Person.
+- Formelle Inserate verwenden `Guten Tag Frau/Herr Nachname, ich bin …`; informelle Inserate verwenden `Hallo Vorname, ich bin …`.
+- Fehlt im Inserat ein eindeutiges du-/Sie-Signal, gilt bei einer klaren Person die formelle Ansprache als sicherer Standard.
+- Nur wenn keine persönliche Bewerbungskontaktperson sicher identifiziert ist, bleibt das Kurzprofil ohne Anrede.
+- Die Anrede ist Teil der automatischen Vier-Zeilen-Auswahl: Der längste passende Kurzprofil-Kandidat wird inklusive Anrede gewählt. Schriftgrösse, Abstände und Layout dürfen dafür nicht verändert werden.
+
 ## Verbotene Abkürzungen
 
 - Kein Rückgriff auf alte Branches oder PRs als Ganzes.

@@ -16,7 +16,7 @@
     "src/styles/tokens.css": "03a51bf772ad5c62e037314f837bdd929cc201b0166ec0d53d2ea3302c4b7e56",
     "src/styles/cv.css": "e6c0a7a471c657105a2ad9d1031e0d6f1f0ea911d357b473ed7f947bb198c0bc",
     "src/templates/cv.ts": "8bef0e6efdd24e898b28a2998ad81c06dc29f3e72a63292f54eed7999e5bdac0",
-    "scripts/render.mjs": "3cbd81544dbb592ddc7ff3b02ae00c04b5bbcffb391b4450c190c63bea41d0a6",
+    "scripts/render.mjs": "f7e99408b3a5b9c158df40a47847b464bf81b03b9d16cc22a12f97f640a2cb08",
     "modules/motivation-letter/layout-reference.json": "291f965b647bb8d0a2dbaf104538a4ca384aa8d446a4d2759c73dbb6aa0220f1",
     "modules/motivation-letter/references/ad_logo.png": "8a0381353dc1bb47763c96ade594015c8737aae30571a741706e6e66f6997c01",
     "modules/motivation-letter/styles/motivation-letter.css": "769ebd490243e2dd2aee23e94838afc80e5bb0a1d9dc1bef15cd05456a722c3f",

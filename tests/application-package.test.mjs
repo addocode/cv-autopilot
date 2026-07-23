@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { normalizeJobTitle } from '../modules/application-core/src/utils.mjs';
+import { buildCvSummaryGreeting, composePersonalizedSummary, normalizeJobTitle, resolveAddressMode } from '../modules/application-core/src/utils.mjs';
 import { buildApplicationStrategy } from '../modules/application-core/src/strategy.mjs';
 import { composeMotivationLetter, validateLetterContent } from '../modules/motivation-letter/src/compose.mjs';
 import { generateApplicationEmail } from '../modules/application-email/src/generate.mjs';
@@ -42,6 +42,44 @@ test('normalizes advertised titles without changing neutral roles', () => {
   assert.equal(normalizeJobTitle('Sachbearbeiter/in Administration (80 %)').rendered, 'Sachbearbeiter Administration');
   assert.equal(normalizeJobTitle('Content Manager:in').rendered, 'Content Manager');
   assert.equal(normalizeJobTitle('Fachperson Kommunikation (m/w/d)').rendered, 'Fachperson Kommunikation');
+});
+
+test('CV summary greeting uses the same safe application contact and distinguishes Sie from du', () => {
+  const christoph = {
+    fullName: 'Christoph Lüthi',
+    firstName: 'Christoph',
+    lastName: 'Lüthi',
+    explicitSalutation: 'Herr',
+    addressMode: 'formal',
+    confidence: 1,
+    isApplicationContact: true,
+    sourceText: 'Fragen zur Bewerbung: Christoph Lüthi',
+  };
+  const formal = buildCvSummaryGreeting(christoph, 'Wir freuen uns auf Ihre Bewerbung.');
+  assert.equal(formal.rendered, true);
+  assert.equal(formal.text, 'Guten Tag Herr Lüthi,');
+  assert.equal(formal.contactName, 'Christoph Lüthi');
+  assert.equal(composePersonalizedSummary(formal.text, 'Mediamatiker EFZ mit Berufsmaturität und Erfahrung in GEVER.').text, 'Guten Tag Herr Lüthi, ich bin Mediamatiker EFZ mit Berufsmaturität und Erfahrung in GEVER.');
+
+  const informal = buildCvSummaryGreeting({ ...christoph, explicitSalutation: '', addressMode: 'unknown' }, 'Wir freuen uns auf dich und deine Bewerbung.');
+  assert.equal(informal.rendered, true);
+  assert.equal(informal.text, 'Hallo Christoph,');
+  assert.equal(informal.addressModeSource, 'job-ad-informal-signal');
+
+  assert.deepEqual(resolveAddressMode({ addressMode: 'unknown' }, 'Ihre Aufgaben und Ihr Profil'), { addressMode: 'formal', source: 'job-ad-formal-signal' });
+});
+
+test('CV summary greeting is omitted only when no safe personal application contact exists', () => {
+  const generic = buildCvSummaryGreeting({
+    fullName: 'HR Team',
+    firstName: '',
+    lastName: '',
+    addressMode: 'unknown',
+    confidence: 0.5,
+    isApplicationContact: true,
+  }, 'Wir freuen uns auf Ihre Bewerbung.');
+  assert.equal(generic.rendered, false);
+  assert.equal(generic.omissionReason, 'no-safe-personal-application-contact');
 });
 
 test('one strategy drives motivation letter and draft email', () => {

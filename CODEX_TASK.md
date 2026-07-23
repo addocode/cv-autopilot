@@ -40,6 +40,7 @@ Ein einziger Aufruf von `scripts/create-application.mjs` erzeugt aus einer gemei
 - Keine erfundenen Fakten oder Kenntnisse.
 - Keine unsichere Referenznummer aus beliebigen Zahlen ableiten.
 - Empfängeradressen mit Best-Effort-Status bleiben Review-Vorschläge.
+- Eine eindeutig identifizierte Bewerbungskontaktperson wird im CV-Kurzprofil und in den übrigen Anschreiben konsistent angesprochen; du/Sie folgt dem Inserat, bei unklarer Tonalität gilt formal, und nur bei unklarer Person entfällt die CV-Anrede.
 - Kein automatischer Versand; Status bleibt bis zur manuellen Freigabe `draft`.
 
 ## Qualität
