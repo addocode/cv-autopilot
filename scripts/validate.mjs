@@ -10,6 +10,7 @@ if(!JSON.stringify(d).includes('Onlineshop-Management inkl. Content-, Struktur- 
 if(d.workload.text!=='60–100 % flexibel nach Absprache') errs.push('workload text invalid');
 if(d.languages.map(l=>l.name).join('|')!=='Deutsch|Englisch|Französisch|Polnisch') errs.push('language order invalid');
 const general=variants.find(v=>v.id==='general'); for(const bid of ['bullet-freelance-french','bullet-freelance-self-organization']) if(!general?.selectedBulletIds.includes(bid)) errs.push(`general missing ${bid}`);
+const communication=variants.find(v=>v.id==='communication-content'); if(!communication?.selectedBulletIds.includes('bullet-freelance-invest-platform')) errs.push('communication-content missing invest.dolinsky.ch project');
 if(d.references.length<2 || d.references.some(r=>!r.phone || /gemäss|siehe|Referenzperson/i.test(JSON.stringify(r)))) errs.push('real references incomplete');
 if(raw.includes('+51 58 489 20 03')) errs.push('obsolete +51 Peter Wyss number must not appear');
 const wyss=d.references.find(r=>r.name==='Peter Wyss'); if(!wyss||wyss.phone!=='+41 58 489 20 03'||'manualVerificationRequired' in wyss) errs.push('Peter Wyss confirmed +41 number invalid');

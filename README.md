@@ -26,6 +26,17 @@ applications/<applicationId>/
 
 Zusätzlich entsteht unter `exports/` ein deterministisches `tar.gz`-Archiv mit SHA-256-Sidecar.
 
+Für die spätere Gesprächsvorbereitung erzeugt jeder Live-Run ausserdem eine
+schlanke, commit-fertige GitHub-Akte:
+
+```text
+job-ad-archive/<applicationId>/00_stelleninserat.md
+```
+
+Sie enthält den vollständigen Originaltext, Quellenmetadaten, Inhaltshash und
+öffentlich publizierte Kontakte. Private Bewerbungsunterlagen und interne
+Strategiedaten werden dort nicht dupliziert.
+
 ## Installation
 
 Benötigt Node.js 22 und Chromium für Playwright. Die Installation erfolgt einmal pro Umgebung, nicht pro Bewerbung.
@@ -179,6 +190,8 @@ GitHub Actions führt diese vollständige Suite bei Pull Requests und manuellen 
 
 - Niemals Passwörter, Tokens, private Schlüssel oder Session-Cookies speichern.
 - Reale Bewerbungspakete unter `applications/` bleiben git-ignoriert.
+- Öffentliche Stellenakten unter `job-ad-archive/` werden nach jedem Live-Run
+  committed und auf GitHub veröffentlicht.
 - Keine unbelegten Kenntnisse oder Arbeitgeberangaben verwenden.
 - Kein automatischer Versand oder automatische Portalübermittlung.
 - Das finale Paket bleibt bis zu Adams manueller Schlusskontrolle im Status `draft`.

@@ -22,6 +22,8 @@ Ein einziger Aufruf von `scripts/create-application.mjs` erzeugt aus einer gemei
 5. Mailentwurf,
 6. RAV-Recap als HTML, JSON und TXT,
 7. Einzelreports, Paketreport, Manifest und deterministisches Archiv.
+8. öffentliche, commit-fertige Stellenakte unter
+   `job-ad-archive/<applicationId>/00_stelleninserat.md`.
 
 ## Aktive Architektur
 
@@ -42,6 +44,9 @@ Ein einziger Aufruf von `scripts/create-application.mjs` erzeugt aus einer gemei
 - Empfängeradressen mit Best-Effort-Status bleiben Review-Vorschläge.
 - Eine eindeutig identifizierte Bewerbungskontaktperson wird im CV-Kurzprofil und in den übrigen Anschreiben konsistent angesprochen; du/Sie folgt dem Inserat, bei unklarer Tonalität gilt formal, und nur bei unklarer Person entfällt die CV-Anrede.
 - Kein automatischer Versand; Status bleibt bis zur manuellen Freigabe `draft`.
+- Reale CV-, MS-, Strategie-, RAV- und PDF-Dateien bleiben git-ignoriert. Auf
+  GitHub wird pro Live-Run nur die öffentliche Stellenakte mit Originalinserat,
+  Quelle und Hash archiviert.
 
 ## Qualität
 

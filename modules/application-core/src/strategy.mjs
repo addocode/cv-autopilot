@@ -18,6 +18,7 @@ const DEFAULT_EVIDENCE_BY_ROLE = {
     'tool-html-css',
   ],
   'communication-content': [
+    'bullet-freelance-invest-platform',
     'bullet-kunz-guegg',
     'bullet-kunz-campaigns',
     'bullet-kunz-photo-video-social-ci',

@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { buildCvSummaryGreeting, composePersonalizedSummary, normalizeJobTitle, resolveAddressMode } from '../modules/application-core/src/utils.mjs';
+import { buildCvSummaryGreeting, buildSalutation, composePersonalizedSummary, normalizeJobTitle, resolveAddressMode } from '../modules/application-core/src/utils.mjs';
+import { buildJobAdArchiveMarkdown } from '../modules/application-core/src/job-ad-archive.mjs';
 import { buildApplicationStrategy } from '../modules/application-core/src/strategy.mjs';
 import { composeMotivationLetter, validateLetterContent } from '../modules/motivation-letter/src/compose.mjs';
 import { generateApplicationEmail } from '../modules/application-email/src/generate.mjs';
@@ -42,6 +43,7 @@ test('normalizes advertised titles without changing neutral roles', () => {
   assert.equal(normalizeJobTitle('Sachbearbeiter/in Administration (80 %)').rendered, 'Sachbearbeiter Administration');
   assert.equal(normalizeJobTitle('Content Manager:in').rendered, 'Content Manager');
   assert.equal(normalizeJobTitle('Fachperson Kommunikation (m/w/d)').rendered, 'Fachperson Kommunikation');
+  assert.equal(normalizeJobTitle('Fachspezialistin / Fachspezialist Marketingkommunikation (a)').rendered, 'Fachspezialist Marketingkommunikation');
 });
 
 test('CV summary greeting uses the same safe application contact and distinguishes Sie from du', () => {
@@ -67,6 +69,7 @@ test('CV summary greeting uses the same safe application contact and distinguish
   assert.equal(informal.addressModeSource, 'job-ad-informal-signal');
 
   assert.deepEqual(resolveAddressMode({ addressMode: 'unknown' }, 'Ihre Aufgaben und Ihr Profil'), { addressMode: 'formal', source: 'job-ad-formal-signal' });
+  assert.equal(buildSalutation({ fullName: 'HR Team' }, 'informal'), 'Guten Tag');
 });
 
 test('CV summary greeting is omitted only when no safe personal application contact exists', () => {
@@ -92,13 +95,38 @@ test('one strategy drives motivation letter and draft email', () => {
   assert.equal(strategy.applicationId, ctx.applicationId);
   assert.equal(strategy.jobTitleRendered, 'Junior Digital Marketing Manager');
   assert.equal(letter.jobTitleRendered, strategy.jobTitleRendered);
-  assert.equal(letter.salutation, 'Guten Tag Frau Röthlisberger');
+  assert.equal(letter.salutation, 'Hallo Lisa');
   assert.ok(letter.selectedEvidenceIds.includes('education-mediamatiker-efz-berufsmaturitaet'));
   assert.ok(letter.emphasisGroups.length >= 2 && letter.emphasisGroups.length <= 4);
   assert.match(email.subject, /^Bewerbung als Junior Digital Marketing Manager/);
   assert.equal(email.status, 'draft');
   assert.equal(email.automaticSend, false);
   assert.equal(email.to.status, 'explicit-or-official');
+});
+
+test('public job-ad archive merges duplicate contact purposes without duplicating the person', () => {
+  const nicole = {
+    fullName: 'Nicole Schneider',
+    role: 'Leitung Marketing-Kommunikation',
+    email: 'nicole.schneider@bekb.ch',
+    phone: '031 666 16 47',
+  };
+  const markdown = buildJobAdArchiveMarkdown(context({
+    applicationId: '2026-07-23_bekb_marketingkommunikation',
+    applicationDate: '2026-07-23',
+    employer: 'Berner Kantonalbank AG',
+    jobTitleOriginal: 'Fachspezialistin / Fachspezialist Marketingkommunikation (a)',
+    jobContact: nicole,
+    applicationContact: nicole,
+    source: {
+      url: 'https://jobs.bekb.ch/offene-stellen/example',
+      sha256: 'abc123',
+    },
+  }), 'Vollständiger Inseratstext');
+  assert.match(markdown, /\| Fachkontakt \/ Bewerbungskontakt \| Nicole Schneider \|/);
+  assert.equal(markdown.match(/Nicole Schneider/g)?.length, 1);
+  assert.match(markdown, /Vollständiger Inseratstext/);
+  assert.doesNotMatch(markdown, /Belegmatrix|Gap-Analyse/);
 });
 
 test('layout lock protects all canonical design files', () => {
