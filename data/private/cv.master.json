@@ -827,7 +827,7 @@
       "bullets": [
         {
           "id": "bullet-records-manager-confirmed-employment",
-          "text": "Zugesagte unbefristete Anstellung im 60%-Pensum",
+          "text": "Zugesagte unbefristete Anstellung zu 60 %",
           "tags": ["records-management", "public-sector", "employment"],
           "evidenceLevel": "confirmed_future_employment",
           "sources": ["user-confirmed-2026-08-15"],

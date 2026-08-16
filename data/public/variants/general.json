@@ -53,12 +53,12 @@
     "tool-adobe-photoshop",
     "tool-adobe-illustrator"
   ],
-  "maxBulletsPerExperience": 7,
+  "maxBulletsPerExperience": 5,
   "maxTools": 14,
   "budgets": {
     "summaryMaxChars": 430,
     "pageOneMaxSkillItems": 19,
-    "pageTwoMaxExperienceBullets": 18
+    "pageTwoMaxExperienceBullets": 16
   },
   "supplementaryIndicators": {
     "tools": {
