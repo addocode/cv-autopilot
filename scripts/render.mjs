@@ -11,6 +11,7 @@ const variantId = arg >= 0 ? process.argv[arg + 1] : 'general';
 const previewOnly = process.argv.includes('--preview-only');
 const outputSuffixArg = process.argv.indexOf('--output-suffix');
 const outputVariantId = outputSuffixArg >= 0 ? `${variantId}-${process.argv[outputSuffixArg + 1]}` : variantId;
+const chromiumLaunchArgs = ['--font-render-hinting=none'];
 mkdirSync('dist', { recursive: true });
 // Legacy literals kept for tests: dist/Lebenslauf_Adam-Dolinsky_${variantId}.pdf dist/cv-${variantId}-page-1.png dist/cv-${variantId}-page-2.png dist/text-${variantId}-poppler.txt dist/text-${variantId}-poppler-raw.txt dist/text-${variantId}-poppler-default.txt dist/text-${variantId}-poppler-layout.txt dist/fonts-${variantId}-pdffonts.txt
 const staleFiles = [
@@ -416,7 +417,8 @@ function applyVariant() {
 
   return {
     ...data,
-    headline: variant.headline,
+    headline: isSupplementaryWorkload(data.applicationContext?.jobAd) ? (variant.supplementaryHeadline || variant.headline) : variant.headline,
+    supplementaryTarget: isSupplementaryWorkload(data.applicationContext?.jobAd),
     targetRoleFamily,
     summaryCandidates: data.summary.candidates?.[variant.summaryKey] || data.summary.candidates?.default || [{ id: `${variant.summaryKey || 'default'}-fallback`, text: variant.summaryKey === 'default' ? data.summary.default : data.summary.variants[variant.summaryKey], evidenceIds: ['cv-2d', 'linkedin-profile'], atsTerms: [variant.headline] }],
     summaryText: (data.summary.candidates?.[variant.summaryKey] || data.summary.candidates?.default)?.[0]?.text || (variant.summaryKey === 'default' ? data.summary.default : data.summary.variants[variant.summaryKey]),
@@ -448,6 +450,12 @@ function applyVariant() {
       rejectedOptionalBulletIds: [],
     },
   };
+}
+
+function isSupplementaryWorkload(jobAd = {}) {
+  const workload = jobAd?.workload || {};
+  const maxPercent = Number(workload.maxPercent ?? workload.minPercent ?? 0);
+  return Number.isFinite(maxPercent) && maxPercent > 0 && maxPercent <= 40;
 }
 
 function normalizeWorkload(jobAd = {}) {
@@ -485,6 +493,12 @@ const jobAdPersonalization = {
   workload: normalizeWorkload(applicationJobAd),
   start: normalizeStart(applicationJobAd),
   greeting: buildCvSummaryGreeting(applicationContact, applicationJobAd.rawText),
+  supplementaryTarget: {
+    active: cv.supplementaryTarget,
+    maximumWorkloadPercent: 40,
+    confirmedRoleId: 'records-manager-bsm-confirmed',
+    selectedHeadline: cv.headline,
+  },
 };
 if (jobAdPersonalization.greeting.rendered) cv.summaryText = composePersonalizedSummary(jobAdPersonalization.greeting.text, cv.summaryText).text;
 cv.workload = { ...cv.workload, text: jobAdPersonalization.workload.renderedText };
@@ -607,7 +621,7 @@ async function withPlaywright() {
   renderStage = 'playwright-import';
   const { chromium } = await import('playwright');
   renderStage = 'browser-launch';
-  browser = await chromium.launch({ headless: true });
+  browser = await chromium.launch({ headless: true, args: chromiumLaunchArgs });
   const page = await browser.newPage({ viewport: { width: 794, height: 1123 }, deviceScaleFactor: 1 });
   const fileUrl = new URL(htmlPath, `file://${process.cwd()}/`).href;
   renderStage = 'preview-navigation';
@@ -855,6 +869,8 @@ async function withPlaywright() {
         profile: { loaded: false },
       },
       fonts: {
+        browserLaunchArgs: variantMeta.browserLaunchArgs || [],
+        fontRenderHintingDisabled: (variantMeta.browserLaunchArgs || []).includes('--font-render-hinting=none'),
         heading: getComputedStyle(document.querySelector('.hero h1')).fontFamily,
         name: getComputedStyle(document.querySelector('.hero h1')).fontFamily,
         sectionHeading: getComputedStyle(document.querySelector('.skill-section h2')).fontFamily,
@@ -1291,7 +1307,7 @@ async function withPlaywright() {
     return out;
   }, {
     bgExists: backgroundFileExists,
-    variantMeta: { variantId, supplementary: cv.supplementary, fill: cv.fill, summary: cv.summaryMeta, summaryCandidates: cv.summaryCandidates, typographySelection, skillsetLayoutSelection, footerIconFiles, skillIconFiles, targetRoleFamily: cv.targetRoleFamily,
+    variantMeta: { variantId, supplementary: cv.supplementary, fill: cv.fill, summary: cv.summaryMeta, summaryCandidates: cv.summaryCandidates, typographySelection, skillsetLayoutSelection, footerIconFiles, skillIconFiles, targetRoleFamily: cv.targetRoleFamily, browserLaunchArgs: chromiumLaunchArgs,
   jobAdPersonalization, crossDomainBulletText },
   });
 

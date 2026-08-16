@@ -1,0 +1,20 @@
+{
+  "jobAd": {
+    "rawText": "Mitarbeiter/in Marketing & Kommunikation 30–40 %. Stellenantritt per sofort oder nach Vereinbarung.",
+    "sourceId": "job-ad-fixture-supplementary",
+    "workload": {
+      "kind": "range",
+      "minPercent": 30,
+      "maxPercent": 40,
+      "sourceText": "30–40 %",
+      "confidence": 0.99
+    },
+    "start": {
+      "kind": "negotiable",
+      "isoDate": null,
+      "sourceText": "per sofort oder nach Vereinbarung",
+      "confidence": 0.99
+    },
+    "contact": null
+  }
+}

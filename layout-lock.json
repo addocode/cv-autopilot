@@ -16,12 +16,12 @@
     "src/styles/tokens.css": "03a51bf772ad5c62e037314f837bdd929cc201b0166ec0d53d2ea3302c4b7e56",
     "src/styles/cv.css": "e6c0a7a471c657105a2ad9d1031e0d6f1f0ea911d357b473ed7f947bb198c0bc",
     "src/templates/cv.ts": "8bef0e6efdd24e898b28a2998ad81c06dc29f3e72a63292f54eed7999e5bdac0",
-    "scripts/render.mjs": "f7e99408b3a5b9c158df40a47847b464bf81b03b9d16cc22a12f97f640a2cb08",
+    "scripts/render.mjs": "3ba8d0e366167e259b0b071b82033aac3facf2d7d0f3dce45a647bc173de7721",
     "modules/motivation-letter/layout-reference.json": "291f965b647bb8d0a2dbaf104538a4ca384aa8d446a4d2759c73dbb6aa0220f1",
     "modules/motivation-letter/references/ad_logo.png": "8a0381353dc1bb47763c96ade594015c8737aae30571a741706e6e66f6997c01",
     "modules/motivation-letter/styles/motivation-letter.css": "769ebd490243e2dd2aee23e94838afc80e5bb0a1d9dc1bef15cd05456a722c3f",
     "modules/motivation-letter/src/template.mjs": "222a58a7528b329724dc6e0a72580035be4708bba9375880a9bee2f5ac6e5b8e",
-    "modules/motivation-letter/src/renderer.mjs": "3a3bc06b3041ea2d6f309790eef3a0d08a9c256b63d355583603cfa2fc2cc051",
+    "modules/motivation-letter/src/renderer.mjs": "6be63dc42863a3fb3f4cca6b407aaf1c2c45a7837425f0f762544d71e1fd6529",
     "modules/rav-recap/mobile-template.html": "7c9e449bb5d44b13d8ed2117c294224a1d5b05ffc2088405c5ad1e0e117d3ade",
     "modules/rav-recap/src/render.mjs": "64c0c7435d998a8c7cd6e838bbca59a6f29583555cbd23ba29365fd76a99d505"
   }

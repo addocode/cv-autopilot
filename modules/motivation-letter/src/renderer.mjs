@@ -79,7 +79,8 @@ export async function renderMotivationLetter(letterInput, options = {}) {
   }
 
   const { chromium } = await import('playwright');
-  const browser = await chromium.launch({ headless: true });
+  const chromiumLaunchArgs = ['--font-render-hinting=none'];
+  const browser = await chromium.launch({ headless: true, args: chromiumLaunchArgs });
   try {
     const page = await browser.newPage({ viewport: { width: 794, height: 1123 }, deviceScaleFactor: 1 });
     await page.goto(pathToFileURL(resolve(artifacts.previewPath)).href, { waitUntil: 'load' });
@@ -183,6 +184,8 @@ export async function renderMotivationLetter(letterInput, options = {}) {
     const report = {
       success: pageCount === 1 && overflows.length === 0 && collisions.length === 0 && warnings.length === 0 && missingTerms.length === 0,
       renderer: 'playwright',
+      browserLaunchArgs: chromiumLaunchArgs,
+      fontRenderHintingDisabled: chromiumLaunchArgs.includes('--font-render-hinting=none'),
       motivationLetterStandard: 'approved-golden-v1',
       layoutSchemaVersion: 2,
       contentGuidanceVersion: '2026-07-21.1',

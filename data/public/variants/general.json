@@ -1,6 +1,7 @@
 {
   "id": "general",
   "headline": "Digital Marketing · Web · Content · KI-gestützte Prozesse",
+  "supplementaryHeadline": "Mediamatik · Marketing · Records Management · Administration",
   "summaryKey": "default",
   "skillSectionOrder": [
     "digital-marketing-web",
@@ -52,12 +53,12 @@
     "tool-adobe-photoshop",
     "tool-adobe-illustrator"
   ],
-  "maxBulletsPerExperience": 7,
+  "maxBulletsPerExperience": 5,
   "maxTools": 14,
   "budgets": {
     "summaryMaxChars": 430,
     "pageOneMaxSkillItems": 19,
-    "pageTwoMaxExperienceBullets": 18
+    "pageTwoMaxExperienceBullets": 16
   },
   "supplementaryIndicators": {
     "tools": {

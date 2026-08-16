@@ -541,7 +541,8 @@
           ],
           "atsSynonyms": [
             "video",
-            "photo"
+            "photo",
+            "gestaltung"
           ],
           "status": "verified"
         },
@@ -795,9 +796,10 @@
     {
       "id": "lang-fr",
       "name": "Französisch",
-      "level": "B1",
+      "level": "B2",
       "sources": [
-        "cv-2d-p1"
+        "cv-2d-p1",
+        "user-confirmed-neukaledonien-2026"
       ]
     },
     {
@@ -810,6 +812,40 @@
     }
   ],
   "experiences": [
+    {
+      "id": "records-manager-bsm-confirmed",
+      "period": "ab 10/2026",
+      "role": "Records Manager (60 %)",
+      "employer": "Amt für Bevölkerungsschutz, Sport und Militär (BSM), Kanton Bern",
+      "location": "",
+      "stationType": "confirmed-future-role",
+      "excludeFromCrossDomain": true,
+      "excludeFromBreadthSummary": true,
+      "excludeFromAdaptivePruning": true,
+      "requiredVisibleBulletCount": 2,
+      "notes": [],
+      "bullets": [
+        {
+          "id": "bullet-records-manager-confirmed-employment",
+          "text": "Zugesagte unbefristete Anstellung zu 60 %",
+          "tags": ["records-management", "public-sector", "employment"],
+          "evidenceLevel": "confirmed_future_employment",
+          "sources": ["user-confirmed-2026-08-15"],
+          "atsSynonyms": ["Records Manager", "Kanton Bern", "BSM"],
+          "status": "verified"
+        },
+        {
+          "id": "bullet-records-manager-start-date",
+          "text": "Stellenantritt am 1. Oktober 2026",
+          "tags": ["start-date", "availability"],
+          "evidenceLevel": "confirmed_future_employment",
+          "sources": ["user-confirmed-2026-08-15"],
+          "atsSynonyms": ["1. Oktober 2026", "ab Oktober 2026"],
+          "status": "verified"
+        }
+      ],
+      "sources": ["user-confirmed-2026-08-15", "job-ad-records-manager-bsm-2026"]
+    },
     {
       "id": "freelance-digital-marketing-media",
       "period": "03/2026 – heute",
@@ -904,6 +940,26 @@
           "atsSynonyms": [
             "organization",
             "international"
+          ],
+          "status": "verified"
+        },
+        {
+          "id": "bullet-freelance-commercial-admin",
+          "text": "Erstellung von Rechnungen sowie Einholung und Vergleich von Offerten in der Freelance-Tätigkeit",
+          "tags": [
+            "administration",
+            "finance",
+            "procurement"
+          ],
+          "evidenceLevel": "professional_supporting",
+          "sources": [
+            "user-confirmed-2026-08-14"
+          ],
+          "atsSynonyms": [
+            "Rechnungen",
+            "Offerten",
+            "Bestellungen",
+            "Abrechnungen"
           ],
           "status": "verified"
         },
@@ -1874,7 +1930,7 @@
     },
     {
       "id": "tool-adobe-audition",
-      "name": "Adobe Audition",
+      "name": "Audition",
       "category": "design-media",
       "tags": [
         "audio",
@@ -1902,7 +1958,7 @@
     },
     {
       "id": "tool-adobe-after-effects",
-      "name": "Adobe After Effects",
+      "name": "After Effects",
       "category": "design-media",
       "tags": [
         "motion",
