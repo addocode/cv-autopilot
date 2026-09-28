@@ -472,7 +472,8 @@ function normalizeWorkload(jobAd = {}) {
     else if (m) { parsedValue = `${Number(m[1])} %`; confidence = Math.max(confidence, 0.9); }
   }
   const usedFallback = !parsedValue || confidence < 0.8;
-  return { sourceText: workload.sourceText || '', parsedValue: usedFallback ? '' : parsedValue, renderedText: usedFallback ? 'Flexibel nach Absprache' : `${parsedValue} gemäss Inserat, flexibel nach Absprache`, usedFallback, confidence, visible: true, atsExtractable: true };
+  const exactWorkload = workload.exact === true && workload.kind === 'single' && !usedFallback;
+  return { sourceText: workload.sourceText || '', parsedValue: usedFallback ? '' : parsedValue, renderedText: usedFallback ? 'Flexibel nach Absprache' : (exactWorkload ? `Exakt ${parsedValue}` : `${parsedValue} gemäss Inserat, flexibel nach Absprache`), usedFallback, confidence, visible: true, atsExtractable: true };
 }
 function normalizeStart(jobAd = {}) {
   const start = jobAd.start || {};
